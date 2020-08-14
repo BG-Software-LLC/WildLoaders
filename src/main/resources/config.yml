@@ -1,0 +1,22 @@
+#######################################################
+##                                                   ##
+##             WildLoaders Configuration             ##
+##                Developed by Ome_R                 ##
+##                                                   ##
+#######################################################
+
+hologram-lines:
+- '&b{0}''s Loader'
+- '&bTime Left: &f{1} days, {2} hours, {3} minutes, {4} seconds'
+
+# List of all the chunk-loaders
+# Do not name 2 chunk-loaders the same
+chunkloaders:
+  normal_loader:
+    time: 1    #1 stands for 1x1 chunks, 3 for 3x3 and so on.
+    type: SPONGE
+    data: 1
+    name: '&6Chunk Buster &7(Place to bust)'
+    lore:
+      - '&7Place this chunk buster'
+      - '&7to bust the chunk!'

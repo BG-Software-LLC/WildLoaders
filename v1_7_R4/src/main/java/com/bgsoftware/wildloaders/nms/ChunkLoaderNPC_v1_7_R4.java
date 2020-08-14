@@ -1,0 +1,145 @@
+package com.bgsoftware.wildloaders.nms;
+
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.npc.DummyChannel;
+import net.minecraft.server.v1_7_R4.DamageSource;
+import net.minecraft.server.v1_7_R4.EntityPlayer;
+import net.minecraft.server.v1_7_R4.EnumGamemode;
+import net.minecraft.server.v1_7_R4.MinecraftServer;
+import net.minecraft.server.v1_7_R4.NetworkManager;
+import net.minecraft.server.v1_7_R4.Packet;
+import net.minecraft.server.v1_7_R4.PacketPlayInBlockDig;
+import net.minecraft.server.v1_7_R4.PacketPlayInBlockPlace;
+import net.minecraft.server.v1_7_R4.PacketPlayInChat;
+import net.minecraft.server.v1_7_R4.PacketPlayInFlying;
+import net.minecraft.server.v1_7_R4.PacketPlayInHeldItemSlot;
+import net.minecraft.server.v1_7_R4.PacketPlayInTransaction;
+import net.minecraft.server.v1_7_R4.PacketPlayInUpdateSign;
+import net.minecraft.server.v1_7_R4.PacketPlayInWindowClick;
+import net.minecraft.server.v1_7_R4.PlayerConnection;
+import net.minecraft.server.v1_7_R4.PlayerInteractManager;
+import net.minecraft.server.v1_7_R4.WorldServer;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R4.CraftServer;
+import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
+
+import java.lang.reflect.Field;
+import java.util.UUID;
+
+public final class ChunkLoaderNPC_v1_7_R4 extends EntityPlayer implements ChunkLoaderNPC {
+
+    public ChunkLoaderNPC_v1_7_R4(Location location, UUID uuid){
+        super(((CraftServer) Bukkit.getServer()).getServer(), ((CraftWorld) location.getWorld()).getHandle(),
+                new GameProfile(uuid, "Loader-" + location.getWorld().getName()), new PlayerInteractManager(((CraftWorld) location.getWorld()).getHandle()));
+
+        playerConnection = new DummyPlayerConnection(server, this);
+
+        playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
+        fallDistance = 0.0F;
+
+        fauxSleeping = true;
+
+        spawnIn(world);
+        setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+
+        //noinspection unchecked
+        world.players.add(this);
+        ((WorldServer) world).getPlayerChunkMap().addPlayer(this);
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return super.getUniqueID();
+    }
+
+    @Override
+    public void die() {
+        super.die();
+    }
+
+    @Override
+    public Location getLocation() {
+        return getBukkitEntity().getLocation();
+    }
+
+    @Override
+    public boolean damageEntity(DamageSource damagesource, float f) {
+        return false;
+    }
+
+    private static class DummyNetworkManager extends NetworkManager {
+
+        DummyNetworkManager(){
+            super(false);
+            updateFields();
+        }
+
+        private void updateFields() {
+            try {
+                Field channelField = NetworkManager.class.getDeclaredField("m");
+                channelField.setAccessible(true);
+                channelField.set(this, new DummyChannel());
+                channelField.setAccessible(false);
+
+                Field socketAddressField = NetworkManager.class.getDeclaredField("n");
+                socketAddressField.setAccessible(true);
+                socketAddressField.set(this, null);
+            }
+            catch (NoSuchFieldException|SecurityException|IllegalArgumentException|IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static class DummyPlayerConnection extends PlayerConnection {
+
+        DummyPlayerConnection(MinecraftServer minecraftServer, EntityPlayer entityPlayer) {
+            super(minecraftServer, new DummyNetworkManager(), entityPlayer);
+        }
+
+        public void a(PacketPlayInWindowClick packetPlayInWindowClick) {
+
+        }
+
+        public void a(PacketPlayInTransaction packetPlayInTransaction) {
+
+        }
+
+        public void a(PacketPlayInFlying packetPlayInFlying) {
+
+        }
+
+        public void a(PacketPlayInUpdateSign packetPlayInUpdateSign) {
+
+        }
+
+        public void a(PacketPlayInBlockDig packetPlayInBlockDig) {
+
+        }
+
+        public void a(PacketPlayInBlockPlace packetPlayInBlockPlace) {
+
+        }
+
+        public void disconnect(String s) {
+
+        }
+
+        public void a(PacketPlayInHeldItemSlot packetPlayInHeldItemSlot) {
+
+        }
+
+        public void a(PacketPlayInChat packetPlayInChat) {
+
+        }
+
+        public void sendPacket(Packet packet) {
+
+        }
+
+    }
+
+}

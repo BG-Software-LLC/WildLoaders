@@ -1,0 +1,21 @@
+#######################################################
+##                                                   ##
+##             WildLoaders Configuration             ##
+##                Developed by Ome_R                 ##
+##                                                   ##
+#######################################################
+
+ALREADY_LOADED: '&a&lWildLoaders &7This chunk is already loaded.'
+BROKE_LOADER: '&a&lWildLoaders &7Successfully broken this chunk-loader.'
+COMMAND_USAGE: '&cUsage: /{0}'
+GIVE_SUCCESS: '&a&lWildLoaders &7Successfully gave x{0} {1} to {2}.'
+HELP_COMMAND_HEADER: '&a&lWildLoaders &7Plugin Commands:'
+HELP_COMMAND_LINE: '&a/{0} &7- {1}'
+HELP_COMMAND_FOOTER: ''
+INVALID_AMOUNT: '&a&lWildLoaders &7Invalid amount {0}.'
+INVALID_LOADER: '&a&lWildLoaders &7Couldn''t find a valid chunk-loader with the name {0}.'
+INVALID_PLAYER: '&a&lWildLoaders &7Couldn''t find a player with the name {0}.'
+NO_PERMISSION: '&fUnknown command. Type "/help" for help.'
+NO_PLACE_PERMISSION: '&a&lWildLoaders &7You are lacking the permission to place chunk loaders.'
+PLACED_LOADER: '&a&lWildLoaders &7Successfully placed a new chunk-loader at {0}.'
+RECEIVE_SUCCESS: '&a&lWildLoaders &7You received x{0} {1} from {2}.'
