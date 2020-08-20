@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -74,7 +75,7 @@ public final class WChunkLoader implements ChunkLoader {
     @Override
     public void remove() {
         if(!Bukkit.isPrimaryThread()){
-            Bukkit.getScheduler().runTask(plugin, this::remove);
+            Executor.sync(this::remove);
             return;
         }
 

@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.locations.LocationUtils;
+import com.bgsoftware.wildloaders.utils.threads.Executor;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -105,7 +106,7 @@ public final class NPCHandler implements NPCManager {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void saveUUIDs(){
         if(Bukkit.isPrimaryThread()){
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, this::saveUUIDs);
+            Executor.async(this::saveUUIDs);
             return;
         }
 
