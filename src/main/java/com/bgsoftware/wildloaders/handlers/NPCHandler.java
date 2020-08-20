@@ -3,19 +3,15 @@ package com.bgsoftware.wildloaders.handlers;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.npc.NPCIdentifier;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
-import com.bgsoftware.wildloaders.utils.locations.LocationUtils;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
+import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,7 +25,6 @@ public final class NPCHandler implements NPCManager {
 
     public NPCHandler(WildLoadersPlugin plugin){
         this.plugin = plugin;
-        loadUUIDs();
     }
 
     @Override
@@ -55,7 +50,10 @@ public final class NPCHandler implements NPCManager {
             npcs.remove(identifier);
 
             npcUUIDs.remove(identifier);
-            saveUUIDs();
+
+            Query.DELETE_NPC_IDENTIFIER.getStatementHolder()
+                    .setLocation(identifier.getSpawnLocation())
+                    .execute(true);
 
             npc.die();
         }
@@ -70,20 +68,12 @@ public final class NPCHandler implements NPCManager {
         npcs.clear();
     }
 
-    private void loadUUIDs(){
-        File file = new File(plugin.getDataFolder(), "uuids.yml");
+    public Map<NPCIdentifier, ChunkLoaderNPC> getNPCs() {
+        return Collections.unmodifiableMap(npcs);
+    }
 
-        if(!file.exists())
-            return;
-
-        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-
-        for(String location : cfg.getConfigurationSection("").getKeys(false)){
-            try{
-                Location _location = LocationUtils.getLocation(location);
-                npcUUIDs.put(new NPCIdentifier(_location), UUID.fromString(cfg.getString(location)));
-            }catch(Exception ignored){}
-        }
+    public void registerUUID(Location location, UUID uuid){
+        npcUUIDs.put(new NPCIdentifier(location), uuid);
     }
 
     private UUID getUUID(NPCIdentifier identifier){
@@ -98,67 +88,12 @@ public final class NPCHandler implements NPCManager {
 
         npcUUIDs.put(identifier, uuid);
 
-        saveUUIDs();
+        Query.INSERT_NPC_IDENTIFIER.getStatementHolder()
+                .setLocation(identifier.getSpawnLocation())
+                .setString(uuid.toString())
+                .execute(true);
 
         return uuid;
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void saveUUIDs(){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(this::saveUUIDs);
-            return;
-        }
-
-        File file = new File(plugin.getDataFolder(), "uuids.yml");
-
-        if(!file.exists())
-            file.delete();
-
-        YamlConfiguration cfg = new YamlConfiguration();
-
-        for(Map.Entry<NPCIdentifier, UUID> entry : npcUUIDs.entrySet())
-            cfg.set(LocationUtils.getLocation(entry.getKey().getSpawnLocation()), entry.getValue() + "");
-
-        try{
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            cfg.save(file);
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    private static final class NPCIdentifier{
-
-        private final Object identifier;
-
-        NPCIdentifier(Location location){
-            this.identifier = PER_WORLD_NPCS ? location.getWorld() : location;
-        }
-
-        Location getSpawnLocation(){
-            return PER_WORLD_NPCS ? ((World) identifier).getSpawnLocation() : (Location) identifier;
-        }
-
-        @Override
-        public String toString() {
-            return PER_WORLD_NPCS ? ((World) identifier).getName() : identifier.toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NPCIdentifier that = (NPCIdentifier) o;
-            return Objects.equals(identifier, that.identifier);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(identifier);
-        }
-
     }
 
 }

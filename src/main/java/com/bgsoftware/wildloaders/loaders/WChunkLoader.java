@@ -4,12 +4,12 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.utils.database.StatementHolder;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -26,9 +26,9 @@ public final class WChunkLoader implements ChunkLoader {
     private boolean active = true;
     private long timeLeft;
 
-    public WChunkLoader(String loaderName, Player whoPlaced, Location location, long timeLeft){
+    public WChunkLoader(String loaderName, UUID whoPlaced, Location location, long timeLeft){
         this.loaderName = loaderName;
-        this.whoPlaced = whoPlaced.getUniqueId();
+        this.whoPlaced = whoPlaced;
         this.location = location.clone();
         this.timeLeft = timeLeft;
         plugin.getNMSAdapter().createLoader(this);
@@ -89,6 +89,15 @@ public final class WChunkLoader implements ChunkLoader {
     public ItemStack getLoaderItem() {
         ItemStack itemStack = getLoaderData().getLoaderItem();
         return plugin.getNMSAdapter().setTag(itemStack, "loader-time", getTimeLeft());
+    }
+
+    public StatementHolder updateInsertStatement(StatementHolder statementHolder){
+        statementHolder.setLocation(getLocation())
+                .setString(whoPlaced.toString())
+                .setString(getLoaderData().getName())
+                .setLong(getTimeLeft());
+
+        return statementHolder;
     }
 
 }

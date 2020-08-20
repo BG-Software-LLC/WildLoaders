@@ -8,7 +8,12 @@ public final class LocationUtils {
     private LocationUtils(){}
 
     public static String getLocation(Location location){
-        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+        try {
+            return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+        }catch (Exception ex){
+            System.out.println(location);
+            throw ex;
+        }
     }
 
     public static Location getLocation(String location){
