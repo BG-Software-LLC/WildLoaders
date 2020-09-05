@@ -4,7 +4,7 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import com.bgsoftware.wildloaders.utils.database.StatementHolder;
+import com.bgsoftware.wildloaders.utils.database.Query;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -60,6 +60,12 @@ public final class WChunkLoader implements ChunkLoader {
         if(timeLeft < 0) {
             remove();
         }
+        else if(timeLeft > 0 && timeLeft % 10 == 0){
+            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
+                    .setObject(timeLeft)
+                    .setLocation(location)
+                    .queue(location);
+        }
     }
 
     @Override
@@ -89,15 +95,6 @@ public final class WChunkLoader implements ChunkLoader {
     public ItemStack getLoaderItem() {
         ItemStack itemStack = getLoaderData().getLoaderItem();
         return plugin.getNMSAdapter().setTag(itemStack, "loader-time", getTimeLeft());
-    }
-
-    public StatementHolder updateInsertStatement(StatementHolder statementHolder){
-        statementHolder.setLocation(getLocation())
-                .setString(whoPlaced.toString())
-                .setString(getLoaderData().getName())
-                .setLong(getTimeLeft());
-
-        return statementHolder;
     }
 
 }

@@ -10,6 +10,7 @@ import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
@@ -58,7 +59,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     @Override
     public void onDisable() {
-        dataHandler.saveDatabase();
+        Database.stop();
         loadersHandler.removeChunkLoaders();
         npcHandler.killAllNPCs();
     }

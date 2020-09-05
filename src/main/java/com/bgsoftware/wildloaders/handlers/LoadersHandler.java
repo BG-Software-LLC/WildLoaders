@@ -9,7 +9,6 @@ import com.bgsoftware.wildloaders.loaders.WLoaderData;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -24,8 +23,6 @@ import java.util.UUID;
 
 public final class LoadersHandler implements LoadersManager {
 
-    private static final long TIMERS_UPDATE_INTERVAL = 300L;
-
     private final Map<Location, ChunkLoader> chunkLoaders = Maps.newConcurrentMap();
     private final Map<ChunkPosition, ChunkLoader> chunkLoadersByChunks = Maps.newConcurrentMap();
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
@@ -33,8 +30,6 @@ public final class LoadersHandler implements LoadersManager {
 
     public LoadersHandler(WildLoadersPlugin plugin){
         this.plugin = plugin;
-
-        Bukkit.getScheduler().runTaskTimer(plugin, plugin.getDataHandler()::saveChunkLoadersTimes, TIMERS_UPDATE_INTERVAL, TIMERS_UPDATE_INTERVAL);
     }
 
     @Override
@@ -65,7 +60,14 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public ChunkLoader addChunkLoader(LoaderData loaderData, Player whoPlaced, Location location, long timeLeft) {
         WChunkLoader chunkLoader = addChunkLoader(loaderData, whoPlaced.getUniqueId(), location, timeLeft);
-        chunkLoader.updateInsertStatement(Query.INSERT_CHUNK_LOADER.getStatementHolder()).execute(true);
+
+        Query.INSERT_CHUNK_LOADER.insertParameters()
+                .setLocation(location)
+                .setObject(whoPlaced.getUniqueId().toString())
+                .setObject(loaderData.getName())
+                .setObject(timeLeft)
+                .queue(location);
+
         return chunkLoader;
     }
 
@@ -74,7 +76,6 @@ public final class LoadersHandler implements LoadersManager {
         chunkLoaders.put(location, chunkLoader);
         chunkLoadersByChunks.put(ChunkPosition.of(location), chunkLoader);
         plugin.getNPCs().createNPC(location);
-        System.out.println("Adding chunk loader for " + location);
         return chunkLoader;
     }
 
@@ -85,9 +86,9 @@ public final class LoadersHandler implements LoadersManager {
         chunkLoadersByChunks.remove(ChunkPosition.of(location));
         chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
 
-        Query.DELETE_CHUNK_LOADER.getStatementHolder()
-                .setLocation(location)
-                .execute(true);
+        Query.DELETE_CHUNK_LOADER.insertParameters()
+                .setObject(location)
+                .queue(location);
     }
 
     @Override

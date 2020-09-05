@@ -51,9 +51,9 @@ public final class NPCHandler implements NPCManager {
 
             npcUUIDs.remove(identifier);
 
-            Query.DELETE_NPC_IDENTIFIER.getStatementHolder()
+            Query.DELETE_NPC_IDENTIFIER.insertParameters()
                     .setLocation(identifier.getSpawnLocation())
-                    .execute(true);
+                    .queue(npc.getUniqueId());
 
             npc.die();
         }
@@ -88,10 +88,10 @@ public final class NPCHandler implements NPCManager {
 
         npcUUIDs.put(identifier, uuid);
 
-        Query.INSERT_NPC_IDENTIFIER.getStatementHolder()
+        Query.INSERT_NPC_IDENTIFIER.insertParameters()
                 .setLocation(identifier.getSpawnLocation())
-                .setString(uuid.toString())
-                .execute(true);
+                .setObject(uuid.toString())
+                .queue(uuid);
 
         return uuid;
     }
