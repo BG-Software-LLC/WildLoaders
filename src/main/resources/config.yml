@@ -13,10 +13,9 @@ hologram-lines:
 # Do not name 2 chunk-loaders the same
 chunkloaders:
   normal_loader:
-    time: 1    #1 stands for 1x1 chunks, 3 for 3x3 and so on.
-    type: SPONGE
-    data: 1
-    name: '&6Chunk Buster &7(Place to bust)'
+    time: 86400
+    type: BEACON
+    name: '&6Chunk Loader &7(Place to load)'
     lore:
-      - '&7Place this chunk buster'
-      - '&7to bust the chunk!'
+      - '&7Place this chunk loader to keep'
+      - '&7the chunk loaded in the next 24 hours!'
