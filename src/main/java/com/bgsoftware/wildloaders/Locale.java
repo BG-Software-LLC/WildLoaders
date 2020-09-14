@@ -24,6 +24,9 @@ public final class Locale {
     public static Locale INVALID_AMOUNT = new Locale("INVALID_AMOUNT");
     public static Locale INVALID_LOADER = new Locale("INVALID_LOADER");
     public static Locale INVALID_PLAYER = new Locale("INVALID_PLAYER");
+    public static Locale LIST_LOADERS_HEADER = new Locale("LIST_LOADERS_HEADER");
+    public static Locale LIST_LOADERS_LINE = new Locale("LIST_LOADERS_LINE");
+    public static Locale LIST_LOADERS_FOOTER = new Locale("LIST_LOADERS_FOOTER");
     public static Locale NO_PERMISSION = new Locale("NO_PERMISSION");
     public static Locale NO_PLACE_PERMISSION = new Locale("NO_PLACE_PERMISSION");
     public static Locale PLACED_LOADER = new Locale("PLACED_LOADER");
@@ -46,6 +49,10 @@ public final class Locale {
         }
 
         return null;
+    }
+
+    public boolean isEmpty(){
+        return message == null || message.equals("");
     }
 
     public void send(CommandSender sender, Object... objects){

@@ -3,6 +3,7 @@ package com.bgsoftware.wildloaders.command;
 import com.bgsoftware.wildloaders.Locale;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.command.commands.CmdGive;
+import com.bgsoftware.wildloaders.command.commands.CmdList;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -18,6 +19,7 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
     public CommandsHandler(WildLoadersPlugin plugin){
         this.plugin = plugin;
         subCommands.add(new CmdGive());
+        subCommands.add(new CmdList());
     }
 
     @Override

@@ -15,6 +15,11 @@ HELP_COMMAND_FOOTER: ''
 INVALID_AMOUNT: '&a&lWildLoaders &7Invalid amount {0}.'
 INVALID_LOADER: '&a&lWildLoaders &7Couldn''t find a valid chunk-loader with the name {0}.'
 INVALID_PLAYER: '&a&lWildLoaders &7Couldn''t find a player with the name {0}.'
+LIST_LOADERS_HEADER: '&a&lWildLoaders &7Available loaders:'
+LIST_LOADERS_LINE: |
+  &a  {0}:
+  &7   - &aDefault Time Left&7: &f{1}
+LIST_LOADERS_FOOTER: ''
 NO_PERMISSION: '&fUnknown command. Type "/help" for help.'
 NO_PLACE_PERMISSION: '&a&lWildLoaders &7You are lacking the permission to place chunk loaders.'
 PLACED_LOADER: '&a&lWildLoaders &7Successfully placed a new chunk-loader at {0}.'
