@@ -1,8 +1,6 @@
 package com.bgsoftware.wildloaders.utils.database;
 
-import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -10,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class QueryParameters {
-
-    private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     private final Query query;
     private final List<Object> parameters;
@@ -39,6 +35,9 @@ public final class QueryParameters {
     }
 
     public QueryParameters setObject(Object object){
+        if(object instanceof Location)
+            return setLocation((Location) object);
+
         parameters.add(object);
         return this;
     }
