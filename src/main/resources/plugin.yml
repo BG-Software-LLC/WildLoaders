@@ -14,5 +14,8 @@ permissions:
     default: op
     children:
       wildloaders.use: true
+      wildloaders.give: true
   wildloaders.use:
     description: Gives access to place a chunkloader.
+  wildloaders.give:
+    description: Gives access to give chunkloaders to other players.
