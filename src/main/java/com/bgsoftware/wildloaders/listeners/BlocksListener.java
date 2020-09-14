@@ -34,6 +34,7 @@ public final class BlocksListener implements Listener {
             return;
 
         if(!e.getPlayer().hasPermission("wildloaders.use")) {
+            e.setCancelled(true);
             Locale.NO_PLACE_PERMISSION.send(e.getPlayer());
             return;
         }
