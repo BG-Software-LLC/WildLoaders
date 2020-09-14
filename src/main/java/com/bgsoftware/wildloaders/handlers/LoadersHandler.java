@@ -87,7 +87,7 @@ public final class LoadersHandler implements LoadersManager {
         chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
 
         Query.DELETE_CHUNK_LOADER.insertParameters()
-                .setObject(location)
+                .setLocation(location)
                 .queue(location);
     }
 
