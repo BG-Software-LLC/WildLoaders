@@ -9,6 +9,7 @@ import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.handlers.SettingsHandler;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
+import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.utils.database.Database;
@@ -58,6 +59,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
         getCommand("loader").setExecutor(commandsHandler);
@@ -65,12 +67,12 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         Locale.reload();
 
-//        if(Updater.isOutdated()) {
-//            log("");
-//            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
-//            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
-//            log("");
-//        }
+        if(Updater.isOutdated()) {
+            log("");
+            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
+            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
+            log("");
+        }
 
         log("******** ENABLE DONE ********");
     }
