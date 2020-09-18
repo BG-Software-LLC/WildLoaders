@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders;
 
 import com.bgsoftware.wildloaders.api.WildLoaders;
+import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
 import com.bgsoftware.wildloaders.handlers.LoadersHandler;
@@ -11,7 +12,10 @@ import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.utils.database.Database;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.lang.reflect.Field;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
@@ -24,14 +28,28 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     private NMSAdapter nmsAdapter;
 
+    private boolean shouldEnable = true;
+
     @Override
-    public void onEnable() {
+    public void onLoad() {
         plugin = this;
         new Metrics(this);
 
-        log("******** ENABLE START ********");
-
         loadNMSAdapter();
+        loadAPI();
+
+        if(!shouldEnable)
+            log("&cThere was an error while loading the plugin.");
+    }
+
+    @Override
+    public void onEnable() {
+        if(!shouldEnable) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        log("******** ENABLE START ********");
 
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
@@ -59,9 +77,11 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     @Override
     public void onDisable() {
-        Database.stop();
-        loadersHandler.removeChunkLoaders();
-        npcHandler.killAllNPCs();
+        if(shouldEnable) {
+            Database.stop();
+            loadersHandler.removeChunkLoaders();
+            npcHandler.killAllNPCs();
+        }
     }
 
     private void loadNMSAdapter(){
@@ -71,6 +91,18 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         } catch(ClassNotFoundException | InstantiationException | IllegalAccessException ex){
             log("Couldn't load up with an adapter " + version + ". Please contact @Ome_R");
             getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void loadAPI(){
+        try{
+            Field instance = WildLoadersAPI.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(null, this);
+        }catch(Exception ex){
+            log("Failed to set-up API - disabling plugin...");
+            ex.printStackTrace();
+            shouldEnable = false;
         }
     }
 
