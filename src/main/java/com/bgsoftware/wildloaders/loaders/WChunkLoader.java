@@ -34,7 +34,7 @@ public final class WChunkLoader implements ChunkLoader {
         this.loaderName = loaderData.getName();
         this.whoPlaced = whoPlaced;
         this.location = location.clone();
-        this.loadedChunks = calculateChunks(loaderData, this.location);
+        this.loadedChunks = calculateChunks(loaderData, whoPlaced, this.location);
         this.timeLeft = timeLeft;
         plugin.getNMSAdapter().createLoader(this);
     }
@@ -107,16 +107,38 @@ public final class WChunkLoader implements ChunkLoader {
         return plugin.getNMSAdapter().setTag(itemStack, "loader-time", getTimeLeft());
     }
 
-    private static Chunk[] calculateChunks(LoaderData loaderData, Location original){
+    private static Chunk[] calculateChunks(LoaderData loaderData, UUID whoPlaced, Location original){
         List<Chunk> chunkList = new ArrayList<>();
 
-        int chunkX = original.getBlockX() >> 4, chunkZ = original.getBlockZ() >> 4;
+        if(loaderData.isChunksSpread()){
+            calculateClaimChunks(original.getChunk(), whoPlaced, chunkList);
+        }
+        else {
+            int chunkX = original.getBlockX() >> 4, chunkZ = original.getBlockZ() >> 4;
 
-        for(int x = -loaderData.getChunksRadius(); x <= loaderData.getChunksRadius(); x++)
-            for(int z = -loaderData.getChunksRadius(); z <= loaderData.getChunksRadius(); z++)
-                chunkList.add(original.getWorld().getChunkAt(chunkX + x, chunkZ + z));
+            for (int x = -loaderData.getChunksRadius(); x <= loaderData.getChunksRadius(); x++)
+                for (int z = -loaderData.getChunksRadius(); z <= loaderData.getChunksRadius(); z++)
+                    chunkList.add(original.getWorld().getChunkAt(chunkX + x, chunkZ + z));
+        }
 
         return chunkList.toArray(new Chunk[0]);
+    }
+
+    private static void calculateClaimChunks(Chunk originalChunk, UUID whoPlaced, List<Chunk> chunkList){
+        if(!plugin.getProviders().hasChunkAccess(whoPlaced, originalChunk))
+            return;
+
+        chunkList.add(originalChunk);
+
+        int chunkX = originalChunk.getX(), chunkZ = originalChunk.getZ();
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                if(x != 0 || z != 0) // We don't want to add the originalChunk again.
+                    calculateClaimChunks(originalChunk.getWorld().getChunkAt(chunkX + x, chunkZ + z), whoPlaced, chunkList);
+            }
+        }
+
     }
 
 }

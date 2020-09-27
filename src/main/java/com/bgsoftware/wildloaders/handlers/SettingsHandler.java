@@ -82,6 +82,9 @@ public final class SettingsHandler {
             if(loaderSection.contains("chunks-radius"))
                 loaderData.setChunksRadius(loaderSection.getInt("chunks-radius"));
 
+            if(loaderSection.contains("chunks-spread"))
+                loaderData.setChunksSpread(loaderSection.getBoolean("chunks-spread"));
+
             loadersAmount++;
         }
 

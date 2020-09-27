@@ -34,4 +34,17 @@ public interface LoaderData {
      */
     int getChunksRadius();
 
+    /**
+     * Set whether or not the chunks-spread mode is enabled for this chunk loader.
+     * When this mode is enabled, all the chunks inside a claim that are connected to each other will be claimed.
+     * @param chunksSpread Set the status of the chunks spread mode.
+     */
+    void setChunksSpread(boolean chunksSpread);
+
+    /**
+     * Get whether or not the chunks-spread mode is enabled for this chunk loader.
+     * When this mode is enabled, all the chunks inside a claim that are connected to each other will be claimed.
+     */
+    boolean isChunksSpread();
+
 }

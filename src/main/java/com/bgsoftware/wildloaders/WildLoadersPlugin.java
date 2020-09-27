@@ -6,6 +6,7 @@ import com.bgsoftware.wildloaders.command.CommandsHandler;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
 import com.bgsoftware.wildloaders.handlers.LoadersHandler;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
+import com.bgsoftware.wildloaders.handlers.ProvidersHandler;
 import com.bgsoftware.wildloaders.handlers.SettingsHandler;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
@@ -26,6 +27,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
     private LoadersHandler loadersHandler;
     private NPCHandler npcHandler;
     private DataHandler dataHandler;
+    private ProvidersHandler providersHandler;
 
     private NMSAdapter nmsAdapter;
 
@@ -55,6 +57,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
         npcHandler = new NPCHandler(this);
+        providersHandler = new ProvidersHandler();
         settingsHandler = new SettingsHandler(this);
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
@@ -117,8 +120,14 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         return loadersHandler;
     }
 
+    @Override
     public NPCHandler getNPCs() {
         return npcHandler;
+    }
+
+    @Override
+    public ProvidersHandler getProviders() {
+        return providersHandler;
     }
 
     public NMSAdapter getNMSAdapter() {

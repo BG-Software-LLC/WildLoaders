@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.api;
 
 import com.bgsoftware.wildloaders.api.managers.LoadersManager;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
+import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
 
 public interface WildLoaders {
 
@@ -14,5 +15,10 @@ public interface WildLoaders {
      * Get the npcs manager.
      */
     NPCManager getNPCs();
+
+    /**
+     * Get the providers manager.
+     */
+    ProvidersManager getProviders();
 
 }
