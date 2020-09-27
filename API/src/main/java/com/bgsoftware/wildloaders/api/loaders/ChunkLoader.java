@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.api.loaders;
 
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +29,11 @@ public interface ChunkLoader {
      * Get the location of the chunk loader.
      */
     Location getLocation();
+
+    /**
+     * Get the chunks that this chunk-loader is loading.
+     */
+    Chunk[] getLoadedChunks();
 
     /**
      * Get the NPC of this chunk loader.

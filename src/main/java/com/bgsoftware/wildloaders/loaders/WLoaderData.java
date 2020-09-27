@@ -12,10 +12,13 @@ public final class WLoaderData implements LoaderData {
     private final long timeLeft;
     private final ItemStack loaderItem;
 
+    private int chunksRadius;
+
     public WLoaderData(String name, long timeLeft, ItemStack loaderItem){
         this.name = name;
         this.timeLeft = timeLeft;
         this.loaderItem = plugin.getNMSAdapter().setTag(loaderItem, "loader-name", name);
+        this.chunksRadius = 0;
     }
 
     @Override
@@ -32,4 +35,15 @@ public final class WLoaderData implements LoaderData {
     public ItemStack getLoaderItem() {
         return loaderItem.clone();
     }
+
+    @Override
+    public void setChunksRadius(int chunksRadius) {
+        this.chunksRadius = chunksRadius;
+    }
+
+    @Override
+    public int getChunksRadius() {
+        return chunksRadius;
+    }
+
 }

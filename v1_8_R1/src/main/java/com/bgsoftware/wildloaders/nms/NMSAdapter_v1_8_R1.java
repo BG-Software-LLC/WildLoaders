@@ -124,14 +124,16 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         //noinspection unchecked
         world.tileEntityList.add(tileEntityChunkLoader);
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        //noinspection unchecked
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
-            NBTTagCompound nbtTagCompound = new NBTTagCompound();
-            ((TileEntity) tileEntity).b(nbtTagCompound);
-            nbtTagCompound.setShort("RequiredPlayerRange", (short) -1);
-            ((TileEntity) tileEntity).a(nbtTagCompound);
-        });
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            //noinspection unchecked
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                ((TileEntity) tileEntity).b(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) -1);
+                ((TileEntity) tileEntity).a(nbtTagCompound);
+            });
+        }
     }
 
     @Override
@@ -151,14 +153,16 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         if(spawnParticle)
             world.a(null, 2001, blockPosition, Block.getCombinedId(world.getType(blockPosition)));
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        //noinspection unchecked
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
-            NBTTagCompound nbtTagCompound = new NBTTagCompound();
-            ((TileEntity) tileEntity).b(nbtTagCompound);
-            nbtTagCompound.setShort("RequiredPlayerRange", (short) 16);
-            ((TileEntity) tileEntity).a(nbtTagCompound);
-        });
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            //noinspection unchecked
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                ((TileEntity) tileEntity).b(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) 16);
+                ((TileEntity) tileEntity).a(nbtTagCompound);
+            });
+        }
     }
 
     @Override

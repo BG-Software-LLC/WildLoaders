@@ -2,7 +2,6 @@ package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 

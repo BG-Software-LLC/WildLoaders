@@ -19,3 +19,11 @@ chunkloaders:
     lore:
       - '&7Place this chunk loader to keep'
       - '&7the chunk loaded in the next 24 hours!'
+  large_loader:
+    time: 86400
+    type: BEACON
+    chunks-radius: 2 # This will load all chunks in a radius of 2, aka 5x5 chunks
+    name: '&6Large Chunk Loader &7(Place to load)'
+    lore:
+      - '&7Place this chunk loader to keep all chunks'
+      - '&7in a radius of 2 loaded in the next 24 hours!'

@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.utils.chunks;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.Objects;
 
@@ -54,6 +55,10 @@ public final class ChunkPosition {
 
     public static ChunkPosition of(Chunk chunk){
         return new ChunkPosition(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+    }
+
+    public static ChunkPosition of(World world, int chunkX, int chunkZ){
+        return new ChunkPosition(world.getName(), chunkX, chunkZ);
     }
 
 }

@@ -72,9 +72,11 @@ public final class LoadersHandler implements LoadersManager {
     }
 
     public WChunkLoader addChunkLoader(LoaderData loaderData, UUID placer, Location location, long timeLeft){
-        WChunkLoader chunkLoader = new WChunkLoader(loaderData.getName(), placer, location, timeLeft);
+        WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, location, timeLeft);
         chunkLoaders.put(location, chunkLoader);
-        chunkLoadersByChunks.put(ChunkPosition.of(location), chunkLoader);
+        for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
+            chunkLoadersByChunks.put(ChunkPosition.of(loadedChunk), chunkLoader);
+        }
         plugin.getNPCs().createNPC(location);
         return chunkLoader;
     }
@@ -83,7 +85,9 @@ public final class LoadersHandler implements LoadersManager {
     public void removeChunkLoader(ChunkLoader chunkLoader) {
         Location location = chunkLoader.getLocation();
         chunkLoaders.remove(location);
-        chunkLoadersByChunks.remove(ChunkPosition.of(location));
+        for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
+            chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
+        }
         chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
 
         Query.DELETE_CHUNK_LOADER.insertParameters()
@@ -92,9 +96,10 @@ public final class LoadersHandler implements LoadersManager {
     }
 
     @Override
-    public void createLoaderData(String name, long timeLeft, ItemStack itemStack) {
+    public LoaderData createLoaderData(String name, long timeLeft, ItemStack itemStack) {
         LoaderData loaderData = new WLoaderData(name, timeLeft, itemStack);
         loadersData.put(name, loaderData);
+        return loaderData;
     }
 
     @Override

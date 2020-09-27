@@ -125,9 +125,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         TileEntityChunkLoader tileEntityChunkLoader = new TileEntityChunkLoader(chunkLoader, world, blockPosition);
         world.tileEntityListTick.add(tileEntityChunkLoader);
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = -1);
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
+                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = -1);
+        }
     }
 
     @Override
@@ -147,9 +149,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         if(spawnParticle)
             world.a(null, 2001, blockPosition, Block.getCombinedId(world.getType(blockPosition)));
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = 16);
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
+                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = 16);
+        }
     }
 
     @Override

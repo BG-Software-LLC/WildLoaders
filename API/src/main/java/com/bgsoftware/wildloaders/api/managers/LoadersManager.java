@@ -62,7 +62,7 @@ public interface LoadersManager {
      * @param timeLeft The default amount of time to run.
      * @param itemStack The item stack to drop upon break.
      */
-    void createLoaderData(String name, long timeLeft, ItemStack itemStack);
+    LoaderData createLoaderData(String name, long timeLeft, ItemStack itemStack);
 
     /**
      * Remove all the chunk loaders data from cache.

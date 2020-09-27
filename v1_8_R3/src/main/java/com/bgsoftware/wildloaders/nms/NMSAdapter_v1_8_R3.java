@@ -123,13 +123,15 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         TileEntityChunkLoader tileEntityChunkLoader = new TileEntityChunkLoader(chunkLoader, world, blockPosition);
         world.tileEntityList.add(tileEntityChunkLoader);
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
-            NBTTagCompound nbtTagCompound = new NBTTagCompound();
-            tileEntity.b(nbtTagCompound);
-            nbtTagCompound.setShort("RequiredPlayerRange", (short) -1);
-            tileEntity.a(nbtTagCompound);
-        });
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                tileEntity.b(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) -1);
+                tileEntity.a(nbtTagCompound);
+            });
+        }
     }
 
     @Override
@@ -149,13 +151,15 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         if(spawnParticle)
             world.a(null, 2001, blockPosition, Block.getCombinedId(world.getType(blockPosition)));
 
-        Chunk chunk = ((CraftChunk) loaderLoc.getChunk()).getHandle();
-        chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
-            NBTTagCompound nbtTagCompound = new NBTTagCompound();
-            tileEntity.b(nbtTagCompound);
-            nbtTagCompound.setShort("RequiredPlayerRange", (short) 16);
-            tileEntity.a(nbtTagCompound);
-        });
+        for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                tileEntity.b(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) 16);
+                tileEntity.a(nbtTagCompound);
+            });
+        }
     }
 
     @Override
