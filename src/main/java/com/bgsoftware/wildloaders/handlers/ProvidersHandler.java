@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
 import com.bgsoftware.wildloaders.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildloaders.hooks.ClaimsProvider_FactionsX;
 import com.bgsoftware.wildloaders.hooks.ClaimsProvider_MassiveFactions;
+import com.bgsoftware.wildloaders.hooks.ClaimsProvider_SuperiorSkyblock;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -27,6 +28,9 @@ public final class ProvidersHandler implements ProvidersManager {
             }
             if(Bukkit.getPluginManager().isPluginEnabled("FactionsX")){
                 claimsProviders.add(new ClaimsProvider_FactionsX());
+            }
+            if(Bukkit.getPluginManager().isPluginEnabled("SuperiorSkyblock2")){
+                claimsProviders.add(new ClaimsProvider_SuperiorSkyblock());
             }
         });
     }
