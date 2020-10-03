@@ -2,11 +2,13 @@ package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
+import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import com.bgsoftware.wildloaders.utils.locations.LocationUtils;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.io.File;
 import java.util.Optional;
@@ -50,7 +52,13 @@ public final class DataHandler {
                 if(!loaderData.isPresent())
                     continue;
 
-                if(location.getBlock().getType() != loaderData.get().getLoaderItem().getType()){
+                Material blockType = location.getBlock().getType();
+
+                if(ServerVersion.isLegacy() && blockType == Material.CAULDRON){
+                    blockType = Material.CAULDRON_ITEM;
+                }
+
+                if(blockType != loaderData.get().getLoaderItem().getType()){
                     WildLoadersPlugin.log("The chunk-loader at " + LocationUtils.getLocation(location) + " is invalid.");
                     continue;
                 }
