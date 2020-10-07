@@ -4,14 +4,10 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
-import net.minecraft.server.v1_16_R2.AxisAlignedBB;
 import net.minecraft.server.v1_16_R2.Block;
 import net.minecraft.server.v1_16_R2.BlockPosition;
 import net.minecraft.server.v1_16_R2.Chunk;
 import net.minecraft.server.v1_16_R2.ChunkCoordIntPair;
-import net.minecraft.server.v1_16_R2.Entity;
-import net.minecraft.server.v1_16_R2.EntityArmorStand;
-import net.minecraft.server.v1_16_R2.EntityTypes;
 import net.minecraft.server.v1_16_R2.IBlockData;
 import net.minecraft.server.v1_16_R2.ITickable;
 import net.minecraft.server.v1_16_R2.ItemStack;
@@ -28,7 +24,6 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_16_R2.util.CraftChatMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,7 +143,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         long tileEntityLong = ChunkCoordIntPair.pair(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
         TileEntityChunkLoader tileEntityChunkLoader = TileEntityChunkLoader.tileEntityChunkLoaderMap.remove(tileEntityLong);
         if(tileEntityChunkLoader != null) {
-            tileEntityChunkLoader.holograms.forEach(Entity::die);
+            tileEntityChunkLoader.holograms.forEach(EntityHolograms_v1_16_R2::removeHologram);
             tileEntityChunkLoader.removed = true;
             world.tileEntityListTick.remove(tileEntityChunkLoader);
         }
@@ -184,7 +179,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
-        private final List<EntityHologram> holograms = new ArrayList<>();
+        private final List<EntityHolograms_v1_16_R2> holograms = new ArrayList<>();
         private final ChunkLoader chunkLoader;
 
         private short currentTick = 20;
@@ -215,7 +210,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
             double currentY = position.getY() + 1;
             for(int i = plugin.getSettings().hologramLines.size(); i > 0; i--){
-                EntityHologram hologram = new EntityHologram(world, position.getX() + 0.5, currentY, position.getZ() + 0.5);
+                EntityHolograms_v1_16_R2 hologram = new EntityHolograms_v1_16_R2(world, position.getX() + 0.5, currentY, position.getZ() + 0.5);
                 updateName(hologram, plugin.getSettings().hologramLines.get(i - 1));
                 world.addEntity(hologram);
                 currentY += 0.23;
@@ -242,7 +237,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
             int hologramsAmount = holograms.size();
             for (int i = hologramsAmount; i > 0; i--) {
-                EntityHologram hologram = holograms.get(hologramsAmount - i);
+                EntityHolograms_v1_16_R2 hologram = holograms.get(hologramsAmount - i);
                 updateName(hologram, plugin.getSettings().hologramLines.get(i - 1));
             }
 
@@ -265,32 +260,15 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
             }
         }
 
-        private void updateName(EntityHologram hologram, String line){
+        private void updateName(EntityHolograms_v1_16_R2 hologram, String line){
             assert chunkLoader.getWhoPlaced().getName() != null;
-            hologram.setCustomName(CraftChatMessage.fromStringOrNull(line
+            hologram.setHologramName(line
                     .replace("{0}", chunkLoader.getWhoPlaced().getName())
                     .replace("{1}", daysAmount + "")
                     .replace("{2}", hoursAmount + "")
                     .replace("{3}", minutesAmount + "")
-                    .replace("{4}", secondsAmount + ""))
+                    .replace("{4}", secondsAmount + "")
             );
-        }
-
-    }
-
-    private static class EntityHologram extends EntityArmorStand {
-
-        EntityHologram(World world, double x, double y, double z){
-            super(EntityTypes.ARMOR_STAND, world);
-            setPosition(x, y, z);
-            setInvisible(true);
-            setSmall(true);
-            setArms(false);
-            setNoGravity(true);
-            setBasePlate(true);
-            setMarker(true);
-            setCustomNameVisible(true);
-            a(new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D));
         }
 
     }
