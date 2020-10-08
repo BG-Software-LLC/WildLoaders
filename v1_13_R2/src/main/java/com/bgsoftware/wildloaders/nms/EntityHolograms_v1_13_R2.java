@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms;
 
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import net.minecraft.server.v1_13_R2.AxisAlignedBB;
 import net.minecraft.server.v1_13_R2.DamageSource;
 import net.minecraft.server.v1_13_R2.EntityArmorStand;
@@ -16,11 +17,12 @@ import net.minecraft.server.v1_13_R2.World;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.util.CraftChatMessage;
+import org.bukkit.entity.Entity;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("unused")
-public final class EntityHolograms_v1_13_R2 extends EntityArmorStand {
+public final class EntityHolograms_v1_13_R2 extends EntityArmorStand implements Hologram {
 
     EntityHolograms_v1_13_R2(World world, double x, double y, double z){
         super(world, x, y, z);
@@ -35,12 +37,19 @@ public final class EntityHolograms_v1_13_R2 extends EntityArmorStand {
         super.a(new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D));
     }
 
+    @Override
     public void setHologramName(String name) {
         super.setCustomName(CraftChatMessage.fromString(name)[0]);
     }
 
+    @Override
     public void removeHologram() {
         super.die();
+    }
+
+    @Override
+    public Entity getEntity() {
+        return getBukkitEntity();
     }
 
     @Override

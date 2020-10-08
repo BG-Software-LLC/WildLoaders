@@ -1,8 +1,10 @@
 package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import net.minecraft.server.v1_12_R1.Block;
 import net.minecraft.server.v1_12_R1.BlockPosition;
@@ -24,6 +26,8 @@ import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +125,7 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
     }
 
     @Override
-    public void createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
         Location loaderLoc = chunkLoader.getLocation();
         World world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
@@ -143,6 +147,8 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
                 }
             });
         }
+
+        return tileEntityChunkLoader;
     }
 
     @Override
@@ -195,7 +201,7 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         }
     }
 
-    private static final class TileEntityChunkLoader extends TileEntity implements ITickable {
+    private static final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
@@ -281,6 +287,11 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
                     }
                 }
             }
+        }
+
+        @Override
+        public Collection<Hologram> getHolograms() {
+            return Collections.unmodifiableList(holograms);
         }
 
         private void updateName(EntityHolograms_v1_12_R1 hologram, String line){

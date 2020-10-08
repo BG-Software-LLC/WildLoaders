@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,7 +22,7 @@ public interface NMSAdapter {
 
     ChunkLoaderNPC createNPC(Location location, UUID uuid);
 
-    void createLoader(ChunkLoader chunkLoader);
+    ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader);
 
     void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle);
 

@@ -1,11 +1,13 @@
 package com.bgsoftware.wildloaders.api.loaders;
 
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface ChunkLoader {
@@ -49,5 +51,10 @@ public interface ChunkLoader {
      * Get the drop item of this chunk loader.
      */
     ItemStack getLoaderItem();
+
+    /**
+     * Get the holograms of the chunk loader.
+     */
+    Collection<Hologram> getHolograms();
 
 }

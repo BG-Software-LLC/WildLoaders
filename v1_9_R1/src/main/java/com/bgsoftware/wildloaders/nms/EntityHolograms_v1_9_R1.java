@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms;
 
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import net.minecraft.server.v1_9_R1.AxisAlignedBB;
 import net.minecraft.server.v1_9_R1.DamageSource;
 import net.minecraft.server.v1_9_R1.EntityArmorStand;
@@ -14,9 +15,10 @@ import net.minecraft.server.v1_9_R1.Vec3D;
 import net.minecraft.server.v1_9_R1.World;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
+import org.bukkit.entity.Entity;
 
 @SuppressWarnings("unused")
-public final class EntityHolograms_v1_9_R1 extends EntityArmorStand {
+public final class EntityHolograms_v1_9_R1 extends EntityArmorStand implements Hologram {
 
     EntityHolograms_v1_9_R1(World world, double x, double y, double z){
         super(world, x, y, z);
@@ -31,12 +33,19 @@ public final class EntityHolograms_v1_9_R1 extends EntityArmorStand {
         super.a(new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D));
     }
 
+    @Override
     public void setHologramName(String name) {
         super.setCustomName(name);
     }
 
+    @Override
     public void removeHologram() {
         super.die();
+    }
+
+    @Override
+    public Entity getEntity() {
+        return getBukkitEntity();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms;
 
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.DamageSource;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
@@ -10,9 +11,10 @@ import net.minecraft.server.v1_8_R3.Vec3D;
 import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.entity.Entity;
 
 @SuppressWarnings("unused")
-public final class EntityHolograms_v1_8_R3 extends EntityArmorStand {
+public final class EntityHolograms_v1_8_R3 extends EntityArmorStand implements Hologram {
 
     EntityHolograms_v1_8_R3(World world, double x, double y, double z){
         super(world, x, y, z);
@@ -27,12 +29,19 @@ public final class EntityHolograms_v1_8_R3 extends EntityArmorStand {
         this.onGround = true; // Workaround to force EntityTrackerEntry to send a teleport packet.
     }
 
+    @Override
     public void setHologramName(String name) {
         super.setCustomName(name);
     }
 
+    @Override
     public void removeHologram() {
         super.die();
+    }
+
+    @Override
+    public Entity getEntity() {
+        return getBukkitEntity();
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import net.minecraft.server.v1_16_R2.Block;
 import net.minecraft.server.v1_16_R2.BlockPosition;
@@ -26,6 +28,8 @@ import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +119,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     @Override
-    public void createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
         Location loaderLoc = chunkLoader.getLocation();
         assert loaderLoc.getWorld() != null;
         WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
@@ -131,6 +135,8 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
             world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, true);
         }
+
+        return tileEntityChunkLoader;
     }
 
     @Override
@@ -175,7 +181,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         mobSpawner.getSpawner().requiredPlayerRange = reset ? 16 : -1;
     }
 
-    private static final class TileEntityChunkLoader extends TileEntity implements ITickable {
+    private static final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
@@ -267,6 +273,11 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
                     }
                 }
             }
+        }
+
+        @Override
+        public Collection<Hologram> getHolograms() {
+            return Collections.unmodifiableList(holograms);
         }
 
         private void updateName(EntityHolograms_v1_16_R2 hologram, String line){

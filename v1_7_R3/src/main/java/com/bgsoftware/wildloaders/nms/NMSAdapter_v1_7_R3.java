@@ -1,8 +1,10 @@
 package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import net.minecraft.server.v1_7_R3.Block;
 import net.minecraft.server.v1_7_R3.Chunk;
@@ -21,6 +23,8 @@ import org.bukkit.craftbukkit.v1_7_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_7_R3.util.LongHash;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -109,7 +113,7 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
     }
 
     @Override
-    public void createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
         Location loaderLoc = chunkLoader.getLocation();
         World world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         int x = loaderLoc.getBlockX(), y = loaderLoc.getBlockY(), z = loaderLoc.getBlockZ();
@@ -128,6 +132,8 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
                 ((TileEntity) tileEntity).a(nbtTagCompound);
             });
         }
+
+        return tileEntityChunkLoader;
     }
 
     @Override
@@ -171,7 +177,9 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
         mobSpawner.a(nbtTagCompound);
     }
 
-    private static final class TileEntityChunkLoader extends TileEntity implements IUpdatePlayerListBox {
+    private static final class TileEntityChunkLoader extends TileEntity implements IUpdatePlayerListBox, ITileEntityChunkLoader {
+
+        private static final Collection<Hologram> EMPTY_CONTAINER = Collections.emptyList();
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
@@ -204,6 +212,11 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
             }
 
             ((WChunkLoader) chunkLoader).tick();
+        }
+
+        @Override
+        public Collection<Hologram> getHolograms() {
+            return EMPTY_CONTAINER;
         }
 
     }

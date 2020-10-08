@@ -1,8 +1,10 @@
 package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import net.minecraft.server.v1_8_R2.Block;
 import net.minecraft.server.v1_8_R2.BlockPosition;
@@ -23,6 +25,8 @@ import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R2.util.LongHash;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +116,7 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
-    public void createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
         Location loaderLoc = chunkLoader.getLocation();
         World world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
@@ -129,6 +133,8 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
                 tileEntity.a(nbtTagCompound);
             });
         }
+
+        return tileEntityChunkLoader;
     }
 
     @Override
@@ -172,7 +178,7 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
         mobSpawner.a(nbtTagCompound);
     }
 
-    private static final class TileEntityChunkLoader extends TileEntity implements IUpdatePlayerListBox {
+    private static final class TileEntityChunkLoader extends TileEntity implements IUpdatePlayerListBox, ITileEntityChunkLoader {
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
@@ -258,6 +264,11 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
                     }
                 }
             }
+        }
+
+        @Override
+        public Collection<Hologram> getHolograms() {
+            return Collections.unmodifiableList(holograms);
         }
 
         private void updateName(EntityHolograms_v1_8_R2 hologram, String line){

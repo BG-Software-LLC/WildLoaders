@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.loaders;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
@@ -14,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +28,7 @@ public final class WChunkLoader implements ChunkLoader {
     private final Location location;
     private final Chunk[] loadedChunks;
     private final String loaderName;
+    private final ITileEntityChunkLoader tileEntityChunkLoader;
 
     private boolean active = true;
     private long timeLeft;
@@ -36,7 +39,7 @@ public final class WChunkLoader implements ChunkLoader {
         this.location = location.clone();
         this.loadedChunks = calculateChunks(loaderData, whoPlaced, this.location);
         this.timeLeft = timeLeft;
-        plugin.getNMSAdapter().createLoader(this);
+        this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this);
     }
 
     @Override
@@ -78,10 +81,6 @@ public final class WChunkLoader implements ChunkLoader {
         return timeLeft == Integer.MIN_VALUE;
     }
 
-    public List<String> getHologramLines(){
-        return isInfinite() ? plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
-    }
-
     @Override
     public Location getLocation() {
         return location.clone();
@@ -114,6 +113,15 @@ public final class WChunkLoader implements ChunkLoader {
     public ItemStack getLoaderItem() {
         ItemStack itemStack = getLoaderData().getLoaderItem();
         return plugin.getNMSAdapter().setTag(itemStack, "loader-time", getTimeLeft());
+    }
+
+    @Override
+    public Collection<Hologram> getHolograms() {
+        return tileEntityChunkLoader.getHolograms();
+    }
+
+    public List<String> getHologramLines(){
+        return isInfinite() ? plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
     }
 
     private static Chunk[] calculateChunks(LoaderData loaderData, UUID whoPlaced, Location original){
