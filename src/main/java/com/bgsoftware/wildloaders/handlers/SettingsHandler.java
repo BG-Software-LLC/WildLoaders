@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
+import com.bgsoftware.wildloaders.utils.config.CommentedConfiguration;
 import com.bgsoftware.wildloaders.utils.items.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,7 +29,8 @@ public final class SettingsHandler {
         if(!file.exists())
             plugin.saveResource("config.yml", false);
 
-        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
+        cfg.syncWithConfig(file, plugin.getResource("config.yml"), "chunkloaders");
 
         hologramLines = cfg.getStringList("hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
