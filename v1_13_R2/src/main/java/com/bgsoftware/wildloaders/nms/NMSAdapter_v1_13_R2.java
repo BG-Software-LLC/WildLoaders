@@ -170,7 +170,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
         private final List<EntityHolograms_v1_13_R2> holograms = new ArrayList<>();
-        private final ChunkLoader chunkLoader;
+        private final WChunkLoader chunkLoader;
 
         private short currentTick = 20;
         private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
@@ -179,30 +179,34 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         TileEntityChunkLoader(ChunkLoader chunkLoader, World world, BlockPosition blockPosition){
             super(TileEntityTypes.COMMAND_BLOCK);
 
-            this.chunkLoader = chunkLoader;
+            this.chunkLoader = (WChunkLoader) chunkLoader;
 
             setPosition(blockPosition);
             setWorld(world);
 
-            long timeLeft = chunkLoader.getTimeLeft();
+            if(!this.chunkLoader.isInfinite()) {
+                long timeLeft = chunkLoader.getTimeLeft();
 
-            daysAmount = (short) (timeLeft / 86400);
-            timeLeft = timeLeft % 86400;
+                daysAmount = (short) (timeLeft / 86400);
+                timeLeft = timeLeft % 86400;
 
-            hoursAmount = (short) (timeLeft / 3600);
-            timeLeft = timeLeft % 3600;
+                hoursAmount = (short) (timeLeft / 3600);
+                timeLeft = timeLeft % 3600;
 
-            minutesAmount = (short) (timeLeft / 60);
-            timeLeft = timeLeft % 60;
+                minutesAmount = (short) (timeLeft / 60);
+                timeLeft = timeLeft % 60;
 
-            secondsAmount = (short) timeLeft;
+                secondsAmount = (short) timeLeft;
+            }
 
             tileEntityChunkLoaderMap.put(LongHash.toLong(blockPosition.getX() >> 4, blockPosition.getZ() >> 4), this);
 
+            List<String> hologramLines = this.chunkLoader.getHologramLines();
+
             double currentY = position.getY() + 1;
-            for(int i = plugin.getSettings().hologramLines.size(); i > 0; i--){
+            for(int i = hologramLines.size(); i > 0; i--){
                 EntityHolograms_v1_13_R2 hologram = new EntityHolograms_v1_13_R2(world, position.getX() + 0.5, currentY, position.getZ() + 0.5);
-                updateName(hologram, plugin.getSettings().hologramLines.get(i - 1));
+                updateName(hologram, hologramLines.get(i - 1));
                 world.addEntity(hologram);
                 currentY += 0.23;
                 holograms.add(hologram);
@@ -216,18 +220,23 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
             currentTick = 0;
 
-            if(((WChunkLoader) chunkLoader).isNotActive()){
+            if(chunkLoader.isNotActive()){
                 chunkLoader.remove();
                 return;
             }
 
+            if(chunkLoader.isInfinite())
+                return;
+
+            List<String> hologramLines = chunkLoader.getHologramLines();
+
             int hologramsAmount = holograms.size();
             for (int i = hologramsAmount; i > 0; i--) {
                 EntityHolograms_v1_13_R2 hologram = holograms.get(hologramsAmount - i);
-                updateName(hologram, plugin.getSettings().hologramLines.get(i - 1));
+                updateName(hologram, hologramLines.get(i - 1));
             }
 
-            ((WChunkLoader) chunkLoader).tick();
+            chunkLoader.tick();
 
             if(!removed) {
                 secondsAmount--;

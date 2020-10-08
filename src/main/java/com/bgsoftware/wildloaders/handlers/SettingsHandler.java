@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public final class SettingsHandler {
 
     public List<String> hologramLines;
+    public List<String> infiniteHologramLines;
 
     public SettingsHandler(WildLoadersPlugin plugin){
         WildLoadersPlugin.log("Loading configuration started...");
@@ -31,13 +32,15 @@ public final class SettingsHandler {
 
         hologramLines = cfg.getStringList("hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
+        infiniteHologramLines = cfg.getStringList("infinite-hologram-lines").stream()
+                .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
 
         plugin.getLoaders().removeLoadersData();
 
         for (String name : cfg.getConfigurationSection("chunkloaders").getKeys(false)) {
             ConfigurationSection loaderSection = cfg.getConfigurationSection("chunkloaders." + name);
 
-            long timeLeft = loaderSection.getLong("time", 0);
+            long timeLeft = loaderSection.getLong("time", Integer.MIN_VALUE);
 
             ItemBuilder itemBuilder = null;
 
@@ -72,7 +75,7 @@ public final class SettingsHandler {
                 }
             } catch(Exception ignored){}
 
-            if (timeLeft <= 0 || itemBuilder == null) {
+            if (itemBuilder == null) {
                 WildLoadersPlugin.log("Something went wrong while loading chunk-loader '" + name + "'.");
                 continue;
             }

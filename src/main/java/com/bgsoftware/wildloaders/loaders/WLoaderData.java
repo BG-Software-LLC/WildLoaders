@@ -34,6 +34,11 @@ public final class WLoaderData implements LoaderData {
     }
 
     @Override
+    public boolean isInfinite() {
+        return timeLeft == Integer.MIN_VALUE;
+    }
+
+    @Override
     public ItemStack getLoaderItem() {
         return loaderItem.clone();
     }

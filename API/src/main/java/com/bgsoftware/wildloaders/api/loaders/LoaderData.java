@@ -15,6 +15,11 @@ public interface LoaderData {
     long getTimeLeft();
 
     /**
+     * Whether or not the chunk loader is infinite.
+     */
+    boolean isInfinite();
+
+    /**
      * Get the drop item of the chunk loader, with default time.
      */
     ItemStack getLoaderItem();

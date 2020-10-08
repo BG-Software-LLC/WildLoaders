@@ -61,16 +61,25 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public void tick(){
-        timeLeft--;
-        if(timeLeft < 0) {
-            remove();
+        if(!isInfinite()) {
+            timeLeft--;
+            if (timeLeft < 0) {
+                remove();
+            } else if (timeLeft > 0 && timeLeft % 10 == 0) {
+                Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
+                        .setObject(timeLeft)
+                        .setLocation(location)
+                        .queue(location);
+            }
         }
-        else if(timeLeft > 0 && timeLeft % 10 == 0){
-            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
-                    .setObject(timeLeft)
-                    .setLocation(location)
-                    .queue(location);
-        }
+    }
+
+    public boolean isInfinite(){
+        return timeLeft == Integer.MIN_VALUE;
+    }
+
+    public List<String> getHologramLines(){
+        return isInfinite() ? plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
     }
 
     @Override
