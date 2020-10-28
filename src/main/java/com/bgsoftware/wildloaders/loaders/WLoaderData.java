@@ -2,7 +2,12 @@ package com.bgsoftware.wildloaders.loaders;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
+import com.bgsoftware.wildloaders.utils.TimeUtils;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class WLoaderData implements LoaderData {
 
@@ -40,7 +45,35 @@ public final class WLoaderData implements LoaderData {
 
     @Override
     public ItemStack getLoaderItem() {
-        return loaderItem.clone();
+        return getLoaderItem(getTimeLeft());
+    }
+
+    @Override
+    public ItemStack getLoaderItem(long timeLeft) {
+        ItemStack itemStack = loaderItem.clone();
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if(itemMeta != null){
+            String formattedTime = TimeUtils.formatTime(timeLeft);
+
+            if(itemMeta.hasDisplayName()) {
+                itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", formattedTime));
+            }
+
+            if(itemMeta.hasLore()){
+                List<String> lore = new ArrayList<>(itemMeta.getLore().size());
+
+                for(String line : itemMeta.getLore())
+                    lore.add(line.replace("{}", formattedTime));
+
+                itemMeta.setLore(lore);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+        }
+
+        return plugin.getNMSAdapter().setTag(itemStack, "loader-time", timeLeft);
     }
 
     @Override

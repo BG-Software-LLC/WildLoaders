@@ -31,6 +31,14 @@ public final class Locale {
     public static Locale NO_PLACE_PERMISSION = new Locale("NO_PLACE_PERMISSION");
     public static Locale PLACED_LOADER = new Locale("PLACED_LOADER");
     public static Locale RECEIVE_SUCCESS = new Locale("RECEIVE_SUCCESS");
+    public static Locale TIME_PLACEHOLDER_DAYS = new Locale("TIME_PLACEHOLDER_DAYS");
+    public static Locale TIME_PLACEHOLDER_DAY = new Locale("TIME_PLACEHOLDER_DAY");
+    public static Locale TIME_PLACEHOLDER_HOURS = new Locale("TIME_PLACEHOLDER_HOURS");
+    public static Locale TIME_PLACEHOLDER_HOUR = new Locale("TIME_PLACEHOLDER_HOUR");
+    public static Locale TIME_PLACEHOLDER_MINUTES = new Locale("TIME_PLACEHOLDER_MINUTES");
+    public static Locale TIME_PLACEHOLDER_MINUTE = new Locale("TIME_PLACEHOLDER_MINUTE");
+    public static Locale TIME_PLACEHOLDER_SECONDS = new Locale("TIME_PLACEHOLDER_SECONDS");
+    public static Locale TIME_PLACEHOLDER_SECOND = new Locale("TIME_PLACEHOLDER_SECOND");
 
     private Locale(String identifier){
         localeMap.put(identifier, this);

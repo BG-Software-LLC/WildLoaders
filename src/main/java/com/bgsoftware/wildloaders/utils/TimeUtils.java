@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.utils;
 
+import com.bgsoftware.wildloaders.Locale;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -81,21 +82,36 @@ public final class TimeUtils {
         return timeUnits;
     }
 
-    public static String[] formatTime(long time){
-        String[] result = new String[4];
+    public static String formatTime(long time){
+        StringBuilder stringBuilder = new StringBuilder();
 
-        result[0] = String.valueOf(time / DAYS);
-        time = time % DAYS;
+        if(time >= DAYS){
+            long days = time / DAYS;
+            stringBuilder.append(", ").append(days).append(" ")
+                    .append((days == 1 ? Locale.TIME_PLACEHOLDER_DAY : Locale.TIME_PLACEHOLDER_DAYS).getMessage());
+            time = time % DAYS;
+        }
 
-        result[1] = String.valueOf(time / HOURS);
-        time = time % HOURS;
+        if(time >= HOURS){
+            long hours = time / HOURS;
+            stringBuilder.append(", ").append(hours).append(" ")
+                    .append((hours == 1 ? Locale.TIME_PLACEHOLDER_HOUR : Locale.TIME_PLACEHOLDER_HOURS).getMessage());
+            time = time % HOURS;
+        }
 
-        result[2] = String.valueOf(time / MINUTES);
-        time = time % MINUTES;
+        if(time >= MINUTES){
+            long minutes = time / MINUTES;
+            stringBuilder.append(", ").append(minutes).append(" ")
+                    .append((minutes == 1 ? Locale.TIME_PLACEHOLDER_MINUTE : Locale.TIME_PLACEHOLDER_MINUTES).getMessage());
+            time = time % MINUTES;
+        }
 
-        result[3] = String.valueOf(time);
+        if(time > 0){
+            stringBuilder.append(", ").append(time).append(" ")
+                    .append((time == 1 ? Locale.TIME_PLACEHOLDER_SECOND : Locale.TIME_PLACEHOLDER_SECONDS).getMessage());
+        }
 
-        return result;
+        return stringBuilder.substring(2);
     }
 
 }

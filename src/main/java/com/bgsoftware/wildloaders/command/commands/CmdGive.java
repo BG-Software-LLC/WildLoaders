@@ -87,12 +87,8 @@ public final class CmdGive implements ICommand {
 
         LoaderData loaderData = optionalLoaderData.get();
 
-        ItemStack itemStack = loaderData.getLoaderItem();
+        ItemStack itemStack = args.length == 5 ? loaderData.getLoaderItem(TimeUtils.fromString(args[4])) : loaderData.getLoaderItem();
         itemStack.setAmount(amount);
-
-        if(args.length == 5){
-            itemStack = plugin.getNMSAdapter().setTag(itemStack, "loader-time", TimeUtils.fromString(args[4]));
-        }
 
         ItemUtils.addItems(target.getInventory(), target.getLocation(), itemStack);
 

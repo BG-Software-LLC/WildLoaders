@@ -111,8 +111,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public ItemStack getLoaderItem() {
-        ItemStack itemStack = getLoaderData().getLoaderItem();
-        return plugin.getNMSAdapter().setTag(itemStack, "loader-time", getTimeLeft());
+        return getLoaderData().getLoaderItem(getTimeLeft());
     }
 
     @Override

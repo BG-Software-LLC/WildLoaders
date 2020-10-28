@@ -37,7 +37,7 @@ chunkloaders:
     name: '&6Chunk Loader &7(Place to load)'
     lore:
       - '&7Place this chunk loader to keep'
-      - '&7the chunk loaded in the next 24 hours!'
+      - '&7the chunk loaded in the next {}!'
   large_loader:
     time: 86400
     type: BEACON
@@ -45,4 +45,4 @@ chunkloaders:
     name: '&6Large Chunk Loader &7(Place to load)'
     lore:
       - '&7Place this chunk loader to keep all chunks'
-      - '&7in a radius of 2 loaded in the next 24 hours!'
+      - '&7in a radius of 2 loaded in the next {}!'
