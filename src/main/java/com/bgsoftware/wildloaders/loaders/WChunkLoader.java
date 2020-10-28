@@ -64,6 +64,8 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public void tick(){
+        plugin.getProviders().tick(loadedChunks);
+
         if(!isInfinite()) {
             timeLeft--;
             if (timeLeft < 0) {
