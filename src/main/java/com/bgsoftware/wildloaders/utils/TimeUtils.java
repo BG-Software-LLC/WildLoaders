@@ -111,7 +111,7 @@ public final class TimeUtils {
                     .append((time == 1 ? Locale.TIME_PLACEHOLDER_SECOND : Locale.TIME_PLACEHOLDER_SECONDS).getMessage());
         }
 
-        return stringBuilder.substring(2);
+        return stringBuilder.length() == 0 ? "" : stringBuilder.substring(2);
     }
 
 }

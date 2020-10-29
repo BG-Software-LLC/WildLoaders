@@ -55,7 +55,7 @@ public final class WLoaderData implements LoaderData {
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         if(itemMeta != null){
-            String formattedTime = TimeUtils.formatTime(timeLeft);
+            String formattedTime = isInfinite() ? "" : TimeUtils.formatTime(timeLeft);
 
             if(itemMeta.hasDisplayName()) {
                 itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", formattedTime));
