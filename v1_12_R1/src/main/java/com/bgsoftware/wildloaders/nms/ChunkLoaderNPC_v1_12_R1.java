@@ -37,7 +37,7 @@ public final class ChunkLoaderNPC_v1_12_R1 extends EntityPlayer implements Chunk
 
         playerConnection = new DummyPlayerConnection(server, this);
 
-        a(EnumGamemode.CREATIVE);
+        this.playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
         fauxSleeping = true;
 
         spawnIn(world);
