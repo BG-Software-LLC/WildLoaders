@@ -162,7 +162,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
             chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
                     .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = 16);
 
-            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, true);
+            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, false);
         }
     }
 
