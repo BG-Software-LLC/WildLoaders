@@ -1,5 +1,5 @@
 name: WildLoaders
-version: 0.3.1-Beta
+version: 0.3.2-Beta
 api-version: 1.13
 main: com.bgsoftware.wildloaders.WildLoadersPlugin
 description: Highly configurable and optimized chunk-loaders plugin.
