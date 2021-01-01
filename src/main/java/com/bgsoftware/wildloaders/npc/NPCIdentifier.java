@@ -1,6 +1,5 @@
 package com.bgsoftware.wildloaders.npc;
 
-import com.bgsoftware.wildloaders.utils.ServerVersion;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -8,7 +7,7 @@ import java.util.Objects;
 
 public final class NPCIdentifier {
 
-    private static final boolean PER_WORLD_NPCS = ServerVersion.isLessThan(ServerVersion.v1_14);
+    private static final boolean PER_WORLD_NPCS = /* ServerVersion.isLessThan(ServerVersion.v1_14)*/ false;
 
     private final Object identifier;
 

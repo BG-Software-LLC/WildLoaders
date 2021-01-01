@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public final class NPCHandler implements NPCManager {
 
-    private static final boolean PER_WORLD_NPCS = ServerVersion.isLessThan(ServerVersion.v1_14);
+    private static final boolean PER_WORLD_NPCS = /*ServerVersion.isLessThan(ServerVersion.v1_14)*/ false;
 
     private final WildLoadersPlugin plugin;
     private final Map<NPCIdentifier, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
