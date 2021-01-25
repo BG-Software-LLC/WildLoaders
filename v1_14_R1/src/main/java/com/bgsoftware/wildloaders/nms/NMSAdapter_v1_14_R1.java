@@ -198,6 +198,11 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
             setPosition(blockPosition);
             setWorld(world);
 
+            try {
+                // Not a method of Spigot - fixes https://github.com/OmerBenGera/WildLoaders/issues/2
+                setCurrentChunk(world.getChunkAtWorldCoords(blockPosition));
+            }catch (Throwable ignored){}
+
             if(!this.chunkLoader.isInfinite()) {
                 long timeLeft = chunkLoader.getTimeLeft();
 
