@@ -57,6 +57,8 @@ public final class ChunkLoaderNPC_v1_7_R4 extends EntityPlayer implements ChunkL
     @Override
     public void die() {
         super.die();
+        world.players.remove(this);
+        ((WorldServer) world).getPlayerChunkMap().removePlayer(this);
     }
 
     @Override
