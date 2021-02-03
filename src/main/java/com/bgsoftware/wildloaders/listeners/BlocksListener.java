@@ -8,12 +8,14 @@ import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.Optional;
@@ -58,19 +60,13 @@ public final class BlocksListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onLoaderBreak(BlockBreakEvent e){
-        Location blockLoc = e.getBlock().getLocation();
-        Optional<ChunkLoader> optionalChunkLoader = plugin.getLoaders().getChunkLoader(blockLoc);
+        if(handleLoaderBreak(e.getBlock(), e.getPlayer().getGameMode() != GameMode.CREATIVE))
+            Locale.BROKE_LOADER.send(e.getPlayer());
+    }
 
-        if(!optionalChunkLoader.isPresent())
-            return;
-
-        ChunkLoader chunkLoader = optionalChunkLoader.get();
-        chunkLoader.remove();
-
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
-            blockLoc.getWorld().dropItemNaturally(blockLoc, chunkLoader.getLoaderItem());
-
-        Locale.BROKE_LOADER.send(e.getPlayer());
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onLoaderExplode(EntityExplodeEvent e){
+        e.blockList().removeIf(block -> handleLoaderBreak(block, true));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -91,6 +87,22 @@ public final class BlocksListener implements Listener {
 
         if(plugin.getLoaders().getChunkLoader(e.getClickedBlock().getLocation()).isPresent())
             e.setCancelled(true);
+    }
+
+    private boolean handleLoaderBreak(Block block, boolean dropItem){
+        Location blockLoc = block.getLocation();
+        Optional<ChunkLoader> optionalChunkLoader = plugin.getLoaders().getChunkLoader(blockLoc);
+
+        if(!optionalChunkLoader.isPresent())
+            return false;
+
+        ChunkLoader chunkLoader = optionalChunkLoader.get();
+        chunkLoader.remove();
+
+        if(dropItem)
+            blockLoc.getWorld().dropItemNaturally(blockLoc, chunkLoader.getLoaderItem());
+
+        return true;
     }
 
 }
