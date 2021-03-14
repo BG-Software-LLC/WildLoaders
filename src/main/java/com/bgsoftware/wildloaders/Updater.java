@@ -20,7 +20,7 @@ public final class Updater {
     private Updater(){}
 
     public static boolean isOutdated(){
-        return !plugin.getDescription().getVersion().equals(latestVersion);
+        return !plugin.getDescription().getVersion().startsWith(latestVersion);
     }
 
     public static String getLatestVersion(){
