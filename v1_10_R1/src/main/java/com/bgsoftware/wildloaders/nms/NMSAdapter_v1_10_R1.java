@@ -184,6 +184,7 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
 
         private final List<EntityHolograms_v1_10_R1> holograms = new ArrayList<>();
         private final WChunkLoader chunkLoader;
+        private final Block loaderBlock;
 
         private short currentTick = 20;
         private short daysAmount, hoursAmount = 0, minutesAmount = 0, secondsAmount = 0;
@@ -194,6 +195,8 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
 
             setPosition(blockPosition);
             a(world);
+
+            loaderBlock = world.getType(blockPosition).getBlock();
 
             if(!this.chunkLoader.isInfinite()) {
                 long timeLeft = chunkLoader.getTimeLeft();
@@ -231,7 +234,7 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
 
             currentTick = 0;
 
-            if(chunkLoader.isNotActive()){
+            if(chunkLoader.isNotActive() || world.getType(position).getBlock() != loaderBlock){
                 chunkLoader.remove();
                 return;
             }

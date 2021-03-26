@@ -187,6 +187,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
         private final List<EntityHolograms_v1_16_R2> holograms = new ArrayList<>();
         private final WChunkLoader chunkLoader;
+        private final Block loaderBlock;
 
         private short currentTick = 20;
         private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
@@ -198,6 +199,8 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
             this.chunkLoader = (WChunkLoader) chunkLoader;
 
             setLocation(world, blockPosition);
+
+            loaderBlock = world.getType(blockPosition).getBlock();
 
             try {
                 // Not a method of Spigot - fixes https://github.com/OmerBenGera/WildLoaders/issues/2
@@ -245,7 +248,8 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
             currentTick = 0;
 
-            if(chunkLoader.isNotActive()){
+            assert world != null;
+            if(chunkLoader.isNotActive() || world.getType(position).getBlock() != loaderBlock){
                 chunkLoader.remove();
                 return;
             }

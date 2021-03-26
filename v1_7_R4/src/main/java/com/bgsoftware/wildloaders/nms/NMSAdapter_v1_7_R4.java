@@ -183,18 +183,21 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
 
         private static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
 
-        private final ChunkLoader chunkLoader;
+        private final WChunkLoader chunkLoader;
+        private final Block loaderBlock;
 
         private short currentTick = 20;
         private boolean removed = false;
 
         TileEntityChunkLoader(ChunkLoader chunkLoader, World world, int x, int y, int z){
-            this.chunkLoader = chunkLoader;
+            this.chunkLoader = (WChunkLoader) chunkLoader;
 
             this.x = x;
             this.y = y;
             this.z = z;
             a(world);
+
+            loaderBlock = world.getType(x, y, z);
 
             tileEntityChunkLoaderMap.put(LongHash.toLong(x >> 4, z >> 4), this);
         }
@@ -206,12 +209,12 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
 
             currentTick = 0;
 
-            if(((WChunkLoader) chunkLoader).isNotActive()){
+            if(chunkLoader.isNotActive() || world.getType(x, y, z) != loaderBlock){
                 chunkLoader.remove();
                 return;
             }
 
-            ((WChunkLoader) chunkLoader).tick();
+            chunkLoader.tick();
         }
 
         @Override
