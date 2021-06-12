@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.npc.NPCIdentifier;
-import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Location;
@@ -16,8 +15,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class NPCHandler implements NPCManager {
-
-    private static final boolean PER_WORLD_NPCS = /*ServerVersion.isLessThan(ServerVersion.v1_14)*/ false;
 
     private final WildLoadersPlugin plugin;
     private final Map<NPCIdentifier, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
@@ -45,18 +42,16 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public void killNPC(ChunkLoaderNPC npc) {
-        if(!PER_WORLD_NPCS){
-            NPCIdentifier identifier = new NPCIdentifier(npc.getLocation());
-            npcs.remove(identifier);
+        NPCIdentifier identifier = new NPCIdentifier(npc.getLocation());
+        npcs.remove(identifier);
 
-            npcUUIDs.remove(identifier);
+        npcUUIDs.remove(identifier);
 
-            Query.DELETE_NPC_IDENTIFIER.insertParameters()
-                    .setLocation(identifier.getSpawnLocation())
-                    .queue(npc.getUniqueId());
+        Query.DELETE_NPC_IDENTIFIER.insertParameters()
+                .setLocation(identifier.getSpawnLocation())
+                .queue(npc.getUniqueId());
 
-            npc.die();
-        }
+        npc.die();
     }
 
     @Override

@@ -1,27 +1,24 @@
 package com.bgsoftware.wildloaders.npc;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 
 import java.util.Objects;
 
 public final class NPCIdentifier {
 
-    private static final boolean PER_WORLD_NPCS = /* ServerVersion.isLessThan(ServerVersion.v1_14)*/ false;
-
     private final Object identifier;
 
     public NPCIdentifier(Location location){
-        this.identifier = PER_WORLD_NPCS ? location.getWorld() : getBlockLocation(location);
+        this.identifier = getBlockLocation(location);
     }
 
     public Location getSpawnLocation(){
-        return PER_WORLD_NPCS ? new Location((World) identifier, 0, 1, 0) : (Location) identifier;
+        return (Location) identifier;
     }
 
     @Override
     public String toString() {
-        return PER_WORLD_NPCS ? ((World) identifier).getName() : identifier.toString();
+        return identifier.toString();
     }
 
     @Override
