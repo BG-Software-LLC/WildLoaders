@@ -12,7 +12,7 @@ public final class NPCIdentifier {
     private final Object identifier;
 
     public NPCIdentifier(Location location){
-        this.identifier = PER_WORLD_NPCS ? location.getWorld() : location;
+        this.identifier = PER_WORLD_NPCS ? location.getWorld() : getBlockLocation(location);
     }
 
     public Location getSpawnLocation(){
@@ -35,6 +35,10 @@ public final class NPCIdentifier {
     @Override
     public int hashCode() {
         return Objects.hash(identifier);
+    }
+
+    private static Location getBlockLocation(Location location){
+        return new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
 }
