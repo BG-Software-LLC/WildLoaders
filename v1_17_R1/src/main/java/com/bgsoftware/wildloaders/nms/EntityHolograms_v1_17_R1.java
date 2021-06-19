@@ -15,6 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.World;
 import net.minecraft.world.phys.AxisAlignedBB;
 import net.minecraft.world.phys.Vec3D;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_17_R1.util.CraftChatMessage;
@@ -161,7 +163,7 @@ public final class EntityHolograms_v1_17_R1 extends EntityArmorStand implements 
     @Override
     public CraftEntity getBukkitEntity() {
         if (bukkitEntity == null) {
-            bukkitEntity = new CraftArmorStand(super.getWorld().getServer(), this);
+            bukkitEntity = new CraftArmorStand((CraftServer) Bukkit.getServer(), this);
         }
         return bukkitEntity;
     }
