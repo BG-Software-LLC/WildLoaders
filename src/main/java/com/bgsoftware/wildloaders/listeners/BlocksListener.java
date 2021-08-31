@@ -14,6 +14,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -87,6 +89,30 @@ public final class BlocksListener implements Listener {
 
         if(plugin.getLoaders().getChunkLoader(e.getClickedBlock().getLocation()).isPresent())
             e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onLoaderPistonRetract(BlockPistonRetractEvent e) {
+        try {
+            for (Block block : e.getBlocks()) {
+                if(plugin.getLoaders().getChunkLoader(block.getLocation()).isPresent()) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onLoaderPistonExtend(BlockPistonExtendEvent e) {
+        try {
+            for (Block block : e.getBlocks()) {
+                if(plugin.getLoaders().getChunkLoader(block.getLocation()).isPresent()) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {}
     }
 
     private boolean handleLoaderBreak(Block block, boolean dropItem){
