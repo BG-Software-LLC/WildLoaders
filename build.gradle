@@ -58,7 +58,7 @@ dependencies {
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
 
     // Spigot jars
-    compileOnly "org.spigotmc:v1_7_R3:latest"
+    compileOnly "org.spigotmc:v1_8_R3:latest"
     compileOnly 'org.spigotmc:v1_16_R3-Tuinity:latest'
 
     // Plugin Hooks
