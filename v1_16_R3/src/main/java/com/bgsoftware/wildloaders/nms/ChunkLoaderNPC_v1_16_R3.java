@@ -82,7 +82,21 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
         entityPlayer.shouldBeRemoved = true;
     }
 
-    private static class DummyNetworkManager extends NetworkManager{
+    public static class DummyNetworkManager extends NetworkManager{
+
+        private static Field channelField;
+        private static Field socketAddressField;
+
+        static {
+            try {
+                channelField = NetworkManager.class.getDeclaredField("channel");
+                channelField.setAccessible(true);
+                socketAddressField = NetworkManager.class.getDeclaredField("socketAddress");
+                socketAddressField.setAccessible(true);
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
+        }
 
         DummyNetworkManager(){
             super(EnumProtocolDirection.SERVERBOUND);
@@ -91,23 +105,21 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
 
         private void updateFields() {
             try {
-                Field channelField = NetworkManager.class.getDeclaredField("channel");
-                channelField.setAccessible(true);
-                channelField.set(this, new DummyChannel());
-                channelField.setAccessible(false);
+                if (channelField != null) {
+                    channelField.set(this, new DummyChannel());
+                }
 
-                Field socketAddressField = NetworkManager.class.getDeclaredField("socketAddress");
-                socketAddressField.setAccessible(true);
-                socketAddressField.set(this, null);
-            }
-            catch (NoSuchFieldException|SecurityException|IllegalArgumentException|IllegalAccessException e) {
-                e.printStackTrace();
+                if (socketAddressField != null) {
+                    socketAddressField.set(this, null);
+                }
+            } catch (Exception error) {
+                error.printStackTrace();
             }
         }
 
     }
 
-    private static class DummyPlayerConnection extends PlayerConnection {
+    public static class DummyPlayerConnection extends PlayerConnection {
 
         DummyPlayerConnection(MinecraftServer minecraftServer, EntityPlayer entityPlayer) {
             super(minecraftServer, new DummyNetworkManager(), entityPlayer);

@@ -76,7 +76,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
         worldServer.a(entityPlayer, RemovalReason.d);
     }
 
-    private static class DummyNetworkManager extends NetworkManager {
+    public static class DummyNetworkManager extends NetworkManager {
 
         DummyNetworkManager(){
             super(EnumProtocolDirection.a);
@@ -86,7 +86,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
 
     }
 
-    private static class DummyPlayerConnection extends PlayerConnection {
+    public static class DummyPlayerConnection extends PlayerConnection {
 
         DummyPlayerConnection(MinecraftServer minecraftServer, EntityPlayer entityPlayer) {
             super(minecraftServer, new DummyNetworkManager(), entityPlayer);
