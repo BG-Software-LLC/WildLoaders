@@ -68,11 +68,6 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
     }
 
     private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer){
-//        Chunk currentChunk = entityPlayer.getCurrentChunk();
-//        if (currentChunk != null)
-//            currentChunk.b(entityPlayer);
-//        TODO: Paper
-
         worldServer.a(entityPlayer, RemovalReason.d);
     }
 

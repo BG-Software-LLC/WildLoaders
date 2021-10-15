@@ -210,12 +210,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
             loaderBlock = world.getType(blockPosition).getBlock();
 
-//            try {
-//                // Not a method of Spigot - fixes https://github.com/OmerBenGera/WildLoaders/issues/2
-//                setCurrentChunk(world.getChunkAtWorldCoords(blockPosition));
-//            }catch (Throwable ignored){}
-//            TODO: Paper
-
             if(!this.chunkLoader.isInfinite()) {
                 long timeLeft = chunkLoader.getTimeLeft();
 
@@ -311,13 +305,8 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     }
 
-    private static class TileEntityChunkLoaderTicker implements TickingBlockEntity{
-
-        private final TileEntityChunkLoader tileEntityChunkLoader;
-
-        TileEntityChunkLoaderTicker(TileEntityChunkLoader tileEntityChunkLoader){
-            this.tileEntityChunkLoader = tileEntityChunkLoader;
-        }
+    private record TileEntityChunkLoaderTicker(
+            TileEntityChunkLoader tileEntityChunkLoader) implements TickingBlockEntity {
 
         @Override
         public void a() {
