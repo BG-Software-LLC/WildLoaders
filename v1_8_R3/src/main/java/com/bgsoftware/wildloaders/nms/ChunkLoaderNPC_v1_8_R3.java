@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.nms;
 
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_8_R3.DamageSource;
@@ -32,8 +33,10 @@ import java.util.UUID;
 public final class ChunkLoaderNPC_v1_8_R3 extends EntityPlayer implements ChunkLoaderNPC {
 
     public ChunkLoaderNPC_v1_8_R3(Location location, UUID uuid){
-        super(((CraftServer) Bukkit.getServer()).getServer(), ((CraftWorld) location.getWorld()).getHandle(),
-                new GameProfile(uuid, "Loader-" + location.getWorld().getName()), new PlayerInteractManager(((CraftWorld) location.getWorld()).getHandle()));
+        super(((CraftServer) Bukkit.getServer()).getServer(),
+                ((CraftWorld) location.getWorld()).getHandle(),
+                new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())),
+                new PlayerInteractManager(((CraftWorld) location.getWorld()).getHandle()));
 
         playerConnection = new DummyPlayerConnection(server, this);
 

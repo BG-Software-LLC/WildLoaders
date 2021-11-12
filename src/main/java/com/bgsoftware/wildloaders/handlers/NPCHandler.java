@@ -91,4 +91,9 @@ public final class NPCHandler implements NPCManager {
         return uuid;
     }
 
+    public static String getName(String worldName) {
+        String name = "Loader-" + worldName;
+        return name.length() > 16 ? name.substring(0, 16) : name;
+    }
+
 }
