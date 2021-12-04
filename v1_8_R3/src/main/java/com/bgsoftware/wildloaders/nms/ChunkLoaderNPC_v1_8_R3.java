@@ -45,6 +45,12 @@ public final class ChunkLoaderNPC_v1_8_R3 extends EntityPlayer implements ChunkL
 
         fauxSleeping = true;
 
+        try {
+            // Paper
+            affectsSpawning = true;
+        } catch (Throwable ignored) {
+        }
+
         spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
