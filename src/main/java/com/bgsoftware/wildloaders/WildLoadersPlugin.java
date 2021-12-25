@@ -57,7 +57,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
         npcHandler = new NPCHandler(this);
-        providersHandler = new ProvidersHandler();
+        providersHandler = new ProvidersHandler(this);
         settingsHandler = new SettingsHandler(this);
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
