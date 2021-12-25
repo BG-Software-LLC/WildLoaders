@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
-import com.bgsoftware.wildloaders.hooks.TickableProvider_EpicSpawners;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -56,7 +55,8 @@ public final class ProvidersHandler implements ProvidersManager {
     private void loadTickableProviders() {
         // Loading the tickable providers
         if (Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-            addTickableProvider(new TickableProvider_EpicSpawners());
+            Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners");
+            tickableProvider.ifPresent(this::addTickableProvider);
         }
     }
 

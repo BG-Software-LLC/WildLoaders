@@ -17,7 +17,7 @@ public final class TickableProvider_EpicSpawners implements TickableProvider {
 
     @Override
     public void tick(Chunk[] chunks) {
-        if(EpicSpawners.getInstance().getSpawnerManager() == null)
+        if (EpicSpawners.getInstance().getSpawnerManager() == null)
             return;
 
         List<Long> chunkList = Stream.of(chunks).map(chunk -> pair(chunk.getX(), chunk.getZ())).collect(Collectors.toList());
@@ -28,7 +28,7 @@ public final class TickableProvider_EpicSpawners implements TickableProvider {
                     Location location = spawner.getLocation();
                     TickDelay tickDelay = spawnerDelays.get(location);
 
-                    if(tickDelay == null) {
+                    if (tickDelay == null) {
                         spawnerDelays.put(location, new TickDelay(spawner.updateDelay()));
                         return;
                     }
@@ -42,15 +42,15 @@ public final class TickableProvider_EpicSpawners implements TickableProvider {
                 });
     }
 
-    private long pair(int x, int z){
-        return (x & 4294967295L) | (z & 4294967295L) << 32;
+    private long pair(int x, int z) {
+        return (x & 0xFFFFFFFFL) | (z & 0xFFFFFFFFL) << 32;
     }
 
-    private static final class TickDelay{
+    private static final class TickDelay {
 
         private int delay;
 
-        TickDelay(int delay){
+        TickDelay(int delay) {
             this.delay = delay;
         }
 
