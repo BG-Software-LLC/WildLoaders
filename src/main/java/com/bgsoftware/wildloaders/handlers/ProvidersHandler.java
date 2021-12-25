@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
-import com.bgsoftware.wildloaders.hooks.ClaimsProvider_SuperiorSkyblock;
 import com.bgsoftware.wildloaders.hooks.TickableProvider_EpicSpawners;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -49,7 +48,8 @@ public final class ProvidersHandler implements ProvidersManager {
             claimsProvider.ifPresent(this::addClaimsProvider);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("SuperiorSkyblock2")) {
-            addClaimsProvider(new ClaimsProvider_SuperiorSkyblock());
+            Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_SuperiorSkyblock");
+            claimsProvider.ifPresent(this::addClaimsProvider);
         }
     }
 

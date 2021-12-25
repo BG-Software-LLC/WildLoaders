@@ -58,7 +58,6 @@ dependencies {
     compileOnly 'org.spigotmc:v1_16_R3-Tuinity:latest'
 
     // Plugin Hooks
-    compileOnly "com.bgsoftware:SuperiorSkyblockAPI:latest"
     compileOnly "com.songoda:EpicSpawners-6:latest"
 }
 
