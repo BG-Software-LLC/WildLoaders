@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
-import com.bgsoftware.wildloaders.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildloaders.hooks.ClaimsProvider_FactionsX;
 import com.bgsoftware.wildloaders.hooks.ClaimsProvider_SuperiorSkyblock;
 import com.bgsoftware.wildloaders.hooks.TickableProvider_EpicSpawners;
@@ -38,7 +37,8 @@ public final class ProvidersHandler implements ProvidersManager {
         // Loading the claim providers
         if (Bukkit.getPluginManager().isPluginEnabled("Factions")) {
             if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock")) {
-                addClaimsProvider(new ClaimsProvider_FactionsUUID());
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_FactionsUUID");
+                claimsProvider.ifPresent(this::addClaimsProvider);
             }
             else {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_MassiveFactions");
