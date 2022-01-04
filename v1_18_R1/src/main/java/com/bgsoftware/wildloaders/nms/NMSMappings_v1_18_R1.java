@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTBase;
@@ -19,11 +20,13 @@ import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
 import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.IChunkAccess;
-import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.Map;
 
 public final class NMSMappings_v1_18_R1 {
+
+    private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
+            1, EnumGamemode.class, EnumGamemode.class);
 
     private NMSMappings_v1_18_R1() {
 
@@ -118,7 +121,7 @@ public final class NMSMappings_v1_18_R1 {
     }
 
     public static void setGameMode(PlayerInteractManager playerInteractManager, EnumGamemode gamemode) {
-        playerInteractManager.a(gamemode);
+        SET_GAMEMODE.invoke(playerInteractManager, gamemode, null);
     }
 
     public static World getWorld(Entity entity) {

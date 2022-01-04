@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
@@ -16,6 +17,7 @@ import net.minecraft.network.protocol.game.PacketPlayInUpdateSign;
 import net.minecraft.network.protocol.game.PacketPlayInWindowClick;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.server.level.PlayerInteractManager;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.entity.Entity;
@@ -27,6 +29,9 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements ChunkLoaderNPC {
 
+    private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
+            1, EnumGamemode.class, EnumGamemode.class);
+
     private boolean dieCall = false;
 
     public ChunkLoaderNPC_v1_17_R1(MinecraftServer minecraftServer, Location location, UUID uuid){
@@ -35,7 +40,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
-        this.d.setGameMode(EnumGamemode.b);
+        SET_GAMEMODE.invoke(this.d, EnumGamemode.b);
         clientViewDistance = 1;
 
         fauxSleeping = true;
