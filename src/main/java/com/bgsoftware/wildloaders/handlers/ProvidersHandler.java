@@ -7,6 +7,7 @@ import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -36,8 +37,7 @@ public final class ProvidersHandler implements ProvidersManager {
             if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock")) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_FactionsUUID");
                 claimsProvider.ifPresent(this::addClaimsProvider);
-            }
-            else {
+            } else {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_MassiveFactions");
                 claimsProvider.ifPresent(this::addClaimsProvider);
             }
@@ -55,8 +55,14 @@ public final class ProvidersHandler implements ProvidersManager {
     private void loadTickableProviders() {
         // Loading the tickable providers
         if (Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-            Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners");
-            tickableProvider.ifPresent(this::addTickableProvider);
+            Plugin epicSpawners = Bukkit.getPluginManager().getPlugin("EpicSpawners");
+            if (epicSpawners.getDescription().getVersion().startsWith("6")) {
+                Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners6");
+                tickableProvider.ifPresent(this::addTickableProvider);
+            } else {
+                Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners7");
+                tickableProvider.ifPresent(this::addTickableProvider);
+            }
         }
     }
 

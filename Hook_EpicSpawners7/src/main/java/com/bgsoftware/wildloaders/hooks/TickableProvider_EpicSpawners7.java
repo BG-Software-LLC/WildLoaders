@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class TickableProvider_EpicSpawners implements TickableProvider {
+public final class TickableProvider_EpicSpawners7 implements TickableProvider {
 
     private final Map<Location, TickDelay> spawnerDelays = new HashMap<>();
 
