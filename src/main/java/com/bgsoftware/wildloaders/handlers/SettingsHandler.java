@@ -1,16 +1,16 @@
 package com.bgsoftware.wildloaders.handlers;
 
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
-import com.bgsoftware.wildloaders.utils.config.CommentedConfiguration;
 import com.bgsoftware.wildloaders.utils.items.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,17 +20,22 @@ public final class SettingsHandler {
     public List<String> hologramLines;
     public List<String> infiniteHologramLines;
 
-    public SettingsHandler(WildLoadersPlugin plugin){
+    public SettingsHandler(WildLoadersPlugin plugin) {
         WildLoadersPlugin.log("Loading configuration started...");
         long startTime = System.currentTimeMillis();
         int loadersAmount = 0;
         File file = new File(plugin.getDataFolder(), "config.yml");
 
-        if(!file.exists())
+        if (!file.exists())
             plugin.saveResource("config.yml", false);
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, plugin.getResource("config.yml"), "chunkloaders");
+
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("config.yml"), "chunkloaders");
+        } catch (IOException error) {
+            error.printStackTrace();
+        }
 
         hologramLines = cfg.getStringList("hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
@@ -46,16 +51,16 @@ public final class SettingsHandler {
 
             ItemBuilder itemBuilder = null;
 
-            try{
+            try {
                 Material type = Material.valueOf(loaderSection.getString("type", ""));
                 short data = (short) loaderSection.getInt("data", 0);
 
                 itemBuilder = new ItemBuilder(type, data);
 
-                if(loaderSection.contains("name"))
+                if (loaderSection.contains("name"))
                     itemBuilder.setDisplayName(ChatColor.translateAlternateColorCodes('&', loaderSection.getString("name")));
 
-                if(loaderSection.contains("lore")) {
+                if (loaderSection.contains("lore")) {
                     List<String> lore = new ArrayList<>();
 
                     loaderSection.getStringList("lore").forEach(line ->
@@ -64,18 +69,19 @@ public final class SettingsHandler {
                     itemBuilder.setLore(lore);
                 }
 
-                if(loaderSection.contains("enchants")) {
-                    for(String line : loaderSection.getStringList("enchants")){
+                if (loaderSection.contains("enchants")) {
+                    for (String line : loaderSection.getStringList("enchants")) {
                         Enchantment enchantment = Enchantment.getByName(line.split(":")[0]);
                         int level = Integer.parseInt(line.split(":")[1]);
                         itemBuilder.addEnchant(enchantment, level);
                     }
                 }
 
-                if(loaderSection.contains("skull")) {
+                if (loaderSection.contains("skull")) {
                     itemBuilder.setTexture(loaderSection.getString("skull"));
                 }
-            } catch(Exception ignored){}
+            } catch (Exception ignored) {
+            }
 
             if (itemBuilder == null) {
                 WildLoadersPlugin.log("Something went wrong while loading chunk-loader '" + name + "'.");
@@ -84,10 +90,10 @@ public final class SettingsHandler {
 
             LoaderData loaderData = plugin.getLoaders().createLoaderData(name, timeLeft, itemBuilder.build());
 
-            if(loaderSection.contains("chunks-radius"))
+            if (loaderSection.contains("chunks-radius"))
                 loaderData.setChunksRadius(loaderSection.getInt("chunks-radius"));
 
-            if(loaderSection.contains("chunks-spread"))
+            if (loaderSection.contains("chunks-spread"))
                 loaderData.setChunksSpread(loaderSection.getBoolean("chunks-spread"));
 
             loadersAmount++;

@@ -1,10 +1,11 @@
 package com.bgsoftware.wildloaders;
 
-import com.bgsoftware.wildloaders.utils.config.CommentedConfiguration;
+import com.bgsoftware.common.config.CommentedConfiguration;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,14 +41,14 @@ public final class Locale {
     public static Locale TIME_PLACEHOLDER_SECONDS = new Locale("TIME_PLACEHOLDER_SECONDS");
     public static Locale TIME_PLACEHOLDER_SECOND = new Locale("TIME_PLACEHOLDER_SECOND");
 
-    private Locale(String identifier){
+    private Locale(String identifier) {
         localeMap.put(identifier, this);
     }
 
     private String message;
 
-    public String getMessage(Object... objects){
-        if(message != null && !message.equals("")) {
+    public String getMessage(Object... objects) {
+        if (message != null && !message.equals("")) {
             String msg = message;
 
             for (int i = 0; i < objects.length; i++)
@@ -59,33 +60,38 @@ public final class Locale {
         return null;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return message == null || message.equals("");
     }
 
-    public void send(CommandSender sender, Object... objects){
+    public void send(CommandSender sender, Object... objects) {
         String message = getMessage(objects);
-        if(message != null && sender != null)
+        if (message != null && sender != null)
             sender.sendMessage(message);
     }
 
-    private void setMessage(String message){
+    private void setMessage(String message) {
         this.message = message;
     }
 
-    public static void reload(){
+    public static void reload() {
         WildLoadersPlugin.log("Loading messages started...");
         long startTime = System.currentTimeMillis();
         int messagesAmount = 0;
         File file = new File(plugin.getDataFolder(), "lang.yml");
 
-        if(!file.exists())
+        if (!file.exists())
             plugin.saveResource("lang.yml", false);
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
 
-        for(String identifier : localeMap.keySet()){
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
+        } catch (IOException error) {
+            error.printStackTrace();
+        }
+
+        for (String identifier : localeMap.keySet()) {
             localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));
             messagesAmount++;
         }
@@ -94,7 +100,7 @@ public final class Locale {
         WildLoadersPlugin.log("Loading messages done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
-    public static void sendMessage(CommandSender sender, String message){
+    public static void sendMessage(CommandSender sender, String message) {
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 
