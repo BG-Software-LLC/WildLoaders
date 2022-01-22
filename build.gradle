@@ -52,7 +52,7 @@ dependencies {
     implementation fileTree("archive")
 
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
-    implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.2'
+    implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
 
     // Spigot jars
     compileOnly "org.spigotmc:v1_8_R3:latest"
