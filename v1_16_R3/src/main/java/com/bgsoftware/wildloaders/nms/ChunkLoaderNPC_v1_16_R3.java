@@ -34,7 +34,7 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
 
     private boolean dieCall = false;
 
-    public ChunkLoaderNPC_v1_16_R3(Location location, UUID uuid){
+    public ChunkLoaderNPC_v1_16_R3(Location location, UUID uuid) {
         super(((CraftServer) Bukkit.getServer()).getServer(),
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())),
@@ -60,12 +60,11 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
 
     @Override
     public void die() {
-        if(!dieCall) {
+        if (!dieCall) {
             dieCall = true;
             removePlayer(getWorldServer(), this);
             dieCall = false;
-        }
-        else {
+        } else {
             super.die();
         }
     }
@@ -75,17 +74,21 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
         return getBukkitEntity().getLocation();
     }
 
-    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer){
-        Chunk currentChunk = entityPlayer.getCurrentChunk();
+    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer) {
+        Chunk currentChunk = worldServer.getChunkIfLoaded((int) entityPlayer.locX() >> 4,
+                (int) entityPlayer.locZ() >> 4);
         if (currentChunk != null)
             currentChunk.b(entityPlayer);
 
         worldServer.entitiesById.remove(entityPlayer.getId());
         worldServer.unregisterEntity(entityPlayer);
-        entityPlayer.shouldBeRemoved = true;
+        try {
+            entityPlayer.shouldBeRemoved = true;
+        } catch (Throwable ignored) {
+        }
     }
 
-    public static class DummyNetworkManager extends NetworkManager{
+    public static class DummyNetworkManager extends NetworkManager {
 
         private static Field channelField;
         private static Field socketAddressField;
@@ -101,7 +104,7 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
             }
         }
 
-        DummyNetworkManager(){
+        DummyNetworkManager() {
             super(EnumProtocolDirection.SERVERBOUND);
             updateFields();
         }
