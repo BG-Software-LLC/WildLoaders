@@ -33,7 +33,7 @@ public final class WChunkLoader implements ChunkLoader {
     private boolean active = true;
     private long timeLeft;
 
-    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, Location location, long timeLeft){
+    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, Location location, long timeLeft) {
         this.loaderName = loaderData.getName();
         this.whoPlaced = whoPlaced;
         this.location = location.clone();
@@ -52,8 +52,8 @@ public final class WChunkLoader implements ChunkLoader {
         return Bukkit.getOfflinePlayer(whoPlaced);
     }
 
-    public boolean isNotActive(){
-        if(active)
+    public boolean isNotActive() {
+        if (active)
             active = plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) == this;
         return !active;
     }
@@ -63,10 +63,10 @@ public final class WChunkLoader implements ChunkLoader {
         return timeLeft;
     }
 
-    public void tick(){
+    public void tick() {
         plugin.getProviders().tick(loadedChunks);
 
-        if(!isInfinite()) {
+        if (!isInfinite()) {
             timeLeft--;
             if (timeLeft < 0) {
                 remove();
@@ -79,7 +79,7 @@ public final class WChunkLoader implements ChunkLoader {
         }
     }
 
-    public boolean isInfinite(){
+    public boolean isInfinite() {
         return timeLeft == Integer.MIN_VALUE;
     }
 
@@ -100,7 +100,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::remove);
             return;
         }
@@ -121,17 +121,18 @@ public final class WChunkLoader implements ChunkLoader {
         return tileEntityChunkLoader.getHolograms();
     }
 
-    public List<String> getHologramLines(){
+    public List<String> getHologramLines() {
         return isInfinite() ? plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
     }
 
-    private static Chunk[] calculateChunks(LoaderData loaderData, UUID whoPlaced, Location original){
+    private static Chunk[] calculateChunks(LoaderData loaderData, UUID whoPlaced, Location original) {
         List<Chunk> chunkList = new ArrayList<>();
 
-        if(loaderData.isChunksSpread()){
+        if (loaderData.isChunksSpread()) {
             calculateClaimChunks(original.getChunk(), whoPlaced, chunkList);
         }
-        else {
+
+        if (chunkList.isEmpty()) {
             int chunkX = original.getBlockX() >> 4, chunkZ = original.getBlockZ() >> 4;
 
             for (int x = -loaderData.getChunksRadius(); x <= loaderData.getChunksRadius(); x++)
@@ -142,8 +143,8 @@ public final class WChunkLoader implements ChunkLoader {
         return chunkList.toArray(new Chunk[0]);
     }
 
-    private static void calculateClaimChunks(Chunk originalChunk, UUID whoPlaced, List<Chunk> chunkList){
-        if(!plugin.getProviders().hasChunkAccess(whoPlaced, originalChunk))
+    private static void calculateClaimChunks(Chunk originalChunk, UUID whoPlaced, List<Chunk> chunkList) {
+        if (!plugin.getProviders().hasChunkAccess(whoPlaced, originalChunk))
             return;
 
         chunkList.add(originalChunk);
@@ -152,7 +153,7 @@ public final class WChunkLoader implements ChunkLoader {
 
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
-                if(x != 0 || z != 0) // We don't want to add the originalChunk again.
+                if (x != 0 || z != 0) // We don't want to add the originalChunk again.
                     calculateClaimChunks(originalChunk.getWorld().getChunkAt(chunkX + x, chunkZ + z), whoPlaced, chunkList);
             }
         }
