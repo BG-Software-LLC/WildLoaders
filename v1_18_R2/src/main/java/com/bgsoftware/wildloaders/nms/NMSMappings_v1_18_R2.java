@@ -33,7 +33,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static NBTTagCompound getOrCreateTag(ItemStack itemStack) {
-        return itemStack.t();
+        return itemStack.u();
     }
 
     public static boolean hasKeyOfType(NBTTagCompound nbtTagCompound, String key, int type) {
