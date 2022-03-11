@@ -19,6 +19,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.level.EnumGamemode;
+import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 
@@ -27,6 +28,8 @@ import java.util.UUID;
 import static com.bgsoftware.wildloaders.nms.NMSMappings_v1_18_R1.*;
 
 public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements ChunkLoaderNPC {
+
+    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
 
     private boolean dieCall = false;
 
@@ -45,6 +48,8 @@ public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements Chunk
         setLocation(this, location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         addPlayerJoin(getWorldServer(this), this);
+
+        super.a(EMPTY_BOUND);
     }
 
     @Override
@@ -55,6 +60,11 @@ public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements Chunk
     @Override
     public void die() {
         ah();
+    }
+
+    @Override
+    public AxisAlignedBB cx() {
+        return EMPTY_BOUND;
     }
 
     @Override

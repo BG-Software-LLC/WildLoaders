@@ -22,12 +22,15 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.EnumGamemode;
+import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 
 import java.util.UUID;
 
 public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements ChunkLoaderNPC {
+
+    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
 
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
             1, EnumGamemode.class, EnumGamemode.class);
@@ -49,11 +52,18 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         ((WorldServer) getWorld()).addPlayerJoin(this);
+
+        super.a(EMPTY_BOUND);
     }
 
     @Override
     public UUID getUniqueId() {
         return super.getUniqueID();
+    }
+
+    @Override
+    public AxisAlignedBB cs() {
+        return EMPTY_BOUND;
     }
 
     @Override

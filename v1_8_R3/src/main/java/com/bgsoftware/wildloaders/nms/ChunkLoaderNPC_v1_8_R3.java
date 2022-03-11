@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.DamageSource;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.EnumProtocolDirection;
@@ -32,6 +33,8 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC_v1_8_R3 extends EntityPlayer implements ChunkLoaderNPC {
 
+    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
+
     public ChunkLoaderNPC_v1_8_R3(Location location, UUID uuid){
         super(((CraftServer) Bukkit.getServer()).getServer(),
                 ((CraftWorld) location.getWorld()).getHandle(),
@@ -56,11 +59,18 @@ public final class ChunkLoaderNPC_v1_8_R3 extends EntityPlayer implements ChunkL
 
         world.players.add(this);
         ((WorldServer) world).getPlayerChunkMap().addPlayer(this);
+
+        super.a(EMPTY_BOUND);
     }
 
     @Override
     public UUID getUniqueId() {
         return super.getUniqueID();
+    }
+
+    @Override
+    public AxisAlignedBB getBoundingBox() {
+        return EMPTY_BOUND;
     }
 
     @Override
