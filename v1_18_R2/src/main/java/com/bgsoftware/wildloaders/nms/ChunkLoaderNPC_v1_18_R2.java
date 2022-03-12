@@ -39,15 +39,15 @@ public final class ChunkLoaderNPC_v1_18_R2 extends EntityPlayer implements Chunk
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
-        NMSMappings_v1_18_R2.setGameMode(this.d, EnumGamemode.b);
+        NMSMappings_v1_18_R2.setGameModeForPlayer(this.d, EnumGamemode.b);
         clientViewDistance = 1;
 
         fauxSleeping = true;
 
         spawnIn(getWorld(this));
-        setLocation(this, location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        moveTo(this, location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
-        addPlayerJoin(getWorldServer(this), this);
+        addNewPlayer(getLevel(this), this);
 
         super.a(EMPTY_BOUND);
     }
@@ -71,7 +71,7 @@ public final class ChunkLoaderNPC_v1_18_R2 extends EntityPlayer implements Chunk
     public void a(RemovalReason removalReason) {
         if(!dieCall) {
             dieCall = true;
-            removePlayer(getWorldServer(this), this);
+            removePlayer(getLevel(this), this);
             dieCall = false;
         }
         else {

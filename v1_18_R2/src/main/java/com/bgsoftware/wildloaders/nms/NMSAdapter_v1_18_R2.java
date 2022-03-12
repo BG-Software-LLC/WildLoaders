@@ -54,7 +54,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = getOrCreateTag(nmsItem);
 
-        if(!hasKeyOfType(tagCompound, key, 8))
+        if(!contains(tagCompound, key, 8))
             return def;
 
         return getString(tagCompound, key);
@@ -65,7 +65,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = getOrCreateTag(nmsItem);
 
-        set(tagCompound, key, NBTTagString.a(value));
+        put(tagCompound, key, NBTTagString.a(value));
 
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
@@ -75,7 +75,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = getOrCreateTag(nmsItem);
 
-        if(!hasKeyOfType(tagCompound, key, 4))
+        if(!contains(tagCompound, key, 4))
             return def;
 
         return getLong(tagCompound, key);
@@ -86,7 +86,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = getOrCreateTag(nmsItem);
 
-        set(tagCompound, key, NBTTagLong.a(value));
+        put(tagCompound, key, NBTTagLong.a(value));
 
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
@@ -97,22 +97,22 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
 
         NBTTagCompound nbtTagCompound = getOrCreateTag(nmsItem);
 
-        NBTTagCompound skullOwner = hasKey(nbtTagCompound, "SkullOwner") ?
+        NBTTagCompound skullOwner = NMSMappings_v1_18_R2.contains(nbtTagCompound, "SkullOwner") ?
                 getCompound(nbtTagCompound, "SkullOwner") : new NBTTagCompound();
 
         NBTTagCompound properties = new NBTTagCompound();
 
         NBTTagList textures = new NBTTagList();
         NBTTagCompound signature = new NBTTagCompound();
-        setString(signature, "Value", texture);
+        putString(signature, "Value", texture);
         textures.add(signature);
 
-        set(properties, "textures", textures);
+        put(properties, "textures", textures);
 
-        set(skullOwner, "Properties", properties);
-        setString(skullOwner,"Id", UUID.randomUUID().toString());
+        put(skullOwner, "Properties", properties);
+        putString(skullOwner,"Id", UUID.randomUUID().toString());
 
-        set(nbtTagCompound, "SkullOwner", skullOwner);
+        put(nbtTagCompound, "SkullOwner", skullOwner);
 
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
@@ -134,12 +134,12 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
 
         for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            getTileEntities(chunk).values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
+            getBlockEntities(chunk).values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
                     .forEach(tileEntity -> getSpawner((TileEntityMobSpawner) tileEntity).m = -1);
 
             ChunkCoordIntPair chunkCoords = getPos(chunk);
 
-            setForceLoaded(world, chunkCoords.c, chunkCoords.d, true);
+            setChunkForced(world, chunkCoords.c, chunkCoords.d, true);
         }
 
         return tileEntityChunkLoader;
@@ -160,16 +160,16 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         }
 
         if(spawnParticle)
-            world.a(null, 2001, blockPosition, getCombinedId(getType(world, blockPosition)));
+            world.a(null, 2001, blockPosition, getId(getBlockState(world, blockPosition)));
 
         for(org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            getTileEntities(chunk).values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
+            getBlockEntities(chunk).values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
                     .forEach(tileEntity -> getSpawner((TileEntityMobSpawner) tileEntity).m = 16);
 
             ChunkCoordIntPair chunkCoords = getPos(chunk);
 
-            setForceLoaded(world, chunkCoords.c, chunkCoords.d, false);
+            setChunkForced(world, chunkCoords.c, chunkCoords.d, false);
         }
     }
 
@@ -179,8 +179,8 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         World world = ((CraftWorld) location.getWorld()).getHandle();
 
         BlockPosition blockPosition = new BlockPosition(location.getX(), location.getY(), location.getZ());
-        IBlockData blockData = getType(world, blockPosition);
-        TileEntityMobSpawner mobSpawner = (TileEntityMobSpawner) getTileEntity(world, blockPosition);
+        IBlockData blockData = getBlockState(world, blockPosition);
+        TileEntityMobSpawner mobSpawner = (TileEntityMobSpawner) getBlockEntity(world, blockPosition);
 
         if(mobSpawner == null)
             return;
@@ -202,14 +202,14 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
         private boolean removed = false;
 
         TileEntityChunkLoader(ChunkLoader chunkLoader, World world, BlockPosition blockPosition){
-            super(TileEntityTypes.v, blockPosition, getType(world, blockPosition));
+            super(TileEntityTypes.v, blockPosition, getBlockState(world, blockPosition));
 
             this.chunkLoader = (WChunkLoader) chunkLoader;
             this.ticker = new TileEntityChunkLoaderTicker(this);
 
             a(world);
 
-            loaderBlock = getBlock(getType(world, blockPosition));
+            loaderBlock = getBlock(getBlockState(world, blockPosition));
 
             if(!this.chunkLoader.isInfinite()) {
                 long timeLeft = chunkLoader.getTimeLeft();
@@ -230,12 +230,12 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
 
             List<String> hologramLines = this.chunkLoader.getHologramLines();
 
-            double currentY = getY(getPosition(this)) + 1;
+            double currentY = getY(getBlockPos(this)) + 1;
             for(int i = hologramLines.size(); i > 0; i--){
                 EntityHolograms_v1_18_R2 hologram = new EntityHolograms_v1_18_R2(world,
-                        getX(getPosition(this)) + 0.5, currentY, getZ(getPosition(this)) + 0.5);
+                        getX(getBlockPos(this)) + 0.5, currentY, getZ(getBlockPos(this)) + 0.5);
                 updateName(hologram, hologramLines.get(i - 1));
-                addEntity(world, hologram);
+                addFreshEntity(world, hologram);
                 currentY += 0.23;
                 holograms.add(hologram);
             }
@@ -248,7 +248,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
             currentTick = 0;
 
             assert this.n != null;
-            if(chunkLoader.isNotActive() || getBlock(getType(this.n, getPosition(this))) != loaderBlock){
+            if(chunkLoader.isNotActive() || getBlock(getBlockState(this.n, getBlockPos(this))) != loaderBlock){
                 chunkLoader.remove();
                 return;
             }
@@ -321,12 +321,12 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
 
         @Override
         public BlockPosition c() {
-            return getPosition(tileEntityChunkLoader);
+            return getBlockPos(tileEntityChunkLoader);
         }
 
         @Override
         public String d() {
-            return TileEntityTypes.a(getTileType(tileEntityChunkLoader)) + "";
+            return TileEntityTypes.a(getType(tileEntityChunkLoader)) + "";
         }
     }
 
