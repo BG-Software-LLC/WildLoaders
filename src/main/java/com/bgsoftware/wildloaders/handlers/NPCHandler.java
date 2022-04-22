@@ -16,11 +16,14 @@ import java.util.UUID;
 
 public final class NPCHandler implements NPCManager {
 
+    private static int NPCS_COUNTER = 0;
+
     private final WildLoadersPlugin plugin;
     private final Map<NPCIdentifier, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
     private final Map<NPCIdentifier, UUID> npcUUIDs = Maps.newConcurrentMap();
 
-    public NPCHandler(WildLoadersPlugin plugin){
+
+    public NPCHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -56,7 +59,7 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public void killAllNPCs() {
-        for(ChunkLoaderNPC npc : npcs.values()){
+        for (ChunkLoaderNPC npc : npcs.values()) {
             npc.die();
         }
 
@@ -67,19 +70,19 @@ public final class NPCHandler implements NPCManager {
         return Collections.unmodifiableMap(npcs);
     }
 
-    public void registerUUID(Location location, UUID uuid){
+    public void registerUUID(Location location, UUID uuid) {
         npcUUIDs.put(new NPCIdentifier(location), uuid);
     }
 
-    private UUID getUUID(NPCIdentifier identifier){
-        if(npcUUIDs.containsKey(identifier))
+    private UUID getUUID(NPCIdentifier identifier) {
+        if (npcUUIDs.containsKey(identifier))
             return npcUUIDs.get(identifier);
 
         UUID uuid;
 
-        do{
+        do {
             uuid = UUID.randomUUID();
-        }while(npcUUIDs.containsValue(uuid));
+        } while (npcUUIDs.containsValue(uuid));
 
         npcUUIDs.put(identifier, uuid);
 
@@ -92,8 +95,7 @@ public final class NPCHandler implements NPCManager {
     }
 
     public static String getName(String worldName) {
-        String name = "Loader-" + worldName;
-        return name.length() > 16 ? name.substring(0, 16) : name;
+        return "Loader-" + (worldName.length() > 7 ? worldName.substring(0, 7) : worldName) + "-" + (NPCS_COUNTER++);
     }
 
 }
