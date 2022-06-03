@@ -50,6 +50,10 @@ public final class ProvidersHandler implements ProvidersManager {
             Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_SuperiorSkyblock");
             claimsProvider.ifPresent(this::addClaimsProvider);
         }
+        if (Bukkit.getPluginManager().isPluginEnabled("Lands")) {
+            Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_Lands");
+            claimsProvider.ifPresent(this::addClaimsProvider);
+        }
     }
 
     private void loadTickableProviders() {
