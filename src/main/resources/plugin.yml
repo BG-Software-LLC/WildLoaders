@@ -5,6 +5,12 @@ main: com.bgsoftware.wildloaders.WildLoadersPlugin
 description: Highly configurable and optimized chunk-loaders plugin.
 website: https://bg-software.com/
 authors: [Ome_R]
+softdepend:
+  - EpicSpawners
+  - Factions
+  - FactionsX
+  - Lands
+  - SuperiorSkyblock2
 commands:
   loader:
     description: Main command for wild loaders.
