@@ -33,7 +33,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
     private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
 
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
-            1, EnumGamemode.class, EnumGamemode.class);
+            1, EnumGamemode.class);
 
     private boolean dieCall = false;
 
