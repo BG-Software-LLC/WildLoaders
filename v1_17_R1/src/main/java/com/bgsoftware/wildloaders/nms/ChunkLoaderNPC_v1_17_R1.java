@@ -33,7 +33,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
     private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
 
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
-            1, EnumGamemode.class);
+            1, EnumGamemode.class, EnumGamemode.class);
 
     private boolean dieCall = false;
 
@@ -43,7 +43,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
-        SET_GAMEMODE.invoke(this.d, EnumGamemode.b);
+        SET_GAMEMODE.invoke(this.d, EnumGamemode.b, null);
         clientViewDistance = 1;
 
         fauxSleeping = true;
