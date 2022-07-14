@@ -22,6 +22,7 @@ import net.minecraft.world.level.EnumGamemode;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements Chunk
 
     private boolean dieCall = false;
 
-    public ChunkLoaderNPC_v1_18_R1(MinecraftServer minecraftServer, Location location, UUID uuid){
+    public ChunkLoaderNPC_v1_18_R1(MinecraftServer minecraftServer, Location location, UUID uuid) {
         super(minecraftServer, ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())));
 
@@ -69,12 +70,11 @@ public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements Chunk
 
     @Override
     public void a(RemovalReason removalReason) {
-        if(!dieCall) {
+        if (!dieCall) {
             dieCall = true;
             removePlayer(getWorldServer(this), this);
             dieCall = false;
-        }
-        else {
+        } else {
             super.a(removalReason);
         }
     }
@@ -84,13 +84,18 @@ public final class ChunkLoaderNPC_v1_18_R1 extends EntityPlayer implements Chunk
         return getBukkitEntity().getLocation();
     }
 
-    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer){
+    @Override
+    public Player getPlayer() {
+        return getBukkitEntity();
+    }
+
+    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer) {
         worldServer.a(entityPlayer, RemovalReason.d);
     }
 
     public static class DummyNetworkManager extends NetworkManager {
 
-        DummyNetworkManager(){
+        DummyNetworkManager() {
             super(EnumProtocolDirection.a);
             this.k = new DummyChannel();
             this.l = null;

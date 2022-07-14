@@ -22,6 +22,7 @@ import net.minecraft.world.level.EnumGamemode;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -81,6 +82,11 @@ public final class ChunkLoaderNPC_v1_19_R1 extends EntityPlayer implements Chunk
     @Override
     public Location getLocation() {
         return getBukkitEntity().getLocation();
+    }
+
+    @Override
+    public Player getPlayer() {
+        return getBukkitEntity();
     }
 
     private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer) {

@@ -26,6 +26,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
@@ -81,6 +82,11 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
     @Override
     public Location getLocation() {
         return getBukkitEntity().getLocation();
+    }
+
+    @Override
+    public Player getPlayer() {
+        return getBukkitEntity();
     }
 
     public static class DummyNetworkManager extends NetworkManager {

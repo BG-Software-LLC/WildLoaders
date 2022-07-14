@@ -25,13 +25,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R4.CraftServer;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
 
 public final class ChunkLoaderNPC_v1_7_R4 extends EntityPlayer implements ChunkLoaderNPC {
 
-    public ChunkLoaderNPC_v1_7_R4(Location location, UUID uuid){
+    public ChunkLoaderNPC_v1_7_R4(Location location, UUID uuid) {
         super(((CraftServer) Bukkit.getServer()).getServer(),
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())),
@@ -74,6 +75,11 @@ public final class ChunkLoaderNPC_v1_7_R4 extends EntityPlayer implements ChunkL
         return false;
     }
 
+    @Override
+    public Player getPlayer() {
+        return getBukkitEntity();
+    }
+
     public static class DummyNetworkManager extends NetworkManager {
 
         private static Field channelField;
@@ -90,7 +96,7 @@ public final class ChunkLoaderNPC_v1_7_R4 extends EntityPlayer implements ChunkL
             }
         }
 
-        DummyNetworkManager(){
+        DummyNetworkManager() {
             super(false);
             updateFields();
         }

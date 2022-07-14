@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.api.npc;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -24,5 +25,10 @@ public interface ChunkLoaderNPC {
      * Get the location of the NPC.
      */
     Location getLocation();
+
+    /**
+     * Get the player object of this npc.
+     */
+    Player getPlayer();
 
 }
