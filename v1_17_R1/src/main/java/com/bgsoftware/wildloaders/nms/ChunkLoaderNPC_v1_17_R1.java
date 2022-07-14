@@ -43,7 +43,7 @@ public final class ChunkLoaderNPC_v1_17_R1 extends EntityPlayer implements Chunk
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
-        SET_GAMEMODE.invoke(this.d, EnumGamemode.b);
+        SET_GAMEMODE.invoke(this.d, EnumGamemode.b, null);
         clientViewDistance = 1;
 
         fauxSleeping = true;
