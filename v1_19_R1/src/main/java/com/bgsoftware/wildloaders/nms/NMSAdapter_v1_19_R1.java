@@ -139,7 +139,7 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
 
             ChunkCoordIntPair chunkCoords = getPos(chunk);
 
-            setChunkForced(world, chunkCoords.c, chunkCoords.d, true);
+            setChunkForced(world, chunkCoords.e, chunkCoords.f, true);
         }
 
         return tileEntityChunkLoader;
@@ -169,7 +169,7 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
 
             ChunkCoordIntPair chunkCoords = getPos(chunk);
 
-            setChunkForced(world, chunkCoords.c, chunkCoords.d, false);
+            setChunkForced(world, chunkCoords.e, chunkCoords.f, false);
         }
     }
 
