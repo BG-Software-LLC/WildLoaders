@@ -5,7 +5,6 @@ import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_16_R3.AxisAlignedBB;
-import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EnumGamemode;
 import net.minecraft.server.v1_16_R3.EnumProtocolDirection;
@@ -72,7 +71,7 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
     public void die() {
         if (!dieCall) {
             dieCall = true;
-            removePlayer(getWorldServer(), this);
+            getWorldServer().removePlayer(this);
             dieCall = false;
         } else {
             super.die();
@@ -82,20 +81,6 @@ public final class ChunkLoaderNPC_v1_16_R3 extends EntityPlayer implements Chunk
     @Override
     public Location getLocation() {
         return getBukkitEntity().getLocation();
-    }
-
-    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer) {
-        Chunk currentChunk = worldServer.getChunkIfLoaded((int) entityPlayer.locX() >> 4,
-                (int) entityPlayer.locZ() >> 4);
-        if (currentChunk != null)
-            currentChunk.b(entityPlayer);
-
-        worldServer.entitiesById.remove(entityPlayer.getId());
-        worldServer.unregisterEntity(entityPlayer);
-        try {
-            entityPlayer.shouldBeRemoved = true;
-        } catch (Throwable ignored) {
-        }
     }
 
     public static class DummyNetworkManager extends NetworkManager {
