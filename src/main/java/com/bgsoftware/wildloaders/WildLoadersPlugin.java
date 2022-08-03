@@ -41,13 +41,13 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         loadNMSAdapter();
         loadAPI();
 
-        if(!shouldEnable)
+        if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
     }
 
     @Override
     public void onEnable() {
-        if(!shouldEnable) {
+        if (!shouldEnable) {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -70,7 +70,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         Locale.reload();
 
-        if(Updater.isOutdated()) {
+        if (Updater.isOutdated()) {
             log("");
             log("A new version is available (v" + Updater.getLatestVersion() + ")!");
             log("Version's description: \"" + Updater.getVersionDescription() + "\"");
@@ -82,29 +82,30 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     @Override
     public void onDisable() {
-        if(shouldEnable) {
+        if (shouldEnable) {
             Database.stop();
             loadersHandler.removeChunkLoaders();
             npcHandler.killAllNPCs();
         }
     }
 
-    private void loadNMSAdapter(){
+    private void loadNMSAdapter() {
         String version = getServer().getClass().getPackage().getName().split("\\.")[3];
-        try{
-            nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildloaders.nms.NMSAdapter_" + version).newInstance();
-        } catch(ClassNotFoundException | InstantiationException | IllegalAccessException ex){
+        try {
+            nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildloaders.nms.%s.NMSAdapter", version)).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            shouldEnable = false;
             log("Couldn't load up with an adapter " + version + ". Please contact @Ome_R");
             getServer().getPluginManager().disablePlugin(this);
         }
     }
 
-    private void loadAPI(){
-        try{
+    private void loadAPI() {
+        try {
             Field instance = WildLoadersAPI.class.getDeclaredField("instance");
             instance.setAccessible(true);
             instance.set(null, this);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log("Failed to set-up API - disabling plugin...");
             ex.printStackTrace();
             shouldEnable = false;
@@ -138,11 +139,11 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         return dataHandler;
     }
 
-    public static void log(String message){
+    public static void log(String message) {
         plugin.getLogger().info(message);
     }
 
-    public static WildLoadersPlugin getPlugin(){
+    public static WildLoadersPlugin getPlugin() {
         return plugin;
     }
 
