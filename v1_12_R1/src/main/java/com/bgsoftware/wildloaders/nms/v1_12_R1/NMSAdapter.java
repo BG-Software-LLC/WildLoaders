@@ -32,6 +32,11 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final ReflectMethod<Void> TILE_ENTITY_LOAD = new ReflectMethod<>(TileEntity.class, "load", NBTTagCompound.class);
 
     @Override
+    public boolean isMappingsSupported() {
+        return true;
+    }
+
+    @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();

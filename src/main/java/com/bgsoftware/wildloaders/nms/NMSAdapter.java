@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public interface NMSAdapter {
 
+    boolean isMappingsSupported();
+
     String getTag(ItemStack itemStack, String key, String def);
 
     ItemStack setTag(ItemStack itemStack, String key, String value);

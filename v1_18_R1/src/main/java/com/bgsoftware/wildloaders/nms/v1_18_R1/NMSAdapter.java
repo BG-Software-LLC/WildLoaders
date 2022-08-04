@@ -26,6 +26,7 @@ import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.util.CraftMagicNumbers;
 
 import java.util.UUID;
 
@@ -38,6 +39,13 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final ReflectMethod<TickingBlockEntity> CREATE_TICKING_BLOCK = new ReflectMethod<>(
             net.minecraft.world.level.chunk.Chunk.class, "a",
             net.minecraft.world.level.block.entity.TileEntity.class, BlockEntityTicker.class);
+
+    private static final String BUILT_AGAINST_MAPPING = "20b026e774dbf715e40a0b2afe114792";
+
+    @Override
+    public boolean isMappingsSupported() {
+        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion().equals(BUILT_AGAINST_MAPPING);
+    }
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {

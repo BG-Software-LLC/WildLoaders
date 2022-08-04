@@ -93,6 +93,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         String version = getServer().getClass().getPackage().getName().split("\\.")[3];
         try {
             nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildloaders.nms.%s.NMSAdapter", version)).newInstance();
+            if (!nmsAdapter.isMappingsSupported()) {
+                log("WildLoaders does not support your version mappings... Please contact @Ome_R");
+                shouldEnable = false;
+            }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             shouldEnable = false;
             log("Couldn't load up with an adapter " + version + ". Please contact @Ome_R");

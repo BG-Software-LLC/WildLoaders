@@ -30,6 +30,11 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     @Override
+    public boolean isMappingsSupported() {
+        return true;
+    }
+
+    @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = nmsItem.getOrCreateTag();
