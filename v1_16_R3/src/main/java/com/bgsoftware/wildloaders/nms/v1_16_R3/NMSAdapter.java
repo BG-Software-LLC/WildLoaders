@@ -30,8 +30,8 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     @Override
-    public boolean isMappingsSupported() {
-        return true;
+    public String getMappingsHash() {
+        return null;
     }
 
     @Override

@@ -39,11 +39,9 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final ReflectMethod<TickingBlockEntity> CREATE_TICKING_BLOCK = new ReflectMethod<>(
             Chunk.class, "a", TileEntity.class, BlockEntityTicker.class);
 
-    private static final String BUILT_AGAINST_MAPPING = "acd6e6c27e5a0a9440afba70a96c27c9";
-
     @Override
-    public boolean isMappingsSupported() {
-        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion().equals(BUILT_AGAINST_MAPPING);
+    public String getMappingsHash() {
+        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion();
     }
 
     @Override

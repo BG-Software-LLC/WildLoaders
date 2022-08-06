@@ -40,11 +40,9 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             net.minecraft.world.level.chunk.Chunk.class, "a",
             net.minecraft.world.level.block.entity.TileEntity.class, BlockEntityTicker.class);
 
-    private static final String BUILT_AGAINST_MAPPING = "20b026e774dbf715e40a0b2afe114792";
-
     @Override
-    public boolean isMappingsSupported() {
-        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion().equals(BUILT_AGAINST_MAPPING);
+    public String getMappingsHash() {
+        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion();
     }
 
     @Override

@@ -32,8 +32,8 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     private static final ReflectMethod<Void> TILE_ENTITY_LOAD = new ReflectMethod<>(TileEntity.class, "load", NBTTagCompound.class);
 
     @Override
-    public boolean isMappingsSupported() {
-        return true;
+    public String getMappingsHash() {
+        return null;
     }
 
     @Override

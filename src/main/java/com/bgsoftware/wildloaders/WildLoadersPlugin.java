@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders;
 
+import com.bgsoftware.common.mappings.MappingsChecker;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
@@ -13,10 +14,12 @@ import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.nms.mapping.TestRemaps;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
@@ -38,7 +41,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         plugin = this;
         new Metrics(this);
 
-        loadNMSAdapter();
+        shouldEnable = loadNMSAdapter();
         loadAPI();
 
         if (!shouldEnable)
@@ -89,19 +92,34 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         }
     }
 
-    private void loadNMSAdapter() {
+    private boolean loadNMSAdapter() {
         String version = getServer().getClass().getPackage().getName().split("\\.")[3];
         try {
             nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildloaders.nms.%s.NMSAdapter", version)).newInstance();
-            if (!nmsAdapter.isMappingsSupported()) {
-                log("WildLoaders does not support your version mappings... Please contact @Ome_R");
-                shouldEnable = false;
+
+            String mappingVersionHash = nmsAdapter.getMappingsHash();
+
+            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, version)) {
+                log("WildStacker does not support your version mappings... Please contact @Ome_R");
+                log("Your mappings version: " + mappingVersionHash);
+                return false;
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            shouldEnable = false;
             log("Couldn't load up with an adapter " + version + ". Please contact @Ome_R");
-            getServer().getPluginManager().disablePlugin(this);
+            return false;
         }
+
+        File mappingsFile = new File("mappings");
+        if (mappingsFile.exists()) {
+            try {
+                TestRemaps.testRemapsForClassesInPackage(mappingsFile,
+                        plugin.getClassLoader(), "com.bgsoftware.wildloaders.nms." + version);
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
+        }
+
+        return true;
     }
 
     private void loadAPI() {
