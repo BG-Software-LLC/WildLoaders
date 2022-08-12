@@ -36,7 +36,7 @@ public final class EntityHolograms extends EntityArmorStand implements Hologram 
     @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setMarker", type = Remap.Type.METHOD, remappedName = "t")
     @Remap(classPath = "net.minecraft.world.entity.Entity", name = "setCustomNameVisible", type = Remap.Type.METHOD, remappedName = "n")
     @Remap(classPath = "net.minecraft.world.entity.Entity", name = "setBoundingBox", type = Remap.Type.METHOD, remappedName = "a")
-    public EntityHolograms(World world, double x, double y, double z){
+    public EntityHolograms(World world, double x, double y, double z) {
         super(world, x, y, z);
         j(true); // Invisible
         a(true); // Small
@@ -162,15 +162,6 @@ public final class EntityHolograms extends EntityArmorStand implements Hologram 
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
-            name = "repositionEntityAfterLoad",
-            type = Remap.Type.METHOD,
-            remappedName = "bm")
-    @Override
-    public boolean bm() {
-        return false;
-    }
-
-    @Remap(classPath = "net.minecraft.world.entity.Entity",
             name = "setCustomName",
             type = Remap.Type.METHOD,
             remappedName = "b")
@@ -201,15 +192,6 @@ public final class EntityHolograms extends EntityArmorStand implements Hologram 
     @Override
     public void setItemSlot(EnumItemSlot enumitemslot, ItemStack itemstack, boolean flag) {
         // Prevent stand being equipped
-    }
-
-    @Remap(classPath = "net.minecraft.world.entity.Entity",
-            name = "getBoundingBoxForCulling",
-            type = Remap.Type.METHOD,
-            remappedName = "cz")
-    @Override
-    public AxisAlignedBB cz() {
-        return EMPTY_BOUND;
     }
 
     public void forceSetBoundingBox(AxisAlignedBB boundingBox) {

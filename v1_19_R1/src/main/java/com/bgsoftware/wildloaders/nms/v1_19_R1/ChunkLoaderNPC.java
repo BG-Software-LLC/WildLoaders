@@ -64,13 +64,9 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         super.a(this.boundingBox);
     }
 
-    @Remap(classPath = "net.minecraft.world.entity.Entity",
-            name = "getUUID",
-            type = Remap.Type.METHOD,
-            remappedName = "co")
     @Override
     public UUID getUniqueId() {
-        return super.co();
+        return getBukkitEntity().getUniqueId();
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -80,15 +76,6 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     @Override
     public void die() {
         ah();
-    }
-
-    @Remap(classPath = "net.minecraft.world.entity.Entity",
-            name = "getBoundingBoxForCulling",
-            type = Remap.Type.METHOD,
-            remappedName = "cz")
-    @Override
-    public AxisAlignedBB cz() {
-        return this.boundingBox;
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
