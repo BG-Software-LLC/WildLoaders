@@ -4,6 +4,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.EnumProtocolDirection;
 import net.minecraft.network.protocol.Packet;
@@ -30,16 +31,18 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
-    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
-
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
             1, EnumGamemode.class, EnumGamemode.class);
 
+    private final AxisAlignedBB boundingBox;
+
     private boolean dieCall = false;
 
-    public ChunkLoaderNPC(MinecraftServer minecraftServer, Location location, UUID uuid){
+    public ChunkLoaderNPC(MinecraftServer minecraftServer, Location location, UUID uuid) {
         super(minecraftServer, ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())));
+
+        this.boundingBox = new AxisAlignedBB(new BlockPosition(location.getX(), location.getY(), location.getZ()));
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
@@ -53,7 +56,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         ((WorldServer) getWorld()).addPlayerJoin(this);
 
-        super.a(EMPTY_BOUND);
+        super.a(this.boundingBox);
     }
 
     @Override
@@ -63,17 +66,16 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
     @Override
     public AxisAlignedBB cs() {
-        return EMPTY_BOUND;
+        return this.boundingBox;
     }
 
     @Override
     public void a(Entity.RemovalReason removalReason) {
-        if(!dieCall) {
+        if (!dieCall) {
             dieCall = true;
             removePlayer(getWorldServer(), this);
             dieCall = false;
-        }
-        else {
+        } else {
             super.a(removalReason);
         }
     }
@@ -88,13 +90,13 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         return getBukkitEntity();
     }
 
-    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer){
+    private static void removePlayer(WorldServer worldServer, EntityPlayer entityPlayer) {
         worldServer.a(entityPlayer, RemovalReason.d);
     }
 
     public static class DummyNetworkManager extends NetworkManager {
 
-        DummyNetworkManager(){
+        DummyNetworkManager() {
             super(EnumProtocolDirection.a);
             this.k = new DummyChannel();
             this.l = null;

@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_12_R1.AxisAlignedBB;
+import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.DamageSource;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import net.minecraft.server.v1_12_R1.EnumGamemode;
@@ -33,13 +34,15 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
-    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
+    private final AxisAlignedBB boundingBox;
 
-    public ChunkLoaderNPC(Location location, UUID uuid){
+    public ChunkLoaderNPC(Location location, UUID uuid) {
         super(((CraftServer) Bukkit.getServer()).getServer(),
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())),
                 new PlayerInteractManager(((CraftWorld) location.getWorld()).getHandle()));
+
+        this.boundingBox = new AxisAlignedBB(new BlockPosition(location.getX(), location.getY(), location.getZ()));
 
         playerConnection = new DummyPlayerConnection(server, this);
 
@@ -52,7 +55,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         world.players.add(this);
         ((WorldServer) world).getPlayerChunkMap().addPlayer(this);
 
-        super.a(EMPTY_BOUND);
+        super.a(this.boundingBox);
     }
 
     @Override
@@ -62,7 +65,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        return EMPTY_BOUND;
+        return this.boundingBox;
     }
 
     @Override
@@ -87,7 +90,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         return false;
     }
 
-    public static class DummyNetworkManager extends NetworkManager{
+    public static class DummyNetworkManager extends NetworkManager {
 
         private static Field channelField;
         private static Field socketAddressField;
@@ -103,7 +106,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
             }
         }
 
-        DummyNetworkManager(){
+        DummyNetworkManager() {
             super(EnumProtocolDirection.SERVERBOUND);
             updateFields();
         }

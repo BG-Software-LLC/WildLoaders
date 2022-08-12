@@ -7,6 +7,7 @@ import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.world.enti
 import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.world.level.World;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.EnumProtocolDirection;
 import net.minecraft.network.protocol.Packet;
@@ -34,9 +35,8 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(PlayerInteractManager.class,
             1, EnumGamemode.class, EnumGamemode.class);
 
-    private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
-
     private final World world;
+    private final AxisAlignedBB boundingBox;
 
     private boolean dieCall = false;
 
@@ -47,10 +47,11 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         Entity entity = new Entity(this);
         this.world = entity.getWorld();
+        this.boundingBox = new AxisAlignedBB(new BlockPosition(location.getX(), location.getY(), location.getZ()));
 
         this.b = new DummyPlayerConnection(minecraftServer, this);
 
-        SET_GAMEMODE.invoke(this.d, EnumGamemode.b);
+        SET_GAMEMODE.invoke(this.d, EnumGamemode.b, null);
         clientViewDistance = 1;
 
         fauxSleeping = true;
@@ -60,7 +61,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         this.world.addNewPlayer(this);
 
-        super.a(EMPTY_BOUND);
+        super.a(this.boundingBox);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -87,7 +88,7 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
             remappedName = "cz")
     @Override
     public AxisAlignedBB cz() {
-        return EMPTY_BOUND;
+        return this.boundingBox;
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
