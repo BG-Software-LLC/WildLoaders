@@ -1,7 +1,7 @@
 package com.bgsoftware.wildloaders.nms.v1_18_R1;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.sounds.SoundEffect;

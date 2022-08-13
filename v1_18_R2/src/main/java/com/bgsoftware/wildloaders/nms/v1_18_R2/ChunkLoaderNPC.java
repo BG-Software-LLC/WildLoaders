@@ -2,7 +2,7 @@ package com.bgsoftware.wildloaders.nms.v1_18_R2;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildloaders.nms.v1_18_R2.mappings.net.minecraft.world.entity.Entity;
 import com.bgsoftware.wildloaders.nms.v1_18_R2.mappings.net.minecraft.world.level.World;
 import com.bgsoftware.wildloaders.npc.DummyChannel;

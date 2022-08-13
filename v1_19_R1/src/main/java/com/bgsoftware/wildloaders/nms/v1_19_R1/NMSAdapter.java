@@ -4,7 +4,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildloaders.nms.v1_19_R1.loader.TileEntityChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.core.BlockPosition;
 import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.nbt.NBTTagCompound;

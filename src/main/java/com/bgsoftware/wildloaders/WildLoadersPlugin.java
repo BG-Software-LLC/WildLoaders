@@ -14,7 +14,7 @@ import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
-import com.bgsoftware.wildloaders.nms.mapping.TestRemaps;
+import com.bgsoftware.common.remaps.TestRemaps;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;

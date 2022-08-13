@@ -1,6 +1,6 @@
 package com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.world.level.chunk;
 
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.MappedObject;
 import com.bgsoftware.wildloaders.nms.v1_19_R1.mappings.net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.core.BlockPosition;

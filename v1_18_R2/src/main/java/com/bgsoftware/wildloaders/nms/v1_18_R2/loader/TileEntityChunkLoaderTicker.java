@@ -1,6 +1,6 @@
 package com.bgsoftware.wildloaders.nms.v1_18_R2.loader;
 
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.entity.TileEntityTypes;

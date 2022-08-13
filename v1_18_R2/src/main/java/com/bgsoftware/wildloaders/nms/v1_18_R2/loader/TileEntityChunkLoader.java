@@ -4,7 +4,7 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
-import com.bgsoftware.wildloaders.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildloaders.nms.v1_18_R2.EntityHolograms;
 import com.bgsoftware.wildloaders.nms.v1_18_R2.mappings.net.minecraft.core.BlockPosition;
 import com.bgsoftware.wildloaders.nms.v1_18_R2.mappings.net.minecraft.world.level.ChunkCoordIntPair;
