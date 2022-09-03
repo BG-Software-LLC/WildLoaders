@@ -99,7 +99,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
             String mappingVersionHash = nmsAdapter.getMappingsHash();
 
-            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, version)) {
+            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, version, error -> {
+                log("&cFailed to retrieve allowed mappings for your server, skipping...");
+                return true;
+            })) {
                 log("WildStacker does not support your version mappings... Please contact @Ome_R");
                 log("Your mappings version: " + mappingVersionHash);
                 return false;
