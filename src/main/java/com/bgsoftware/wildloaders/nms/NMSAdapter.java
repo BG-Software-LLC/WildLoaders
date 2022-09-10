@@ -6,13 +6,9 @@ import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 public interface NMSAdapter {
-
-    @Nullable
-    String getMappingsHash();
 
     String getTag(ItemStack itemStack, String key, String def);
 

@@ -1,9 +1,18 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url "https://repo.papermc.io/repository/maven-public/" }
+    }
+}
+
 rootProject.name = 'WildLoaders'
+
 include 'API'
 include 'Hook_EpicSpawners6'
 include 'Hook_EpicSpawners7'
 include 'Hook_FactionsUUID'
 include 'Hook_FactionsX'
+include 'Hook_Lands'
 include 'Hook_MassiveFactions'
 include 'Hook_SuperiorSkyblock'
 include 'v1_7_R4'
@@ -11,9 +20,8 @@ include 'v1_8_R3'
 include 'v1_12_R1'
 include 'v1_16_R3'
 include 'v1_17_R1'
-include 'v1_18_R1'
-include 'Hook_EpicSpawners7'
-include 'v1_18_R2'
-include 'Hook_Lands'
-include 'v1_19_R1'
-
+include 'v1181'
+include 'v1182'
+include 'v1191'
+include 'v1192'
+include 'v119'

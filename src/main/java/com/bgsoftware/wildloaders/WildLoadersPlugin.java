@@ -1,6 +1,6 @@
 package com.bgsoftware.wildloaders;
 
-import com.bgsoftware.common.mappings.MappingsChecker;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
@@ -14,13 +14,16 @@ import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
-import com.bgsoftware.common.remaps.TestRemaps;
+import com.bgsoftware.wildloaders.utils.Pair;
+import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bukkit.Bukkit;
+import org.bukkit.UnsafeValues;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
@@ -93,34 +96,45 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
     }
 
     private boolean loadNMSAdapter() {
-        String version = getServer().getClass().getPackage().getName().split("\\.")[3];
-        try {
-            nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildloaders.nms.%s.NMSAdapter", version)).newInstance();
+        String version = null;
 
-            String mappingVersionHash = nmsAdapter.getMappingsHash();
+        if (ServerVersion.isLessThan(ServerVersion.v1_18)) {
+            version = getServer().getClass().getPackage().getName().split("\\.")[3];
+        } else {
+            ReflectMethod<Integer> getDataVersion = new ReflectMethod<>(UnsafeValues.class, "getDataVersion");
+            int dataVersion = getDataVersion.invoke(Bukkit.getUnsafe());
 
-            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, version, error -> {
-                log("&cFailed to retrieve allowed mappings for your server, skipping...");
-                return true;
-            })) {
-                log("WildStacker does not support your version mappings... Please contact @Ome_R");
-                log("Your mappings version: " + mappingVersionHash);
-                return false;
+            List<Pair<Integer, String>> versions = Arrays.asList(
+                    new Pair<>(2865, "v1181"),
+                    new Pair<>(2975, "v1182"),
+                    new Pair<>(3105, "v119"),
+                    new Pair<>(3117, "v1191"),
+                    new Pair<>(3120, "v1192")
+            );
+
+            for (Pair<Integer, String> versionData : versions) {
+                if (dataVersion <= versionData.first) {
+                    version = versionData.second;
+                    break;
+                }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            log("Couldn't load up with an adapter " + version + ". Please contact @Ome_R");
-            return false;
+
+            if (version == null) {
+                log("Data version: " + dataVersion);
+            }
         }
 
-        File mappingsFile = new File("mappings");
-        if (mappingsFile.exists()) {
+        if (version != null) {
             try {
-                TestRemaps.testRemapsForClassesInPackage(mappingsFile,
-                        plugin.getClassLoader(), "com.bgsoftware.wildloaders.nms." + version);
+                nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildloaders.nms.%s.NMSAdapter", version)).newInstance();
+                return true;
             } catch (Exception error) {
                 error.printStackTrace();
             }
         }
+
+        log("&cThe plugin doesn't support your minecraft version.");
+        log("&cPlease try a different version.");
 
         return true;
     }

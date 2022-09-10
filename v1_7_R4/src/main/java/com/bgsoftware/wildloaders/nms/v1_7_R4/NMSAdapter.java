@@ -1,6 +1,5 @@
 package com.bgsoftware.wildloaders.nms.v1_7_R4;
 
-import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_7_R4.loader.TileEntityChunkLoader;
@@ -22,15 +21,7 @@ import org.bukkit.craftbukkit.v1_7_R4.util.LongHash;
 
 import java.util.UUID;
 
-@SuppressWarnings("unused")
 public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
-
-    private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
-
-    @Override
-    public String getMappingsHash() {
-        return null;
-    }
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {

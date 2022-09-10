@@ -31,18 +31,7 @@ import org.bukkit.craftbukkit.v1_17_R1.util.CraftMagicNumbers;
 
 import java.util.UUID;
 
-@SuppressWarnings("unused")
 public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
-
-    private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
-
-    private static final ReflectMethod<TickingBlockEntity> CREATE_TICKING_BLOCK = new ReflectMethod<>(
-            Chunk.class, "a", TileEntity.class, BlockEntityTicker.class);
-
-    @Override
-    public String getMappingsHash() {
-        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion();
-    }
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {

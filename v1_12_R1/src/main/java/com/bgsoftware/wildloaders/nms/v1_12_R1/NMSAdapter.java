@@ -1,7 +1,6 @@
 package com.bgsoftware.wildloaders.nms.v1_12_R1;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
-import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_12_R1.loader.TileEntityChunkLoader;
@@ -24,33 +23,23 @@ import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import java.util.UUID;
 
-@SuppressWarnings({"ConstantConditions", "unused"})
 public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
-
-    private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     private static final ReflectMethod<Void> TILE_ENTITY_LOAD = new ReflectMethod<>(TileEntity.class, "load", NBTTagCompound.class);
 
     @Override
-    public String getMappingsHash() {
-        return null;
-    }
-
-    @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
-
-        if (!tagCompound.hasKeyOfType(key, 8))
-            return def;
-
-        return tagCompound.getString(key);
+        NBTTagCompound tagCompound = nmsItem.getTag();
+        return tagCompound == null || !tagCompound.hasKeyOfType(key, 8) ? def : tagCompound.getString(key);
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, String value) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        assert tagCompound != null;
 
         tagCompound.set(key, new NBTTagString(value));
 
@@ -62,18 +51,16 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public long getTag(org.bukkit.inventory.ItemStack itemStack, String key, long def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
-
-        if (!tagCompound.hasKeyOfType(key, 4))
-            return def;
-
-        return tagCompound.getLong(key);
+        NBTTagCompound tagCompound = nmsItem.getTag();
+        return tagCompound == null || !tagCompound.hasKeyOfType(key, 4) ? def : tagCompound.getLong(key);
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, long value) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        assert tagCompound != null;
 
         tagCompound.set(key, new NBTTagLong(value));
 
@@ -87,6 +74,8 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
 
         NBTTagCompound nbtTagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        assert nbtTagCompound != null;
 
         NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
 
