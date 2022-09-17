@@ -138,7 +138,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         log("&cThe plugin doesn't support your minecraft version.");
         log("&cPlease try a different version.");
 
-        return true;
+        return false;
     }
 
     private void loadAPI() {
