@@ -3,6 +3,9 @@ package com.bgsoftware.wildloaders.nms.v1_12_R1;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.v1_12_R1.Advancement;
+import net.minecraft.server.v1_12_R1.AdvancementDataPlayer;
+import net.minecraft.server.v1_12_R1.AdvancementProgress;
 import net.minecraft.server.v1_12_R1.AxisAlignedBB;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.DamageSource;
@@ -29,12 +32,14 @@ import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
     private final AxisAlignedBB boundingBox;
+    private final AdvancementDataPlayer advancements;
 
     public ChunkLoaderNPC(Location location, UUID uuid) {
         super(((CraftServer) Bukkit.getServer()).getServer(),
@@ -44,7 +49,8 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         this.boundingBox = new AxisAlignedBB(new BlockPosition(location.getX(), location.getY(), location.getZ()));
 
-        playerConnection = new DummyPlayerConnection(server, this);
+        this.playerConnection = new DummyPlayerConnection(server, this);
+        this.advancements = new DummyPlayerAdvancements(server, this);
 
         this.playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
         fauxSleeping = true;
@@ -88,6 +94,11 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     @Override
     protected boolean damageEntity0(DamageSource damagesource, float f) {
         return false;
+    }
+
+    @Override
+    public AdvancementDataPlayer getAdvancementData() {
+        return this.advancements;
     }
 
     public static class DummyNetworkManager extends NetworkManager {
@@ -171,6 +182,64 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         public void sendPacket(Packet packet) {
 
+        }
+
+    }
+
+    private static class DummyPlayerAdvancements extends AdvancementDataPlayer {
+
+        DummyPlayerAdvancements(MinecraftServer server, EntityPlayer entityPlayer) {
+            super(server, getAdvancementsFile(server, entityPlayer), entityPlayer);
+        }
+
+        private static File getAdvancementsFile(MinecraftServer server, EntityPlayer entityPlayer) {
+            File advancementsDir = new File(server.getWorldServer(0).getDataManager().getDirectory(), "advancements");
+            return new File(advancementsDir, entityPlayer.getUniqueID() + ".json");
+        }
+
+        @Override
+        public void a(EntityPlayer owner) {
+            // setPlayer
+        }
+
+        @Override
+        public void a() {
+            // stopListening
+        }
+
+        @Override
+        public void b() {
+            // reload
+        }
+
+        @Override
+        public void c() {
+            // save
+        }
+
+        @Override
+        public boolean grantCriteria(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public boolean revokeCritera(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public void b(EntityPlayer player) {
+            // flushDirty
+        }
+
+        @Override
+        public void a(Advancement advancement) {
+            // setSelectedTab
+        }
+
+        @Override
+        public AdvancementProgress getProgress(Advancement advancement) {
+            return new AdvancementProgress();
         }
 
     }

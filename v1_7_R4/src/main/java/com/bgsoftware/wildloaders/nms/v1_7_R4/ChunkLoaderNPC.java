@@ -18,6 +18,7 @@ import net.minecraft.server.v1_7_R4.PacketPlayInUpdateSign;
 import net.minecraft.server.v1_7_R4.PacketPlayInWindowClick;
 import net.minecraft.server.v1_7_R4.PlayerConnection;
 import net.minecraft.server.v1_7_R4.PlayerInteractManager;
+import net.minecraft.server.v1_7_R4.Statistic;
 import net.minecraft.server.v1_7_R4.WorldServer;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
 import org.bukkit.Bukkit;
@@ -72,6 +73,16 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     @Override
     public boolean damageEntity(DamageSource damagesource, float f) {
         return false;
+    }
+
+    @Override
+    public void a(Statistic statistic, int i) {
+        // Prevent achievements from being given to NPCs.
+    }
+
+    @Override
+    public void a(Statistic statistic) {
+        // Prevent achievements from being given to NPCs.
     }
 
     @Override

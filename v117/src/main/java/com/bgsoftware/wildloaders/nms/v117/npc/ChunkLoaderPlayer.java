@@ -4,6 +4,8 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -16,15 +18,20 @@ import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.UUID;
 
 public final class ChunkLoaderPlayer extends ServerPlayer {
@@ -34,6 +41,7 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
 
     private final ServerLevel serverLevel;
     private final AABB boundingBox;
+    private final PlayerAdvancements advancements;
 
     private boolean dieCall = false;
 
@@ -45,6 +53,7 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         this.boundingBox = new AABB(new BlockPos(location.getX(), location.getY(), location.getZ()));
 
         this.connection = new DummyServerGamePacketListenerImpl(minecraftServer, this);
+        this.advancements = new DummyPlayerAdvancements(minecraftServer, this);
 
         SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);
         clientViewDistance = 1;
@@ -73,6 +82,11 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         } else {
             super.remove(removalReason);
         }
+    }
+
+    @Override
+    public PlayerAdvancements getAdvancements() {
+        return advancements;
     }
 
     public static class DummyConnection extends Connection {
@@ -133,6 +147,65 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
 
         public void send(Packet<?> packet) {
             // Do nothing.
+        }
+
+    }
+
+    private static class DummyPlayerAdvancements extends PlayerAdvancements {
+
+        DummyPlayerAdvancements(MinecraftServer server, ServerPlayer serverPlayer) {
+            super(server.getFixerUpper(), server.getPlayerList(), server.getAdvancements(),
+                    getAdvancementsFile(server, serverPlayer), serverPlayer);
+        }
+
+        private static File getAdvancementsFile(MinecraftServer server, ServerPlayer serverPlayer) {
+            File advancementsDir = server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).toFile();
+            return new File(advancementsDir, serverPlayer.getUUID() + ".json");
+        }
+
+        @Override
+        public void setPlayer(ServerPlayer owner) {
+            // Do nothing.
+        }
+
+        @Override
+        public void stopListening() {
+            // Do nothing.
+        }
+
+        @Override
+        public void reload(ServerAdvancementManager advancementLoader) {
+            // Do nothing.
+        }
+
+        @Override
+        public void save() {
+            // Do nothing.
+        }
+
+        @Override
+        public boolean award(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public boolean revoke(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public void flushDirty(ServerPlayer player) {
+            // Do nothing.
+        }
+
+        @Override
+        public void setSelectedTab(@Nullable Advancement advancement) {
+            // Do nothing.
+        }
+
+        @Override
+        public AdvancementProgress getOrStartProgress(Advancement advancement) {
+            return new AdvancementProgress();
         }
 
     }

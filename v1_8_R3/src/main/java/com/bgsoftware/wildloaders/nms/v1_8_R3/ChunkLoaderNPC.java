@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_8_R3.AxisAlignedBB;
-import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.DamageSource;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.EnumProtocolDirection;
@@ -21,6 +20,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayInUpdateSign;
 import net.minecraft.server.v1_8_R3.PacketPlayInWindowClick;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
 import net.minecraft.server.v1_8_R3.PlayerInteractManager;
+import net.minecraft.server.v1_8_R3.Statistic;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import org.bukkit.Bukkit;
@@ -92,6 +92,16 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     @Override
     public boolean damageEntity(DamageSource damagesource, float f) {
         return false;
+    }
+
+    @Override
+    public void a(Statistic statistic, int i) {
+        // Prevent achievements from being given to NPCs.
+    }
+
+    @Override
+    public void a(Statistic statistic) {
+        // Prevent achievements from being given to NPCs.
     }
 
     @Override

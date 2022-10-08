@@ -3,6 +3,10 @@ package com.bgsoftware.wildloaders.nms.v1_16_R3;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.v1_16_R3.Advancement;
+import net.minecraft.server.v1_16_R3.AdvancementDataPlayer;
+import net.minecraft.server.v1_16_R3.AdvancementDataWorld;
+import net.minecraft.server.v1_16_R3.AdvancementProgress;
 import net.minecraft.server.v1_16_R3.AxisAlignedBB;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
@@ -21,19 +25,23 @@ import net.minecraft.server.v1_16_R3.PacketPlayInUpdateSign;
 import net.minecraft.server.v1_16_R3.PacketPlayInWindowClick;
 import net.minecraft.server.v1_16_R3.PlayerConnection;
 import net.minecraft.server.v1_16_R3.PlayerInteractManager;
+import net.minecraft.server.v1_16_R3.SavedFile;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
     private final AxisAlignedBB boundingBox;
+    private final AdvancementDataPlayer advancements;
 
     private boolean dieCall = false;
 
@@ -45,7 +53,8 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         this.boundingBox = new AxisAlignedBB(new BlockPosition(location.getX(), location.getY(), location.getZ()));
 
-        playerConnection = new DummyPlayerConnection(server, this);
+        this.playerConnection = new DummyPlayerConnection(server, this);
+        this.advancements = new DummyPlayerAdvancements(server, this);
 
         this.playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
         clientViewDistance = 1;
@@ -89,6 +98,11 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
     @Override
     public Player getPlayer() {
         return getBukkitEntity();
+    }
+
+    @Override
+    public AdvancementDataPlayer getAdvancementData() {
+        return this.advancements;
     }
 
     public static class DummyNetworkManager extends NetworkManager {
@@ -172,6 +186,65 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
         public void sendPacket(Packet packet) {
 
+        }
+
+    }
+
+    private static class DummyPlayerAdvancements extends AdvancementDataPlayer {
+
+        DummyPlayerAdvancements(MinecraftServer server, EntityPlayer entityPlayer) {
+            super(server.getDataFixer(), server.getPlayerList(), server.getAdvancementData(),
+                    getAdvancementsFile(server, entityPlayer), entityPlayer);
+        }
+
+        private static File getAdvancementsFile(MinecraftServer server, EntityPlayer entityPlayer) {
+            File advancementsDir = server.a(SavedFile.ADVANCEMENTS).toFile();
+            return new File(advancementsDir, entityPlayer.getUniqueID() + ".json");
+        }
+
+        @Override
+        public void a(EntityPlayer owner) {
+            // setPlayer
+        }
+
+        @Override
+        public void a() {
+            // stopListening
+        }
+
+        @Override
+        public void a(AdvancementDataWorld advancementLoader) {
+            // reload
+        }
+
+        @Override
+        public void b() {
+            // save
+        }
+
+        @Override
+        public boolean grantCriteria(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public boolean revokeCritera(Advancement advancement, String criterionName) {
+            return false;
+        }
+
+        @Override
+        public void b(EntityPlayer player) {
+            // flushDirty
+        }
+
+        @Override
+        public void a(@Nullable Advancement advancement) {
+            // setSelectedTab
+        }
+
+        @Override
+        public AdvancementProgress getProgress(Advancement advancement) {
+            return new AdvancementProgress();
         }
 
     }
