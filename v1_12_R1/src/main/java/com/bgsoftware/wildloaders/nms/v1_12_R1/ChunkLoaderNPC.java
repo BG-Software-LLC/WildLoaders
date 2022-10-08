@@ -71,7 +71,9 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        return this.boundingBox;
+        // boundingBox is null on initialization of the class, which fixes:
+        // https://github.com/BG-Software-LLC/WildLoaders/issues/61
+        return this.boundingBox == null ? super.getBoundingBox() : this.boundingBox;
     }
 
     @Override
