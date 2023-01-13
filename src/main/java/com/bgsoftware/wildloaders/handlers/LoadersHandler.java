@@ -1,11 +1,12 @@
 package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
-import com.bgsoftware.wildloaders.api.managers.LoadersManager;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
+import com.bgsoftware.wildloaders.api.managers.LoadersManager;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WLoaderData;
+import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
@@ -28,7 +29,7 @@ public final class LoadersHandler implements LoadersManager {
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
     private final WildLoadersPlugin plugin;
 
-    public LoadersHandler(WildLoadersPlugin plugin){
+    public LoadersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -59,7 +60,8 @@ public final class LoadersHandler implements LoadersManager {
 
     @Override
     public ChunkLoader addChunkLoader(LoaderData loaderData, Player whoPlaced, Location location, long timeLeft) {
-        WChunkLoader chunkLoader = addChunkLoader(loaderData, whoPlaced.getUniqueId(), location, timeLeft);
+        WChunkLoader chunkLoader = addChunkLoaderWithoutDBSave(loaderData, whoPlaced.getUniqueId(), location, timeLeft,
+                ChunkLoaderChunks.calculateChunks(loaderData, whoPlaced.getUniqueId(), location));
 
         Query.INSERT_CHUNK_LOADER.insertParameters()
                 .setLocation(location)
@@ -71,8 +73,8 @@ public final class LoadersHandler implements LoadersManager {
         return chunkLoader;
     }
 
-    public WChunkLoader addChunkLoader(LoaderData loaderData, UUID placer, Location location, long timeLeft){
-        WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, location, timeLeft);
+    public WChunkLoader addChunkLoaderWithoutDBSave(LoaderData loaderData, UUID placer, Location location, long timeLeft, List<Chunk> loadedChunks) {
+        WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, location, loadedChunks.toArray(new Chunk[0]), timeLeft);
         chunkLoaders.put(location, chunkLoader);
         for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
             chunkLoadersByChunks.put(ChunkPosition.of(loadedChunk), chunkLoader);
