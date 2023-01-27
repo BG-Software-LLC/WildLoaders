@@ -76,7 +76,7 @@ public final class CmdGive implements ICommand {
 
         int amount = 1;
 
-        if(args.length == 4){
+        if(args.length >= 4){
             try{
                 amount = Integer.parseInt(args[3]);
             } catch (IllegalArgumentException e){
