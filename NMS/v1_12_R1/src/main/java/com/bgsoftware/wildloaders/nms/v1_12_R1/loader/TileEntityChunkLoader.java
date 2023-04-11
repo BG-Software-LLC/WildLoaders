@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
 
@@ -116,8 +117,9 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
     }
 
     private void updateName(EntityHolograms hologram, String line) {
+        String placerName = Optional.ofNullable(chunkLoader.getWhoPlaced().getName()).orElse("");
         hologram.setHologramName(line
-                .replace("{0}", chunkLoader.getWhoPlaced().getName())
+                .replace("{0}", placerName)
                 .replace("{1}", daysAmount + "")
                 .replace("{2}", hoursAmount + "")
                 .replace("{3}", minutesAmount + "")
