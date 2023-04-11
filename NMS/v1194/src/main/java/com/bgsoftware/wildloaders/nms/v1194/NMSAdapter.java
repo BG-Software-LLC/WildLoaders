@@ -16,7 +16,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_19_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_19_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack;
@@ -104,7 +103,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
         serverLevel.addBlockEntityTicker(ChunkLoaderBlockEntity.getTicker());
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
+            LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
             levelChunk.getBlockEntities().values().stream()
                     .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
                     .forEach(blockEntity -> {
@@ -141,7 +140,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
+            LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
             levelChunk.getBlockEntities().values().stream()
                     .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
                     .forEach(blockEntity -> {
