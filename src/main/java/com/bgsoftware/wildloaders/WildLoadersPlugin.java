@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders;
 
+import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
@@ -42,6 +43,9 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
     @Override
     public void onLoad() {
         plugin = this;
+
+        DependenciesManager.inject(this);
+
         new Metrics(this);
 
         shouldEnable = loadNMSAdapter();
