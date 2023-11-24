@@ -64,9 +64,13 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
         this.advancements = new DummyPlayerAdvancements(minecraftServer, this);
 
         SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);
-        setLoadViewDistance(2);
-        setTickViewDistance(2);
-        setSendViewDistance(2);
+        try {
+            setLoadViewDistance(2);
+            setTickViewDistance(2);
+            setSendViewDistance(2);
+        } catch (Throwable ignored) {
+            // Doesn't exist on Spigot
+        }
 
         fauxSleeping = true;
 
@@ -136,7 +140,7 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
     public class DummyServerGamePacketListenerImpl extends ServerGamePacketListenerImpl {
 
         DummyServerGamePacketListenerImpl(MinecraftServer minecraftServer, ServerPlayer serverPlayer) {
-            super(minecraftServer, new DummyConnection(), serverPlayer, CommonListenerCookie.createInitial(ChunkLoaderNPCImpl.this.gameProfile));
+            super(minecraftServer, new DummyConnection(), serverPlayer, CommonListenerCookie.createInitial(ChunkLoaderNPCImpl.this.getGameProfile()));
         }
 
         @Override
