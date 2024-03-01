@@ -21,11 +21,11 @@ public final class DatabaseQueue {
     private static final Map<Query, Map<Object, Integer>> alreadyObjectsCalled = new ConcurrentHashMap<>();
     private static final AtomicInteger currentIndex = new AtomicInteger(0);
 
-    public static void queue(Object caller, QueryParameters parameters){
+    public static void queue(Object caller, QueryParameters parameters) {
         Map<Object, Integer> queryCalls = alreadyObjectsCalled.computeIfAbsent(parameters.getQuery(), q -> new ConcurrentHashMap<>());
         Integer existingParametersIndex = queryCalls.get(caller);
 
-        if(existingParametersIndex != null)
+        if (existingParametersIndex != null)
             queuedCalls.remove(existingParametersIndex);
 
         int currentIndex = DatabaseQueue.currentIndex.getAndIncrement();
@@ -38,19 +38,37 @@ public final class DatabaseQueue {
         queueService.scheduleAtFixedRate(DatabaseQueue::processQueue, QUEUE_INTERVAL, QUEUE_INTERVAL, TimeUnit.SECONDS);
     }
 
-    static void stop(){
+    static void stop() {
         // Stopping the queue timer, and calling the process queue manually
-        queueService.shutdownNow();
+        shutdownAndAwaitTermination();
         processQueue();
     }
 
-    private static void processQueue(){
+    private static void shutdownAndAwaitTermination() {
+        queueService.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!queueService.awaitTermination(60, TimeUnit.SECONDS)) {
+                queueService.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!queueService.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            queueService.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static void processQueue() {
         int currentIndex = DatabaseQueue.currentIndex.getAndSet(0);
-        if(currentIndex > 0) {
+        if (currentIndex > 0) {
             Map<Query, PreparedStatement> preparedStatementMap = new EnumMap<>(Query.class);
             Connection connection = Database.getConnection();
 
-            for(int i = 0; i < currentIndex; i++){
+            for (int i = 0; i < currentIndex; i++) {
                 try {
                     QueryParameters parameters = queuedCalls.get(i);
 
@@ -71,15 +89,15 @@ public final class DatabaseQueue {
                         preparedStatement.executeUpdate();
                         preparedStatement.clearParameters();
                     }
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
 
             preparedStatementMap.values().forEach(preparedStatement -> {
-                try{
+                try {
                     preparedStatement.close();
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             });
