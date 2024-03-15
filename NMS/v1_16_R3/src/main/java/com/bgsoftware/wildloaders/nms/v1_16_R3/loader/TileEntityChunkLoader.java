@@ -28,6 +28,7 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
     public final List<EntityHolograms> holograms = new ArrayList<>();
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
+    private final String cachedPlacerName;
 
     private short currentTick = 20;
     private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
@@ -75,6 +76,8 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
             currentY += 0.23;
             holograms.add(hologram);
         }
+
+        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
     }
 
     @Override
@@ -131,9 +134,8 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
     }
 
     private void updateName(EntityHolograms hologram, String line) {
-        String placerName = Optional.ofNullable(chunkLoader.getWhoPlaced().getName()).orElse("");
         hologram.setHologramName(line
-                .replace("{0}", placerName)
+                .replace("{0}", this.cachedPlacerName)
                 .replace("{1}", daysAmount + "")
                 .replace("{2}", hoursAmount + "")
                 .replace("{3}", minutesAmount + "")

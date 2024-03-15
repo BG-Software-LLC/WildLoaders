@@ -30,6 +30,7 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
     private final ChunkLoaderBlockEntityTicker ticker;
     private final ServerLevel serverLevel;
     private final BlockPos blockPos;
+    private final String cachedPlacerName;
 
     private short currentTick = 20;
     private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
@@ -75,6 +76,8 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
             currentY += 0.23;
             holograms.add(hologram);
         }
+
+        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
     }
 
     public void tick() {
@@ -133,9 +136,8 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
     }
 
     private void updateName(EntityHologram hologram, String line) {
-        String placerName = Optional.ofNullable(chunkLoader.getWhoPlaced().getName()).orElse("");
         hologram.setHologramName(line
-                .replace("{0}", placerName)
+                .replace("{0}", this.cachedPlacerName)
                 .replace("{1}", daysAmount + "")
                 .replace("{2}", hoursAmount + "")
                 .replace("{3}", minutesAmount + "")
