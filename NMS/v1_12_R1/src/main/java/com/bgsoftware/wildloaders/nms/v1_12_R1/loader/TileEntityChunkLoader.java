@@ -41,6 +41,8 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
         loaderBlock = world.getType(blockPosition).getBlock();
 
+        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
+
         if (!this.chunkLoader.isInfinite()) {
             long timeLeft = chunkLoader.getTimeLeft();
 
@@ -68,8 +70,6 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
             currentY += 0.23;
             holograms.add(hologram);
         }
-
-        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
     }
 
     @Override

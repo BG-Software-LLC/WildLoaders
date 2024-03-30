@@ -48,6 +48,8 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
 
         loaderBlock = serverLevel.getBlockState(blockPos).getBlock();
 
+        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
+
         if (!this.chunkLoader.isInfinite()) {
             long timeLeft = chunkLoader.getTimeLeft();
 
@@ -76,8 +78,6 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
             currentY += 0.23;
             holograms.add(hologram);
         }
-
-        this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
     }
 
     public void tick() {
