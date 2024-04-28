@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.nms.v1_20_1;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
+import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.v1_20_1.loader.ChunkLoaderBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +23,7 @@ import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 
 import java.util.UUID;
 
-public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
+public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, String def) {

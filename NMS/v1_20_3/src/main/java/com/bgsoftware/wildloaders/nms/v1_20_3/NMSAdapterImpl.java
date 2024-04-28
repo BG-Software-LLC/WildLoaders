@@ -1,9 +1,9 @@
-package com.bgsoftware.wildloaders.nms.v1_17;
+package com.bgsoftware.wildloaders.nms.v1_20_3;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
-import com.bgsoftware.wildloaders.nms.v1_17.loader.ChunkLoaderBlockEntity;
-import com.bgsoftware.wildloaders.nms.v1_17.npc.ChunkLoaderNPCWrapper;
+import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.nms.v1_20_3.loader.ChunkLoaderBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,14 +17,13 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 
 import java.util.UUID;
 
-public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
+public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, String def) {
@@ -87,7 +86,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
 
     @Override
     public com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC createNPC(Location location, UUID uuid) {
-        return new ChunkLoaderNPCWrapper(((CraftServer) Bukkit.getServer()).getServer(), location, uuid);
+        return new ChunkLoaderNPCImpl(((CraftServer) Bukkit.getServer()).getServer(), location, uuid);
     }
 
     @Override
@@ -99,13 +98,13 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             throw new IllegalArgumentException("Cannot create loader in null world.");
 
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
-        BlockPos blockPos = new BlockPos(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
+        BlockPos blockPos = new BlockPos(loaderLoc.getBlockX(), loaderLoc.getBlockY(), loaderLoc.getBlockZ());
 
         ChunkLoaderBlockEntity ChunkLoaderBlockEntity = new ChunkLoaderBlockEntity(chunkLoader, serverLevel, blockPos);
         serverLevel.addBlockEntityTicker(ChunkLoaderBlockEntity.getTicker());
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
+            LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
             levelChunk.getBlockEntities().values().stream()
                     .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
                     .forEach(blockEntity -> {
@@ -128,7 +127,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             throw new IllegalArgumentException("Cannot remove loader in null world.");
 
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
-        BlockPos blockPos = new BlockPos(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
+        BlockPos blockPos = new BlockPos(loaderLoc.getBlockX(), loaderLoc.getBlockY(), loaderLoc.getBlockZ());
 
         long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         ChunkLoaderBlockEntity chunkLoaderBlockEntity = ChunkLoaderBlockEntity.chunkLoaderBlockEntityMap.remove(chunkPosLong);
@@ -142,7 +141,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
+            LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
             levelChunk.getBlockEntities().values().stream()
                     .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
                     .forEach(blockEntity -> {
@@ -162,7 +161,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
             throw new IllegalArgumentException("Cannot remove loader in null world.");
 
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
-        BlockPos blockPos = new BlockPos(location.getX(), location.getY(), location.getZ());
+        BlockPos blockPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
         if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
             spawnerBlockEntity.getSpawner().requiredPlayerRange = reset ? 16 : -1;
