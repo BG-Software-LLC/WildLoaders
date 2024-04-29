@@ -1,13 +1,18 @@
-package com.bgsoftware.wildloaders.nms.v1_20_3;
+package com.bgsoftware.wildloaders.nms.v1_20_4;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
-import com.bgsoftware.wildloaders.nms.v1_20_3.loader.ChunkLoaderBlockEntity;
+import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.nms.v1_20_4.loader.ChunkLoaderBlockEntity;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,27 +21,34 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
+import java.util.Optional;
 import java.util.UUID;
 
-public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
+public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, String def) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag == null || !compoundTag.contains(key, 8) ? def : compoundTag.getString(key);
+        CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
+        if (customData != null) {
+            CompoundTag compoundTag = customData.getUnsafe();
+            if (compoundTag.contains(key, 8))
+                return compoundTag.getString(key);
+        }
+        return def;
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, String value) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
 
-        compoundTag.putString(key, value);
+        CustomData customData = itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        customData = customData.update(compoundTag -> compoundTag.putString(key, value));
+        itemStack.set(DataComponents.CUSTOM_DATA, customData);
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
@@ -44,16 +56,22 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public long getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, long def) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag == null || !compoundTag.contains(key, 4) ? def : compoundTag.getLong(key);
+        CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
+        if (customData != null) {
+            CompoundTag compoundTag = customData.getUnsafe();
+            if (compoundTag.contains(key, 4))
+                return compoundTag.getLong(key);
+        }
+        return def;
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, long value) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
 
-        compoundTag.putLong(key, value);
+        CustomData customData = itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        customData = customData.update(compoundTag -> compoundTag.putLong(key, value));
+        itemStack.set(DataComponents.CUSTOM_DATA, customData);
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
@@ -61,24 +79,13 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
 
-        CompoundTag skullOwner = compoundTag.contains("SkullOwner") ?
-                compoundTag.getCompound("SkullOwner") : new CompoundTag();
+        PropertyMap propertyMap = new PropertyMap();
+        propertyMap.put("textures", new Property("textures", texture));
 
-        CompoundTag properties = new CompoundTag();
-        ListTag textures = new ListTag();
-        CompoundTag signature = new CompoundTag();
+        ResolvableProfile resolvableProfile = new ResolvableProfile(Optional.empty(), Optional.empty(), propertyMap);
 
-        signature.putString("Value", texture);
-        textures.add(signature);
-
-        properties.put("textures", textures);
-
-        skullOwner.put("Properties", properties);
-        skullOwner.putString("Id", UUID.randomUUID().toString());
-
-        compoundTag.put("SkullOwner", skullOwner);
+        itemStack.set(DataComponents.PROFILE, resolvableProfile);
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
