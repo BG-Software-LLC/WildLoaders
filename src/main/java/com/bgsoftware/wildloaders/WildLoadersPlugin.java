@@ -4,6 +4,7 @@ import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.nmsloader.INMSLoader;
 import com.bgsoftware.common.nmsloader.NMSHandlersFactory;
 import com.bgsoftware.common.nmsloader.NMSLoadException;
+import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
@@ -24,6 +25,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.reflect.Field;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
+
+    private final Updater updater = new Updater(this, "wildloaders");
 
     private static WildLoadersPlugin plugin;
 
@@ -77,10 +80,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         Locale.reload();
 
-        if (Updater.isOutdated()) {
+        if (updater.isOutdated()) {
             log("");
-            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
-            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
+            log("A new version is available (v" + updater.getLatestVersion() + ")!");
+            log("Version's description: \"" + updater.getVersionDescription() + "\"");
             log("");
         }
 
@@ -148,6 +151,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     public DataHandler getDataHandler() {
         return dataHandler;
+    }
+
+    public Updater getUpdater() {
+        return updater;
     }
 
     public static void log(String message) {

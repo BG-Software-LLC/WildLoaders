@@ -1,6 +1,5 @@
 package com.bgsoftware.wildloaders.listeners;
 
-import com.bgsoftware.wildloaders.Updater;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
@@ -37,9 +36,9 @@ public final class PlayersListener implements Listener {
                     ChatColor.GRAY + "This server is using WildLoaders v" + plugin.getDescription().getVersion()), 5L);
         }
 
-        if (e.getPlayer().isOp() && Updater.isOutdated()) {
+        if (e.getPlayer().isOp() && plugin.getUpdater().isOutdated()) {
             Executor.sync(() -> e.getPlayer().sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "WildLoaders" +
-                    ChatColor.GRAY + " A new version is available (v" + Updater.getLatestVersion() + ")!"), 20L);
+                    ChatColor.GRAY + " A new version is available (v" + plugin.getUpdater().getLatestVersion() + ")!"), 20L);
         }
     }
 
