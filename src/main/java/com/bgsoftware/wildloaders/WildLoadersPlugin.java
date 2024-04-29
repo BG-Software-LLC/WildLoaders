@@ -4,7 +4,6 @@ import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.nmsloader.INMSLoader;
 import com.bgsoftware.common.nmsloader.NMSHandlersFactory;
 import com.bgsoftware.common.nmsloader.NMSLoadException;
-import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
@@ -16,18 +15,13 @@ import com.bgsoftware.wildloaders.handlers.SettingsHandler;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
-import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
-import com.bgsoftware.wildloaders.utils.Pair;
-import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.UnsafeValues;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
@@ -49,7 +43,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         DependenciesManager.inject(this);
 
-        new Metrics(this);
+        new Metrics(this, 21732);
 
         shouldEnable = loadNMSAdapter();
         loadAPI();
