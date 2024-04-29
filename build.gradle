@@ -114,7 +114,7 @@ shadowJar {
     configurations = [project.configurations.getByName("runtimeClasspath")]
 }
 
-task copyAPI(type: Copy) {
+task copyAPI(type: Copy, dependsOn: ':API:build') {
     from rootProject.archiveFolder.getAbsolutePath() + '/API.jar'
     into rootProject.targetFolder.getAbsolutePath()
     rename('API.jar', rootProject.name + 'API.jar')
