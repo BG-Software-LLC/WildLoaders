@@ -1,48 +1,48 @@
-package com.bgsoftware.wildloaders.nms.v1_16_R3;
+package com.bgsoftware.wildloaders.nms.v1_12_R1;
 
-import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
-import com.bgsoftware.wildloaders.nms.v1_16_R3.loader.TileEntityChunkLoader;
-import net.minecraft.server.v1_16_R3.Block;
-import net.minecraft.server.v1_16_R3.BlockPosition;
-import net.minecraft.server.v1_16_R3.Chunk;
-import net.minecraft.server.v1_16_R3.ChunkCoordIntPair;
-import net.minecraft.server.v1_16_R3.IBlockData;
-import net.minecraft.server.v1_16_R3.ItemStack;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import net.minecraft.server.v1_16_R3.NBTTagList;
-import net.minecraft.server.v1_16_R3.NBTTagLong;
-import net.minecraft.server.v1_16_R3.NBTTagString;
-import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
-import net.minecraft.server.v1_16_R3.World;
-import net.minecraft.server.v1_16_R3.WorldServer;
+import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.nms.v1_12_R1.loader.TileEntityChunkLoader;
+import net.minecraft.server.v1_12_R1.Block;
+import net.minecraft.server.v1_12_R1.BlockPosition;
+import net.minecraft.server.v1_12_R1.Chunk;
+import net.minecraft.server.v1_12_R1.ItemStack;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.NBTTagList;
+import net.minecraft.server.v1_12_R1.NBTTagLong;
+import net.minecraft.server.v1_12_R1.NBTTagString;
+import net.minecraft.server.v1_12_R1.TileEntity;
+import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
+import net.minecraft.server.v1_12_R1.World;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import java.util.UUID;
 
-public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapter {
+public final class NMSAdapterImpl implements NMSAdapter {
+
+    private static final ReflectMethod<Void> TILE_ENTITY_LOAD = new ReflectMethod<>(TileEntity.class, "load", NBTTagCompound.class);
 
     @Override
     public String getTag(org.bukkit.inventory.ItemStack itemStack, String key, String def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.getOrCreateTag();
-
-        if (!tagCompound.hasKeyOfType(key, 8))
-            return def;
-
-        return tagCompound.getString(key);
+        NBTTagCompound tagCompound = nmsItem.getTag();
+        return tagCompound == null || !tagCompound.hasKeyOfType(key, 8) ? def : tagCompound.getString(key);
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, String value) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.getOrCreateTag();
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        tagCompound.set(key, NBTTagString.a(value));
+        assert tagCompound != null;
+
+        tagCompound.set(key, new NBTTagString(value));
 
         nmsItem.setTag(tagCompound);
 
@@ -52,20 +52,18 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public long getTag(org.bukkit.inventory.ItemStack itemStack, String key, long def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.getOrCreateTag();
-
-        if (!tagCompound.hasKeyOfType(key, 4))
-            return def;
-
-        return tagCompound.getLong(key);
+        NBTTagCompound tagCompound = nmsItem.getTag();
+        return tagCompound == null || !tagCompound.hasKeyOfType(key, 4) ? def : tagCompound.getLong(key);
     }
 
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, long value) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound tagCompound = nmsItem.getOrCreateTag();
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        tagCompound.set(key, NBTTagLong.a(value));
+        assert tagCompound != null;
+
+        tagCompound.set(key, new NBTTagLong(value));
 
         nmsItem.setTag(tagCompound);
 
@@ -76,7 +74,9 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack itemStack, String texture) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
 
-        NBTTagCompound nbtTagCompound = nmsItem.getOrCreateTag();
+        NBTTagCompound nbtTagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        assert nbtTagCompound != null;
 
         NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
 
@@ -107,8 +107,7 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
         Location loaderLoc = chunkLoader.getLocation();
-        assert loaderLoc.getWorld() != null;
-        WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
+        World world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
 
         TileEntityChunkLoader tileEntityChunkLoader = new TileEntityChunkLoader(chunkLoader, world, blockPosition);
@@ -116,10 +115,16 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = -1);
-
-            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, true);
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                tileEntity.save(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) -1);
+                if (TILE_ENTITY_LOAD.isValid()) {
+                    TILE_ENTITY_LOAD.invoke(tileEntity, nbtTagCompound);
+                } else {
+                    tileEntity.a(nbtTagCompound);
+                }
+            });
         }
 
         return tileEntityChunkLoader;
@@ -128,11 +133,10 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
     @Override
     public void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle) {
         Location loaderLoc = chunkLoader.getLocation();
-        assert loaderLoc.getWorld() != null;
-        WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
+        World world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
 
-        long tileEntityLong = ChunkCoordIntPair.pair(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
+        long tileEntityLong = LongHash.toLong(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
         TileEntityChunkLoader tileEntityChunkLoader = TileEntityChunkLoader.tileEntityChunkLoaderMap.remove(tileEntityLong);
         if (tileEntityChunkLoader != null) {
             tileEntityChunkLoader.holograms.forEach(EntityHolograms::removeHologram);
@@ -145,26 +149,33 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = 16);
-
-            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, false);
+            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner).forEach(tileEntity -> {
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                tileEntity.save(nbtTagCompound);
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) 16);
+                if (TILE_ENTITY_LOAD.isValid()) {
+                    TILE_ENTITY_LOAD.invoke(tileEntity, nbtTagCompound);
+                } else {
+                    tileEntity.a(nbtTagCompound);
+                }
+            });
         }
     }
 
     @Override
     public void updateSpawner(Location location, boolean reset) {
-        assert location.getWorld() != null;
         World world = ((CraftWorld) location.getWorld()).getHandle();
-
         BlockPosition blockPosition = new BlockPosition(location.getX(), location.getY(), location.getZ());
-        IBlockData blockData = world.getType(blockPosition);
         TileEntityMobSpawner mobSpawner = (TileEntityMobSpawner) world.getTileEntity(blockPosition);
 
-        if (mobSpawner == null)
-            return;
-
-        mobSpawner.getSpawner().requiredPlayerRange = reset ? 16 : -1;
+        NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        mobSpawner.save(nbtTagCompound);
+        nbtTagCompound.setShort("RequiredPlayerRange", (short) (reset ? 16 : -1));
+        if (TILE_ENTITY_LOAD.isValid()) {
+            TILE_ENTITY_LOAD.invoke(mobSpawner, nbtTagCompound);
+        } else {
+            mobSpawner.a(nbtTagCompound);
+        }
     }
 
 }

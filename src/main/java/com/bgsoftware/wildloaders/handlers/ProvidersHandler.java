@@ -60,11 +60,15 @@ public final class ProvidersHandler implements ProvidersManager {
         // Loading the tickable providers
         if (Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
             Plugin epicSpawners = Bukkit.getPluginManager().getPlugin("EpicSpawners");
-            if (epicSpawners.getDescription().getVersion().startsWith("6")) {
+            String version = epicSpawners.getDescription().getVersion();
+            if (version.startsWith("6")) {
                 Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners6");
                 tickableProvider.ifPresent(this::addTickableProvider);
-            } else {
+            } else if(version.startsWith("7")) {
                 Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners7");
+                tickableProvider.ifPresent(this::addTickableProvider);
+            } else {
+                Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners8");
                 tickableProvider.ifPresent(this::addTickableProvider);
             }
         }

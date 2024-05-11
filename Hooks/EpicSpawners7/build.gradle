@@ -1,4 +1,4 @@
-group 'Hooks:EpicSpawners6'
+group 'Hooks:EpicSpawners7'
 
 dependencies {
     compileOnly "com.songoda:EpicSpawners:7.0.2"
