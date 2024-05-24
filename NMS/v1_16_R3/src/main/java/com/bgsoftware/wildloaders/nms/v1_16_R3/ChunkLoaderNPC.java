@@ -40,6 +40,7 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
+
     private final AxisAlignedBB boundingBox;
     private final AdvancementDataPlayer advancements;
 
@@ -57,9 +58,16 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         this.advancements = new DummyPlayerAdvancements(server, this);
 
         this.playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
-        clientViewDistance = 1;
 
+        fallDistance = 0.0F;
         fauxSleeping = true;
+        clientViewDistance = 0;
+
+        try {
+            // Paper
+            affectsSpawning = true;
+        } catch (Throwable ignored) {
+        }
 
         spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());

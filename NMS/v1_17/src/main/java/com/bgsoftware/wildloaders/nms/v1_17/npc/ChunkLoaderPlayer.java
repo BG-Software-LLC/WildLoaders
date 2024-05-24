@@ -56,9 +56,16 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         this.advancements = new DummyPlayerAdvancements(minecraftServer, this);
 
         SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);
-        clientViewDistance = 1;
 
+        fallDistance = 0.0F;
         fauxSleeping = true;
+        clientViewDistance = 0;
+
+        try {
+            // Paper
+            affectsSpawning = true;
+        } catch (Throwable ignored) {
+        }
 
         spawnIn(this.serverLevel);
         moveTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
