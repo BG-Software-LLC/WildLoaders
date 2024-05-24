@@ -7,7 +7,9 @@ import com.bgsoftware.wildloaders.npc.NPCIdentifier;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,7 +36,12 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public ChunkLoaderNPC createNPC(Location location) {
-        return npcs.computeIfAbsent(new NPCIdentifier(location), i -> plugin.getNMSAdapter().createNPC(i.getSpawnLocation(), getUUID(i)));
+        return npcs.computeIfAbsent(new NPCIdentifier(location), i -> {
+            ChunkLoaderNPC npc = plugin.getNMSAdapter().createNPC(i.getSpawnLocation(), getUUID(i));
+            Entity npcEntity = npc.getPlayer();
+            npcEntity.setMetadata("NPC", new FixedMetadataValue(plugin, true));
+            return npc;
+        });
     }
 
     @Override
@@ -53,6 +60,9 @@ public final class NPCHandler implements NPCManager {
         Query.DELETE_NPC_IDENTIFIER.insertParameters()
                 .setLocation(identifier.getSpawnLocation())
                 .queue(npc.getUniqueId());
+
+        Entity npcEntity = npc.getPlayer();
+        npcEntity.removeMetadata("NPC", plugin);
 
         npc.die();
     }
