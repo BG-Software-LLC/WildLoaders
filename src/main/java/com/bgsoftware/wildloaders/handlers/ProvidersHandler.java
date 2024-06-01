@@ -85,13 +85,13 @@ public final class ProvidersHandler implements ProvidersManager {
 
         try {
             Class.forName("com.infernalsuite.aswm.api.SlimePlugin");
-            worldsProvider = createInstance("WorldsProvider_AdvancedSlimePaper");
-        } catch (Throwable ignored) {
+            worldsProvider = createInstanceSilently("WorldsProvider_AdvancedSlimePaper");
+        } catch (ClassNotFoundException ignored) {
             try {
                 Class.forName("com.grinderwolf.swm.nms.world.AbstractSlimeNMSWorld");
-                worldsProvider = createInstance("WorldsProvider_AdvancedSlimeWorldManager");
+                worldsProvider = createInstanceSilently("WorldsProvider_AdvancedSlimeWorldManager");
             } catch (Throwable error) {
-                worldsProvider = createInstance("WorldsProvider_SlimeWorldManager");
+                worldsProvider = createInstanceSilently("WorldsProvider_SlimeWorldManager");
             }
         }
 
@@ -138,6 +138,14 @@ public final class ProvidersHandler implements ProvidersManager {
         }
 
         return null;
+    }
+
+    private <T> Optional<T> createInstanceSilently(String className) {
+        try {
+            return createInstance(className);
+        } catch (Throwable error) {
+            return Optional.empty();
+        }
     }
 
     private <T> Optional<T> createInstance(String className) {
