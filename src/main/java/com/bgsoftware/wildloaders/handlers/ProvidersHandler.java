@@ -93,7 +93,7 @@ public final class ProvidersHandler implements ProvidersManager {
         return false;
     }
 
-    public void tick(Chunk[] chunks) {
+    public void tick(List<Chunk> chunks) {
         tickableProviders.forEach(tickableProvider -> tickableProvider.tick(chunks));
     }
 

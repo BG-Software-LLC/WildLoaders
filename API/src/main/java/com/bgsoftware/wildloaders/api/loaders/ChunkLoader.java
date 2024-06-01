@@ -34,8 +34,16 @@ public interface ChunkLoader {
 
     /**
      * Get the chunks that this chunk-loader is loading.
+     *
+     * @deprecated See {@link #getLoadedChunksCollection()}
      */
+    @Deprecated
     Chunk[] getLoadedChunks();
+
+    /**
+     * Get the chunks that this chunk-loader is loading.
+     */
+    Collection<Chunk> getLoadedChunksCollection();
 
     /**
      * Get the NPC of this chunk loader.
