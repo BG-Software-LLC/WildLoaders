@@ -3,12 +3,10 @@ package com.bgsoftware.wildloaders.handlers;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
-import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 
 import java.io.File;
@@ -54,6 +52,10 @@ public final class DataHandler {
                     continue;
 
                 World world = blockPosition.getWorld();
+                if (world == null)
+                    // Try loading the world
+                    world = plugin.getProviders().loadWorld(blockPosition.getWorldName());
+
                 if (world != null) {
                     Location location = blockPosition.getLocation();
                     plugin.getLoaders().addChunkLoaderWithoutDBSave(loaderData.get(), placer,

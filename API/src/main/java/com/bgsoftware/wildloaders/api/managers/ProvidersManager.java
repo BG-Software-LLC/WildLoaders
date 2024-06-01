@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.api.managers;
 
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
+import com.bgsoftware.wildloaders.api.hooks.WorldsProvider;
 
 public interface ProvidersManager {
 
@@ -16,5 +17,12 @@ public interface ProvidersManager {
      * @param tickableProvider The tickable provider to add.
      */
     void addTickableProvider(TickableProvider tickableProvider);
+
+    /**
+     * Add a worlds provider to the plugin.
+     *
+     * @param worldsProvider The worlds provider to add.
+     */
+    void addWorldsProvider(WorldsProvider worldsProvider);
 
 }

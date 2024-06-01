@@ -3,15 +3,19 @@ package com.bgsoftware.wildloaders.handlers;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
+import com.bgsoftware.wildloaders.api.hooks.WorldsProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,11 +24,13 @@ public final class ProvidersHandler implements ProvidersManager {
 
     private final WildLoadersPlugin plugin;
 
-    private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
-    private final List<TickableProvider> tickableProviders = new ArrayList<>();
+    private final List<ClaimsProvider> claimsProviders = new LinkedList<>();
+    private final List<TickableProvider> tickableProviders = new LinkedList<>();
+    private final List<WorldsProvider> worldsProviders = new LinkedList<>();
 
     public ProvidersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
+        loadWorldProviders();
         Executor.sync(() -> {
             loadClaimsProviders();
             loadTickableProviders();
@@ -64,7 +70,7 @@ public final class ProvidersHandler implements ProvidersManager {
             if (version.startsWith("6")) {
                 Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners6");
                 tickableProvider.ifPresent(this::addTickableProvider);
-            } else if(version.startsWith("7")) {
+            } else if (version.startsWith("7")) {
                 Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners7");
                 tickableProvider.ifPresent(this::addTickableProvider);
             } else {
@@ -74,14 +80,40 @@ public final class ProvidersHandler implements ProvidersManager {
         }
     }
 
+    private void loadWorldProviders() {
+        Optional<WorldsProvider> worldsProvider;
+
+        try {
+            Class.forName("com.infernalsuite.aswm.api.SlimePlugin");
+            worldsProvider = createInstance("WorldsProvider_AdvancedSlimePaper");
+        } catch (Throwable ignored) {
+            try {
+                Class.forName("com.grinderwolf.swm.nms.world.AbstractSlimeNMSWorld");
+                worldsProvider = createInstance("WorldsProvider_AdvancedSlimeWorldManager");
+            } catch (Throwable error) {
+                worldsProvider = createInstance("WorldsProvider_SlimeWorldManager");
+            }
+        }
+
+        worldsProvider.ifPresent(this::addWorldsProvider);
+    }
+
     @Override
     public void addClaimsProvider(ClaimsProvider claimsProvider) {
+        Preconditions.checkNotNull(claimsProvider, "claimsProvider cannot be null");
         claimsProviders.add(claimsProvider);
     }
 
     @Override
     public void addTickableProvider(TickableProvider tickableProvider) {
+        Preconditions.checkNotNull(tickableProvider, "tickableProvider cannot be null");
         tickableProviders.add(tickableProvider);
+    }
+
+    @Override
+    public void addWorldsProvider(WorldsProvider worldsProvider) {
+        Preconditions.checkNotNull(worldsProvider, "worldsProvider cannot be null");
+        worldsProviders.add(worldsProvider);
     }
 
     public boolean hasChunkAccess(UUID player, Chunk chunk) {
@@ -95,6 +127,17 @@ public final class ProvidersHandler implements ProvidersManager {
 
     public void tick(List<Chunk> chunks) {
         tickableProviders.forEach(tickableProvider -> tickableProvider.tick(chunks));
+    }
+
+    @Nullable
+    public World loadWorld(String worldName) {
+        for (WorldsProvider worldsProvider : this.worldsProviders) {
+            World loadedWorld = worldsProvider.loadWorld(worldName);
+            if (loadedWorld != null)
+                return loadedWorld;
+        }
+
+        return null;
     }
 
     private <T> Optional<T> createInstance(String className) {
