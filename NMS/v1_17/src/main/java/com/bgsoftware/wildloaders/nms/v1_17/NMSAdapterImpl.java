@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.v1_17.loader.ChunkLoaderBlockEntity;
 import com.bgsoftware.wildloaders.nms.v1_17.npc.ChunkLoaderNPCWrapper;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -105,16 +106,10 @@ public final class NMSAdapterImpl implements NMSAdapter {
         ChunkLoaderBlockEntity ChunkLoaderBlockEntity = new ChunkLoaderBlockEntity(chunkLoader, serverLevel, blockPos);
         serverLevel.addBlockEntityTicker(ChunkLoaderBlockEntity.getTicker());
 
-        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
-            levelChunk.getBlockEntities().values().stream()
-                    .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
-                    .forEach(blockEntity -> {
-                        ((SpawnerBlockEntity) blockEntity).getSpawner().requiredPlayerRange = -1;
-                    });
-
-            ChunkPos chunkPos = levelChunk.getPos();
-            serverLevel.setChunkForced(chunkPos.x, chunkPos.z, true);
+        if (Scheduler.isRegionScheduler()) {
+            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, serverLevel, true));
+        } else {
+            setChunksForcedForLoader(chunkLoader, serverLevel, true);
         }
 
         return ChunkLoaderBlockEntity;
@@ -142,16 +137,25 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (spawnParticle)
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
-        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
+        if (Scheduler.isRegionScheduler()) {
+            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, serverLevel, false));
+        } else {
+            setChunksForcedForLoader(chunkLoader, serverLevel, false);
+        }
+    }
+
+    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, ServerLevel serverLevel, boolean forced) {
+        int requiredPlayerRange = forced ? -1 : 16;
+        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunksCollection()) {
             LevelChunk levelChunk = ((CraftChunk) bukkitChunk).getHandle();
-            levelChunk.getBlockEntities().values().stream()
-                    .filter(blockEntity -> blockEntity instanceof SpawnerBlockEntity)
-                    .forEach(blockEntity -> {
-                        ((SpawnerBlockEntity) blockEntity).getSpawner().requiredPlayerRange = 16;
-                    });
+
+            for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
+                if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
+                    spawnerBlockEntity.getSpawner().requiredPlayerRange = requiredPlayerRange;
+            }
 
             ChunkPos chunkPos = levelChunk.getPos();
-            serverLevel.setChunkForced(chunkPos.x, chunkPos.z, false);
+            serverLevel.setChunkForced(chunkPos.x, chunkPos.z, forced);
         }
     }
 

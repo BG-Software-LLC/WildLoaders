@@ -5,7 +5,7 @@ import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.hooks.WorldsProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -31,7 +31,7 @@ public final class ProvidersHandler implements ProvidersManager {
     public ProvidersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
         loadWorldProviders();
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             loadClaimsProviders();
             loadTickableProviders();
         });

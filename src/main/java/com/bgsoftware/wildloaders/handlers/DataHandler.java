@@ -2,9 +2,9 @@ package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.database.Database;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -19,7 +19,7 @@ public final class DataHandler {
 
     public DataHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             try {
                 Database.start(new File(plugin.getDataFolder(), "database.db"));
                 loadDatabase();
@@ -58,8 +58,13 @@ public final class DataHandler {
 
                 if (world != null) {
                     Location location = blockPosition.getLocation();
-                    plugin.getLoaders().addChunkLoaderWithoutDBSave(loaderData.get(), placer,
-                            location, timeLeft, true);
+                    if(Scheduler.isRegionScheduler()) {
+                        Scheduler.runTask(location, () -> plugin.getLoaders().addChunkLoaderWithoutDBSave(
+                                loaderData.get(), placer, location, timeLeft, true));
+                    } else {
+                        plugin.getLoaders().addChunkLoaderWithoutDBSave(loaderData.get(), placer,
+                                location, timeLeft, true);
+                    }
                 } else {
                     plugin.getLoaders().addUnloadedChunkLoader(loaderData.get(), placer, blockPosition, timeLeft);
                 }

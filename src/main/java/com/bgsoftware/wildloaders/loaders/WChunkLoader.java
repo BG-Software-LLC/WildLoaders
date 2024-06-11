@@ -5,9 +5,9 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -107,11 +107,14 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::remove);
-            return;
+        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
+            Scheduler.runTask(getLocation(), this::removeInternal);
+        } else {
+            removeInternal();
         }
+    }
 
+    private void removeInternal() {
         plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive());
         plugin.getLoaders().removeChunkLoader(this);
 
