@@ -1,7 +1,6 @@
-package com.bgsoftware.wildloaders.nms.v1_20_3;
+package com.bgsoftware.wildloaders.nms.v1_21;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
-import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -16,10 +15,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftArmorStand;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftArmorStand;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 
 public final class EntityHologram extends ArmorStand implements Hologram {
 
@@ -49,11 +48,7 @@ public final class EntityHologram extends ArmorStand implements Hologram {
 
     @Override
     public void removeHologram() {
-        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
-            Scheduler.runTask(getBukkitEntity(), () -> super.remove(RemovalReason.DISCARDED));
-        } else {
-            super.remove(RemovalReason.DISCARDED);
-        }
+        super.remove(RemovalReason.DISCARDED);
     }
 
     @Override
