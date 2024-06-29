@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
@@ -50,7 +51,10 @@ public final class EntityHologram extends ArmorStand implements Hologram {
     @Override
     public void removeHologram() {
         if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
-            Scheduler.runTask(getBukkitEntity(), () -> super.remove(RemovalReason.DISCARDED));
+            World world = level().getWorld();
+            int chunkX = getBlockX() >> 4;
+            int chunkZ = getBlockZ() >> 4;
+            Scheduler.runTask(world, chunkX, chunkZ, () -> super.remove(RemovalReason.DISCARDED));
         } else {
             super.remove(RemovalReason.DISCARDED);
         }

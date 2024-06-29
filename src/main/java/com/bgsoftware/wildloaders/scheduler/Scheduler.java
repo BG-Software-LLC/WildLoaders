@@ -64,6 +64,10 @@ public class Scheduler {
         return runTask(location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4, task, delay);
     }
 
+    public static ScheduledTask runTask(World world, int chunkX, int chunkZ, Runnable task) {
+        return runTask(world, chunkX, chunkZ, task, 0L);
+    }
+
     public static ScheduledTask runTask(Entity entity, Runnable task) {
         return runTask(entity, task, 0L);
     }
