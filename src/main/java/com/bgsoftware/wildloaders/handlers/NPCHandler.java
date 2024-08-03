@@ -3,11 +3,13 @@ package com.bgsoftware.wildloaders.handlers;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import com.bgsoftware.wildloaders.npc.NPCIdentifier;
+import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Collections;
 import java.util.Map;
@@ -19,8 +21,8 @@ public final class NPCHandler implements NPCManager {
     private static int NPCS_COUNTER = 0;
 
     private final WildLoadersPlugin plugin;
-    private final Map<NPCIdentifier, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
-    private final Map<NPCIdentifier, UUID> npcUUIDs = Maps.newConcurrentMap();
+    private final Map<BlockPosition, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
+    private final Map<BlockPosition, UUID> npcUUIDs = Maps.newConcurrentMap();
 
 
     public NPCHandler(WildLoadersPlugin plugin) {
@@ -29,12 +31,25 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public Optional<ChunkLoaderNPC> getNPC(Location location) {
-        return Optional.ofNullable(npcs.get(new NPCIdentifier(location)));
+        return getNPC(BlockPosition.of(location));
+    }
+
+    public Optional<ChunkLoaderNPC> getNPC(BlockPosition blockPosition) {
+        return Optional.ofNullable(npcs.get(blockPosition));
     }
 
     @Override
     public ChunkLoaderNPC createNPC(Location location) {
-        return npcs.computeIfAbsent(new NPCIdentifier(location), i -> plugin.getNMSAdapter().createNPC(i.getSpawnLocation(), getUUID(i)));
+        return createNPC(BlockPosition.of(location));
+    }
+
+    public ChunkLoaderNPC createNPC(BlockPosition blockPosition) {
+        return npcs.computeIfAbsent(blockPosition, i -> {
+            ChunkLoaderNPC npc = plugin.getNMSAdapter().createNPC(i.getLocation(), getUUID(i));
+            Entity npcEntity = npc.getPlayer();
+            npcEntity.setMetadata("NPC", new FixedMetadataValue(plugin, true));
+            return npc;
+        });
     }
 
     @Override
@@ -45,14 +60,17 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public void killNPC(ChunkLoaderNPC npc) {
-        NPCIdentifier identifier = new NPCIdentifier(npc.getLocation());
-        npcs.remove(identifier);
+        BlockPosition blockPosition = BlockPosition.of(npc.getLocation());
 
-        npcUUIDs.remove(identifier);
+        npcs.remove(blockPosition);
+        npcUUIDs.remove(blockPosition);
 
         Query.DELETE_NPC_IDENTIFIER.insertParameters()
-                .setLocation(identifier.getSpawnLocation())
+                .setLocation(blockPosition)
                 .queue(npc.getUniqueId());
+
+        Entity npcEntity = npc.getPlayer();
+        npcEntity.removeMetadata("NPC", plugin);
 
         npc.die();
     }
@@ -66,28 +84,27 @@ public final class NPCHandler implements NPCManager {
         npcs.clear();
     }
 
-    public Map<NPCIdentifier, ChunkLoaderNPC> getNPCs() {
+    public Map<BlockPosition, ChunkLoaderNPC> getNPCs() {
         return Collections.unmodifiableMap(npcs);
     }
 
-    public void registerUUID(Location location, UUID uuid) {
-        npcUUIDs.put(new NPCIdentifier(location), uuid);
+    public void registerUUID(BlockPosition blockPosition, UUID uuid) {
+        npcUUIDs.put(blockPosition, uuid);
     }
 
-    private UUID getUUID(NPCIdentifier identifier) {
-        if (npcUUIDs.containsKey(identifier))
-            return npcUUIDs.get(identifier);
-
-        UUID uuid;
+    private UUID getUUID(BlockPosition blockPosition) {
+        UUID uuid = npcUUIDs.get(blockPosition);
+        if (uuid != null)
+            return uuid;
 
         do {
             uuid = UUID.randomUUID();
         } while (npcUUIDs.containsValue(uuid));
 
-        npcUUIDs.put(identifier, uuid);
+        npcUUIDs.put(blockPosition, uuid);
 
         Query.INSERT_NPC_IDENTIFIER.insertParameters()
-                .setLocation(identifier.getSpawnLocation())
+                .setLocation(blockPosition)
                 .setObject(uuid.toString())
                 .queue(uuid);
 

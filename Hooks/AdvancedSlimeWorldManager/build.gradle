@@ -1,0 +1,19 @@
+group 'Hooks:AdvancedSlimeWorldManager'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+dependencies {
+    compileOnly "com.grinderwolf:slimeworldmanager-api:2.10.0"
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_advancedslimeworldmanager') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_advancedslimeworldmanager").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

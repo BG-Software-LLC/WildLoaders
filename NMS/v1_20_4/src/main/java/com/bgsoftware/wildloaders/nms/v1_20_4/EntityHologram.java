@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.nms.v1_20_4;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -48,7 +50,14 @@ public final class EntityHologram extends ArmorStand implements Hologram {
 
     @Override
     public void removeHologram() {
-        super.remove(RemovalReason.DISCARDED);
+        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
+            World world = level().getWorld();
+            int chunkX = getBlockX() >> 4;
+            int chunkZ = getBlockZ() >> 4;
+            Scheduler.runTask(world, chunkX, chunkZ, () -> super.remove(RemovalReason.DISCARDED));
+        } else {
+            super.remove(RemovalReason.DISCARDED);
+        }
     }
 
     @Override

@@ -41,8 +41,8 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         playerConnection = new DummyPlayerConnection(server, this);
 
         playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
-        fallDistance = 0.0F;
 
+        fallDistance = 0.0F;
         fauxSleeping = true;
 
         spawnIn(world);

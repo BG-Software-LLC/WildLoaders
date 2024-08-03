@@ -1,5 +1,7 @@
 package com.bgsoftware.wildloaders.nms.v1_12_R1;
 
+import com.bgsoftware.common.reflection.ReflectField;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
@@ -38,6 +40,11 @@ import java.util.UUID;
 
 public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC {
 
+    private static final ReflectMethod<Void> PLAYER_SET_VIEW_DISTANCE = new ReflectMethod<>(
+            EntityPlayer.class, "setViewDistance", int.class);
+    private static final ReflectField<Boolean> PLAYER_AFFECTS_SPAWNING = new ReflectField<>(
+            EntityPlayer.class, boolean.class, "affectsSpawning");
+
     private final AxisAlignedBB boundingBox;
     private final AdvancementDataPlayer advancements;
 
@@ -53,7 +60,14 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         this.advancements = new DummyPlayerAdvancements(server, this);
 
         this.playerInteractManager.setGameMode(EnumGamemode.CREATIVE);
+
+        fallDistance = 0.0F;
         fauxSleeping = true;
+
+        if (PLAYER_SET_VIEW_DISTANCE.isValid())
+            PLAYER_SET_VIEW_DISTANCE.invoke(this, 0);
+        if (PLAYER_AFFECTS_SPAWNING.isValid())
+            PLAYER_AFFECTS_SPAWNING.set(this, true);
 
         spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());

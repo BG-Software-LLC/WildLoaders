@@ -64,15 +64,18 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
         this.advancements = new DummyPlayerAdvancements(minecraftServer, this);
 
         SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);
+
+        fallDistance = 0.0F;
+        fauxSleeping = true;
+
         try {
             setLoadViewDistance(2);
             setTickViewDistance(2);
             setSendViewDistance(2);
+            affectsSpawning = true;
         } catch (Throwable ignored) {
             // Doesn't exist on Spigot
         }
-
-        fauxSleeping = true;
 
         spawnIn(this.serverLevel);
         moveTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());

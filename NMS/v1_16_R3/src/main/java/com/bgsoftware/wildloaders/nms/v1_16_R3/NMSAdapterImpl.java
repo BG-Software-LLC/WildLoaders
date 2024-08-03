@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.v1_16_R3.loader.TileEntityChunkLoader;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import net.minecraft.server.v1_16_R3.Block;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.Chunk;
@@ -14,6 +15,7 @@ import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import net.minecraft.server.v1_16_R3.NBTTagList;
 import net.minecraft.server.v1_16_R3.NBTTagLong;
 import net.minecraft.server.v1_16_R3.NBTTagString;
+import net.minecraft.server.v1_16_R3.TileEntity;
 import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R3.World;
 import net.minecraft.server.v1_16_R3.WorldServer;
@@ -114,12 +116,10 @@ public final class NMSAdapterImpl implements NMSAdapter {
         TileEntityChunkLoader tileEntityChunkLoader = new TileEntityChunkLoader(chunkLoader, world, blockPosition);
         world.tileEntityListTick.add(tileEntityChunkLoader);
 
-        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = -1);
-
-            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, true);
+        if (Scheduler.isRegionScheduler()) {
+            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, world, true));
+        } else {
+            setChunksForcedForLoader(chunkLoader, world, true);
         }
 
         return tileEntityChunkLoader;
@@ -143,12 +143,25 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (spawnParticle)
             world.a(null, 2001, blockPosition, Block.getCombinedId(world.getType(blockPosition)));
 
-        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunks()) {
-            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
-            chunk.tileEntities.values().stream().filter(tileEntity -> tileEntity instanceof TileEntityMobSpawner)
-                    .forEach(tileEntity -> ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = 16);
+        if (Scheduler.isRegionScheduler()) {
+            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, world, false));
+        } else {
+            setChunksForcedForLoader(chunkLoader, world, false);
+        }
+    }
 
-            world.setForceLoaded(chunk.getPos().x, chunk.getPos().z, false);
+    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean forced) {
+        int requiredPlayerRange = forced ? -1 : 16;
+        for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunksCollection()) {
+            Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+
+            for (TileEntity tileEntity : chunk.tileEntities.values()) {
+                if (tileEntity instanceof TileEntityMobSpawner)
+                    ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = requiredPlayerRange;
+            }
+
+            ChunkCoordIntPair chunkCoord = chunk.getPos();
+            worldServer.setForceLoaded(chunkCoord.x, chunkCoord.z, forced);
         }
     }
 

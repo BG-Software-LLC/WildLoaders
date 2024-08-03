@@ -5,25 +5,26 @@ import com.craftaro.epicspawners.api.EpicSpawnersApi;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public final class TickableProvider_EpicSpawners8 implements TickableProvider {
 
     private final Map<Location, TickDelay> spawnerDelays = new HashMap<>();
 
     @Override
-    public void tick(Chunk[] chunks) {
+    public void tick(Collection<Chunk> chunks) {
         if (EpicSpawnersApi.getSpawnerManager() == null)
             return;
 
-        List<Long> chunkList = Stream.of(chunks).map(chunk -> pair(chunk.getX(), chunk.getZ())).collect(Collectors.toList());
+        Set<Long> chunkKeys = new HashSet<>();
+        chunks.forEach(chunk -> chunkKeys.add(pair(chunk.getX(), chunk.getZ())));
 
         EpicSpawnersApi.getSpawnerManager().getSpawners().stream()
-                .filter(spawner -> chunkList.contains(pair(spawner.getX() >> 4, spawner.getZ() >> 4)))
+                .filter(spawner -> chunkKeys.contains(pair(spawner.getX() >> 4, spawner.getZ() >> 4)))
                 .forEach(spawner -> {
                     Location location = spawner.getLocation();
                     TickDelay tickDelay = spawnerDelays.get(location);

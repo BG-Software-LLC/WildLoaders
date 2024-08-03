@@ -2,18 +2,14 @@ package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
-import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
-import com.bgsoftware.wildloaders.utils.ServerVersion;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
+import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.database.Database;
-import com.bgsoftware.wildloaders.utils.locations.LocationUtils;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.World;
 
 import java.io.File;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +19,7 @@ public final class DataHandler {
 
     public DataHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             try {
                 Database.start(new File(plugin.getDataFolder(), "database.db"));
                 loadDatabase();
@@ -38,16 +34,16 @@ public final class DataHandler {
         Database.executeUpdate("CREATE TABLE IF NOT EXISTS npc_identifiers (location TEXT NOT NULL PRIMARY KEY, uuid TEXT NOT NULL);");
         Database.executeQuery("SELECT * FROM npc_identifiers;", resultSet -> {
             while (resultSet.next()) {
-                Location location = LocationUtils.getLocation(resultSet.getString("location"));
+                BlockPosition blockPosition = BlockPosition.deserialize(resultSet.getString("location"));
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                plugin.getNPCs().registerUUID(location, uuid);
+                plugin.getNPCs().registerUUID(blockPosition, uuid);
             }
         });
 
         Database.executeUpdate("CREATE TABLE IF NOT EXISTS chunk_loaders (location TEXT NOT NULL PRIMARY KEY, placer TEXT NOT NULL, loader_data TEXT NOT NULL, timeLeft BIGINT NOT NULL);");
         Database.executeQuery("SELECT * FROM chunk_loaders;", resultSet -> {
             while (resultSet.next()) {
-                Location location = LocationUtils.getLocation(resultSet.getString("location"));
+                BlockPosition blockPosition = BlockPosition.deserialize(resultSet.getString("location"));
                 UUID placer = UUID.fromString(resultSet.getString("placer"));
                 Optional<LoaderData> loaderData = plugin.getLoaders().getLoaderData(resultSet.getString("loader_data"));
                 long timeLeft = resultSet.getLong("timeLeft");
@@ -55,21 +51,23 @@ public final class DataHandler {
                 if (!loaderData.isPresent())
                     continue;
 
-                Material blockType = location.getBlock().getType();
+                World world = blockPosition.getWorld();
+                if (world == null)
+                    // Try loading the world
+                    world = plugin.getProviders().loadWorld(blockPosition.getWorldName());
 
-                if (ServerVersion.isLegacy() && blockType == Material.CAULDRON) {
-                    blockType = Material.CAULDRON_ITEM;
+                if (world != null) {
+                    Location location = blockPosition.getLocation();
+                    if(Scheduler.isRegionScheduler()) {
+                        Scheduler.runTask(location, () -> plugin.getLoaders().addChunkLoaderWithoutDBSave(
+                                loaderData.get(), placer, location, timeLeft, true));
+                    } else {
+                        plugin.getLoaders().addChunkLoaderWithoutDBSave(loaderData.get(), placer,
+                                location, timeLeft, true);
+                    }
+                } else {
+                    plugin.getLoaders().addUnloadedChunkLoader(loaderData.get(), placer, blockPosition, timeLeft);
                 }
-
-                if (blockType != loaderData.get().getLoaderItem().getType()) {
-                    WildLoadersPlugin.log("The chunk-loader at " + LocationUtils.getLocation(location) + " is invalid.");
-                    continue;
-                }
-
-                List<Chunk> chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData.get(), placer, location);
-                chunksToLoad.removeIf(chunk -> plugin.getLoaders().getChunkLoader(chunk).isPresent());
-
-                plugin.getLoaders().addChunkLoaderWithoutDBSave(loaderData.get(), placer, location, timeLeft, chunksToLoad);
             }
         });
     }

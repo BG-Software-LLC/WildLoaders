@@ -5,9 +5,9 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
+import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
-import com.bgsoftware.wildloaders.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -16,6 +16,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,18 +26,18 @@ public final class WChunkLoader implements ChunkLoader {
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     private final UUID whoPlaced;
-    private final Location location;
-    private final Chunk[] loadedChunks;
+    private final BlockPosition blockPosition;
+    private final List<Chunk> loadedChunks;
     private final String loaderName;
     private final ITileEntityChunkLoader tileEntityChunkLoader;
 
     private boolean active = true;
     private long timeLeft;
 
-    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, Location location, Chunk[] loadedChunks, long timeLeft) {
+    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, BlockPosition blockPosition, List<Chunk> loadedChunks, long timeLeft) {
         this.loaderName = loaderData.getName();
         this.whoPlaced = whoPlaced;
-        this.location = location.clone();
+        this.blockPosition = blockPosition;
         this.loadedChunks = loadedChunks;
         this.timeLeft = timeLeft;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this);
@@ -73,8 +74,8 @@ public final class WChunkLoader implements ChunkLoader {
             } else if (timeLeft > 0 && timeLeft % 10 == 0) {
                 Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
                         .setObject(timeLeft)
-                        .setLocation(location)
-                        .queue(location);
+                        .setLocation(this.blockPosition)
+                        .queue(this.blockPosition);
             }
         }
     }
@@ -85,26 +86,35 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Location getLocation() {
-        return location.clone();
+        return this.blockPosition.getLocation();
     }
 
     @Override
+    @Deprecated
     public Chunk[] getLoadedChunks() {
-        return loadedChunks;
+        return loadedChunks.toArray(new Chunk[0]);
+    }
+
+    @Override
+    public Collection<Chunk> getLoadedChunksCollection() {
+        return Collections.unmodifiableCollection(loadedChunks);
     }
 
     @Override
     public Optional<ChunkLoaderNPC> getNPC() {
-        return plugin.getNPCs().getNPC(location);
+        return plugin.getNPCs().getNPC(this.blockPosition);
     }
 
     @Override
     public void remove() {
-        if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::remove);
-            return;
+        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
+            Scheduler.runTask(getLocation(), this::removeInternal);
+        } else {
+            removeInternal();
         }
+    }
 
+    private void removeInternal() {
         plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive());
         plugin.getLoaders().removeChunkLoader(this);
 
