@@ -11,6 +11,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +79,11 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
             currentY += 0.23;
             holograms.add(hologram);
         }
+    }
+
+    @Override
+    public boolean isValidBlockState(BlockState state) {
+        return true;
     }
 
     public void tick() {
