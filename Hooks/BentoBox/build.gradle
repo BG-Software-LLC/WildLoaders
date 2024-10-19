@@ -1,0 +1,13 @@
+group 'Hooks:BentoBox'
+
+dependencies {
+    compileOnly "world.bentobox:bentobox:2.6.1-SNAPSHOT"
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_bentobox') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_bentobox").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}
