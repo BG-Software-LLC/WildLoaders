@@ -60,6 +60,10 @@ public final class ProvidersHandler implements ProvidersManager {
             Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_Lands");
             claimsProvider.ifPresent(this::addClaimsProvider);
         }
+        if (Bukkit.getPluginManager().isPluginEnabled("BentoBox")) {
+            Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_BentoBox");
+            claimsProvider.ifPresent(this::addClaimsProvider);
+        }
     }
 
     private void loadTickableProviders() {
