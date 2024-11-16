@@ -38,6 +38,7 @@ public final class ProvidersHandler implements ProvidersManager {
         Scheduler.runTask(() -> {
             loadClaimsProviders();
             loadTickableProviders();
+            loadSpawnersProviders();
         });
     }
 
@@ -85,6 +86,13 @@ public final class ProvidersHandler implements ProvidersManager {
                 Optional<TickableProvider> tickableProvider = createInstance("TickableProvider_EpicSpawners8");
                 tickableProvider.ifPresent(this::addTickableProvider);
             }
+        }
+    }
+
+    private void loadSpawnersProviders() {
+        if (Bukkit.getPluginManager().isPluginEnabled("SpawnerLegacy")) {
+            Optional<SpawnersProvider> spawnersProvider = createInstance("SpawnersProvider_SpawnerLegacy");
+            spawnersProvider.ifPresent(this::addSpawnersProvider);
         }
     }
 
