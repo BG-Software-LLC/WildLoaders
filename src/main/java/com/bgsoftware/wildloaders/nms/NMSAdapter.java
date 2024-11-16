@@ -6,6 +6,7 @@ import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public interface NMSAdapter {
@@ -22,10 +23,18 @@ public interface NMSAdapter {
 
     ChunkLoaderNPC createNPC(Location location, UUID uuid);
 
-    ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader);
+    ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader,
+                                        @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback);
 
-    void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle);
+    void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle,
+                      @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback);
 
-    void updateSpawner(Location location, boolean reset);
+    void updateSpawner(Location location, boolean reset, @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback);
+
+    interface OnSpawnerChangeCallback {
+
+        void apply(Location blockLocation, int newRange);
+
+    }
 
 }

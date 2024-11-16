@@ -7,6 +7,7 @@ import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
+import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -40,7 +41,7 @@ public final class WChunkLoader implements ChunkLoader {
         this.blockPosition = blockPosition;
         this.loadedChunks = loadedChunks;
         this.timeLeft = timeLeft;
-        this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this);
+        this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
     }
 
     @Override
@@ -115,7 +116,8 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void removeInternal() {
-        plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive());
+        plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive(),
+                SpawnerChangeListener.CALLBACK);
         plugin.getLoaders().removeChunkLoader(this);
 
         getLocation().getBlock().setType(Material.AIR);

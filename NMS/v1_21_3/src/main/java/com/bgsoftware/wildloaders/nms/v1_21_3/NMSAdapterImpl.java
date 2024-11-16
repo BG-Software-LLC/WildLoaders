@@ -26,6 +26,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -97,7 +98,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader,
+                                               @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
         Location loaderLoc = chunkLoader.getLocation();
         World bukkitWorld = loaderLoc.getWorld();
 
@@ -111,16 +113,18 @@ public final class NMSAdapterImpl implements NMSAdapter {
         serverLevel.addBlockEntityTicker(ChunkLoaderBlockEntity.getTicker());
 
         if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, serverLevel, true));
+            Scheduler.runTask(() ->
+                    setChunksForcedForLoader(chunkLoader, serverLevel, true, onSpawnerChangeCallback));
         } else {
-            setChunksForcedForLoader(chunkLoader, serverLevel, true);
+            setChunksForcedForLoader(chunkLoader, serverLevel, true, onSpawnerChangeCallback);
         }
 
         return ChunkLoaderBlockEntity;
     }
 
     @Override
-    public void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle) {
+    public void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle,
+                             @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
         Location loaderLoc = chunkLoader.getLocation();
         World bukkitWorld = loaderLoc.getWorld();
 
@@ -142,20 +146,31 @@ public final class NMSAdapterImpl implements NMSAdapter {
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
         if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, serverLevel, false));
+            Scheduler.runTask(() ->
+                    setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback));
         } else {
-            setChunksForcedForLoader(chunkLoader, serverLevel, false);
+            setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback);
         }
     }
 
-    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, ServerLevel serverLevel, boolean forced) {
+    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, ServerLevel serverLevel, boolean forced,
+                                                 @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
+        World bukkitWorld = serverLevel.getWorld();
+
         int requiredPlayerRange = forced ? -1 : 16;
+
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunksCollection()) {
             LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
 
             for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
-                if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
+                if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity) {
                     spawnerBlockEntity.getSpawner().requiredPlayerRange = requiredPlayerRange;
+                    if (onSpawnerChangeCallback != null) {
+                        BlockPos blockPos = blockEntity.getBlockPos();
+                        Location location = new Location(bukkitWorld, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                        onSpawnerChangeCallback.apply(location, requiredPlayerRange);
+                    }
+                }
             }
 
             ChunkPos chunkPos = levelChunk.getPos();
@@ -164,7 +179,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public void updateSpawner(Location location, boolean reset) {
+    public void updateSpawner(Location location, boolean reset,
+                              @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
         World bukkitWorld = location.getWorld();
 
         if (bukkitWorld == null)
@@ -173,8 +189,13 @@ public final class NMSAdapterImpl implements NMSAdapter {
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         BlockPos blockPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-        if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
-            spawnerBlockEntity.getSpawner().requiredPlayerRange = reset ? 16 : -1;
+        if (!(blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity))
+            return;
+
+        int requiredPlayerRange = reset ? 16 : -1;
+        spawnerBlockEntity.getSpawner().requiredPlayerRange = requiredPlayerRange;
+        if (onSpawnerChangeCallback != null)
+            onSpawnerChangeCallback.apply(location, requiredPlayerRange);
     }
 
 }

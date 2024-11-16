@@ -9,7 +9,6 @@ import net.minecraft.server.v1_16_R3.Block;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkCoordIntPair;
-import net.minecraft.server.v1_16_R3.IBlockData;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import net.minecraft.server.v1_16_R3.NBTTagList;
@@ -24,6 +23,7 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public final class NMSAdapterImpl implements NMSAdapter {
@@ -107,7 +107,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader) {
+    public ITileEntityChunkLoader createLoader(ChunkLoader chunkLoader,
+                                               @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
         Location loaderLoc = chunkLoader.getLocation();
         assert loaderLoc.getWorld() != null;
         WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
@@ -117,16 +118,18 @@ public final class NMSAdapterImpl implements NMSAdapter {
         world.tileEntityListTick.add(tileEntityChunkLoader);
 
         if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, world, true));
+            Scheduler.runTask(() ->
+                    setChunksForcedForLoader(chunkLoader, world, true, onSpawnerChangeCallback));
         } else {
-            setChunksForcedForLoader(chunkLoader, world, true);
+            setChunksForcedForLoader(chunkLoader, world, true, onSpawnerChangeCallback);
         }
 
         return tileEntityChunkLoader;
     }
 
     @Override
-    public void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle) {
+    public void removeLoader(ChunkLoader chunkLoader, boolean spawnParticle,
+                             @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
         Location loaderLoc = chunkLoader.getLocation();
         assert loaderLoc.getWorld() != null;
         WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
@@ -144,20 +147,31 @@ public final class NMSAdapterImpl implements NMSAdapter {
             world.a(null, 2001, blockPosition, Block.getCombinedId(world.getType(blockPosition)));
 
         if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() -> setChunksForcedForLoader(chunkLoader, world, false));
+            Scheduler.runTask(() ->
+                    setChunksForcedForLoader(chunkLoader, world, false, onSpawnerChangeCallback));
         } else {
-            setChunksForcedForLoader(chunkLoader, world, false);
+            setChunksForcedForLoader(chunkLoader, world, false, onSpawnerChangeCallback);
         }
     }
 
-    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean forced) {
+    private static void setChunksForcedForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean forced,
+                                                 @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
+        org.bukkit.World bukkitWorld = worldServer.getWorld();
+
         int requiredPlayerRange = forced ? -1 : 16;
+
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunksCollection()) {
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
 
             for (TileEntity tileEntity : chunk.tileEntities.values()) {
-                if (tileEntity instanceof TileEntityMobSpawner)
+                if (tileEntity instanceof TileEntityMobSpawner) {
                     ((TileEntityMobSpawner) tileEntity).getSpawner().requiredPlayerRange = requiredPlayerRange;
+                    if (onSpawnerChangeCallback != null) {
+                        BlockPosition blockPosition = tileEntity.getPosition();
+                        Location location = new Location(bukkitWorld, blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
+                        onSpawnerChangeCallback.apply(location, requiredPlayerRange);
+                    }
+                }
             }
 
             ChunkCoordIntPair chunkCoord = chunk.getPos();
@@ -166,18 +180,25 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public void updateSpawner(Location location, boolean reset) {
-        assert location.getWorld() != null;
-        World world = ((CraftWorld) location.getWorld()).getHandle();
+    public void updateSpawner(Location location, boolean reset,
+                              @Nullable OnSpawnerChangeCallback onSpawnerChangeCallback) {
+        org.bukkit.World bukkitWorld = location.getWorld();
 
+        if (bukkitWorld == null)
+            throw new IllegalArgumentException("Cannot remove loader in null world.");
+
+        World world = ((CraftWorld) bukkitWorld).getHandle();
         BlockPosition blockPosition = new BlockPosition(location.getX(), location.getY(), location.getZ());
-        IBlockData blockData = world.getType(blockPosition);
-        TileEntityMobSpawner mobSpawner = (TileEntityMobSpawner) world.getTileEntity(blockPosition);
-
-        if (mobSpawner == null)
+        TileEntity tileEntity = world.getTileEntity(blockPosition);
+        if (!(tileEntity instanceof TileEntityMobSpawner))
             return;
 
-        mobSpawner.getSpawner().requiredPlayerRange = reset ? 16 : -1;
+        TileEntityMobSpawner mobSpawner = (TileEntityMobSpawner) tileEntity;
+
+        int requiredPlayerRange = reset ? 16 : -1;
+        mobSpawner.getSpawner().requiredPlayerRange = requiredPlayerRange;
+        if (onSpawnerChangeCallback != null)
+            onSpawnerChangeCallback.apply(location, requiredPlayerRange);
     }
 
 }

@@ -2,13 +2,16 @@ package com.bgsoftware.wildloaders.handlers;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
+import com.bgsoftware.wildloaders.api.hooks.SpawnersProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.hooks.WorldsProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
+import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 
@@ -27,6 +30,7 @@ public final class ProvidersHandler implements ProvidersManager {
     private final List<ClaimsProvider> claimsProviders = new LinkedList<>();
     private final List<TickableProvider> tickableProviders = new LinkedList<>();
     private final List<WorldsProvider> worldsProviders = new LinkedList<>();
+    private final List<SpawnersProvider> spawnersProviders = new LinkedList<>();
 
     public ProvidersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
@@ -109,6 +113,13 @@ public final class ProvidersHandler implements ProvidersManager {
     }
 
     @Override
+    public void addSpawnersProvider(SpawnersProvider spawnersProvider) {
+        Preconditions.checkNotNull(spawnersProvider, "spawnersProvider cannot be null");
+        spawnersProviders.add(spawnersProvider);
+        SpawnerChangeListener.CALLBACK = this::setSpawnerRequiredRange;
+    }
+
+    @Override
     public void addTickableProvider(TickableProvider tickableProvider) {
         Preconditions.checkNotNull(tickableProvider, "tickableProvider cannot be null");
         tickableProviders.add(tickableProvider);
@@ -131,6 +142,12 @@ public final class ProvidersHandler implements ProvidersManager {
 
     public void tick(List<Chunk> chunks) {
         tickableProviders.forEach(tickableProvider -> tickableProvider.tick(chunks));
+    }
+
+    public void setSpawnerRequiredRange(Location spawnerLocation, int requiredRange) {
+        for (SpawnersProvider spawnersProvider : this.spawnersProviders) {
+            spawnersProvider.setSpawnerRequiredRange(spawnerLocation, requiredRange);
+        }
     }
 
     @Nullable

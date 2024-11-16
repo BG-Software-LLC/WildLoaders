@@ -10,6 +10,7 @@ import com.bgsoftware.wildloaders.loaders.WLoaderData;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
+import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
@@ -143,7 +144,7 @@ public final class LoadersHandler implements LoadersManager {
         List<UnloadedChunkLoader> unloadedChunkLoaders = new LinkedList<>();
 
         worldChunkLoaders.forEach(chunkLoader -> {
-            plugin.getNMSAdapter().removeLoader(chunkLoader, false);
+            plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
             BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
             UnloadedChunkLoader unloadedChunkLoader = new UnloadedChunkLoader(chunkLoader.getLoaderData(),
                     chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
@@ -195,7 +196,8 @@ public final class LoadersHandler implements LoadersManager {
 
     @Override
     public void removeChunkLoaders() {
-        chunkLoaders.values().forEach(chunkLoader -> plugin.getNMSAdapter().removeLoader(chunkLoader, false));
+        chunkLoaders.values().forEach(chunkLoader ->
+                plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK));
         chunkLoaders.clear();
         chunkLoadersByChunks.clear();
         chunkLoadersByWorlds.clear();

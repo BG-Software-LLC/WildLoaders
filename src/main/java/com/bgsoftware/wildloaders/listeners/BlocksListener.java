@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
+import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
 import org.bukkit.Chunk;
@@ -85,7 +86,7 @@ public final class BlocksListener implements Listener {
         if (!plugin.getLoaders().getChunkLoader(e.getBlock().getChunk()).isPresent())
             return;
 
-        plugin.getNMSAdapter().updateSpawner(e.getBlock().getLocation(), false);
+        plugin.getNMSAdapter().updateSpawner(e.getBlock().getLocation(), false, SpawnerChangeListener.CALLBACK);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
