@@ -6,6 +6,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 public class Scheduler {
+
+    private static final ScheduledTask NULL_TASK = () -> {};
+
     private static final ISchedulerImplementation IMP = initializeSchedulerImplementation();
 
     private static ISchedulerImplementation initializeSchedulerImplementation() {
@@ -24,6 +27,8 @@ public class Scheduler {
         }
     }
 
+    private static boolean isEnabled = true;
+
     private Scheduler() {
 
     }
@@ -32,23 +37,43 @@ public class Scheduler {
         // Do nothing, load static initializer
     }
 
+    public static void disable() {
+        isEnabled = false;
+    }
+
     public static boolean isRegionScheduler() {
         return IMP.isRegionScheduler();
     }
 
     public static ScheduledTask runTask(World world, int chunkX, int chunkZ, Runnable task, long delay) {
+        if (!isEnabled) {
+            return executeNow(task);
+        }
+
         return IMP.scheduleTask(world, chunkX, chunkZ, task, delay);
     }
 
     public static ScheduledTask runTask(Entity entity, Runnable task, long delay) {
+        if (!isEnabled) {
+            return executeNow(task);
+        }
+
         return IMP.scheduleTask(entity, task, delay);
     }
 
     public static ScheduledTask runTask(Runnable task, long delay) {
+        if (!isEnabled) {
+            return executeNow(task);
+        }
+
         return IMP.scheduleTask(task, delay);
     }
 
     public static ScheduledTask runTaskAsync(Runnable task, long delay) {
+        if (!isEnabled) {
+            return executeNow(task);
+        }
+
         return IMP.scheduleAsyncTask(task, delay);
     }
 
@@ -82,6 +107,11 @@ public class Scheduler {
 
     public static ScheduledTask runTaskAsync(Runnable task) {
         return runTaskAsync(task, 0L);
+    }
+
+    private static ScheduledTask executeNow(Runnable task) {
+        task.run();
+        return NULL_TASK;
     }
 
 }

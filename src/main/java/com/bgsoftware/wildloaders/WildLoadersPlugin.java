@@ -18,6 +18,7 @@ import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -44,6 +45,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
     @Override
     public void onLoad() {
         plugin = this;
+        Scheduler.initialize();
 
         DependenciesManager.inject(this);
 
@@ -93,11 +95,13 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     @Override
     public void onDisable() {
-        if (shouldEnable) {
-            Database.stop();
-            loadersHandler.removeChunkLoaders();
-            npcHandler.killAllNPCs();
-        }
+        if (!shouldEnable)
+            return;
+
+        Scheduler.disable();
+        Database.stop();
+        loadersHandler.removeChunkLoaders();
+        npcHandler.killAllNPCs();
     }
 
     private boolean loadNMSAdapter() {
