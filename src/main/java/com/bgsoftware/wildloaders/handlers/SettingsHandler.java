@@ -12,6 +12,7 @@ import org.bukkit.enchantments.Enchantment;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,8 @@ public final class SettingsHandler {
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         infiniteHologramLines = cfg.getStringList("infinite-hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
+        Collections.reverse(this.hologramLines);
+        Collections.reverse(this.infiniteHologramLines);
 
         plugin.getLoaders().removeLoadersData();
 

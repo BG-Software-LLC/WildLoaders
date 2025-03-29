@@ -5,6 +5,10 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_21_4.EntityHologram;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -13,19 +17,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEntityChunkLoader {
 
-    public static final Map<Long, ChunkLoaderBlockEntity> chunkLoaderBlockEntityMap = new HashMap<>();
+    public static final Long2ObjectMap<ChunkLoaderBlockEntity> chunkLoaderBlockEntityMap = new Long2ObjectOpenHashMap<>();
 
-    public final List<EntityHologram> holograms = new ArrayList<>();
+    public final Int2ObjectMap<EntityHologram> holograms = new Int2ObjectArrayMap<>();
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
     private final ChunkLoaderBlockEntityTicker ticker;
@@ -69,16 +69,16 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
         long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         chunkLoaderBlockEntityMap.put(chunkPosLong, this);
 
-        List<String> hologramLines = this.chunkLoader.getHologramLines();
-
-        double currentY = blockPos.getY() + 1;
-        for (int i = hologramLines.size(); i > 0; i--) {
-            EntityHologram hologram = new EntityHologram(serverLevel, blockPos.getX() + 0.5, currentY, blockPos.getZ() + 0.5);
-            updateName(hologram, hologramLines.get(i - 1));
-            serverLevel.addFreshEntity(hologram);
-            currentY += 0.23;
-            holograms.add(hologram);
-        }
+        double baseYLevel = blockPos.getY() + 1;
+        this.chunkLoader.forEachHologramLine((index, hologramLine) -> {
+            if (!hologramLine.isEmpty()) {
+                double currentY = baseYLevel + (index * 0.23);
+                EntityHologram hologram = new EntityHologram(serverLevel, blockPos.getX() + 0.5, currentY, blockPos.getZ() + 0.5);
+                updateName(hologram, hologramLine);
+                serverLevel.addFreshEntity(hologram);
+                this.holograms.put(index, hologram);
+            }
+        });
     }
 
     @Override
@@ -100,13 +100,12 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
         if (chunkLoader.isInfinite())
             return;
 
-        List<String> hologramLines = chunkLoader.getHologramLines();
-
-        int hologramsAmount = holograms.size();
-        for (int i = hologramsAmount; i > 0; i--) {
-            EntityHologram hologram = holograms.get(hologramsAmount - i);
-            updateName(hologram, hologramLines.get(i - 1));
-        }
+        this.chunkLoader.forEachHologramLine((index, hologramLine) -> {
+            if (!hologramLine.isEmpty()) {
+                EntityHologram hologram = this.holograms.get(index);
+                updateName(hologram, hologramLine);
+            }
+        });
 
         chunkLoader.tick();
 
@@ -129,7 +128,7 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
 
     @Override
     public Collection<Hologram> getHolograms() {
-        return Collections.unmodifiableList(holograms);
+        return Collections.unmodifiableCollection(this.holograms.values());
     }
 
     @Override

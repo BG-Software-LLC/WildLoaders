@@ -138,7 +138,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
         long tileEntityLong = ChunkCoordIntPair.pair(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
         TileEntityChunkLoader tileEntityChunkLoader = TileEntityChunkLoader.tileEntityChunkLoaderMap.remove(tileEntityLong);
         if (tileEntityChunkLoader != null) {
-            tileEntityChunkLoader.holograms.forEach(EntityHolograms::removeHologram);
+            tileEntityChunkLoader.holograms.values().forEach(EntityHolograms::removeHologram);
             tileEntityChunkLoader.removed = true;
             world.tileEntityListTick.remove(tileEntityChunkLoader);
         }

@@ -134,7 +134,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
         ChunkLoaderBlockEntity chunkLoaderBlockEntity = ChunkLoaderBlockEntity.chunkLoaderBlockEntityMap.remove(chunkPosLong);
 
         if (chunkLoaderBlockEntity != null) {
-            chunkLoaderBlockEntity.holograms.forEach(EntityHologram::removeHologram);
+            chunkLoaderBlockEntity.holograms.values().forEach(EntityHologram::removeHologram);
             chunkLoaderBlockEntity.removed = true;
         }
 

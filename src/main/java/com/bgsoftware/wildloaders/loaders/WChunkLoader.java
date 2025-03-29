@@ -133,8 +133,21 @@ public final class WChunkLoader implements ChunkLoader {
         return tileEntityChunkLoader.getHolograms();
     }
 
-    public List<String> getHologramLines() {
-        return isInfinite() ? plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
+    public void forEachHologramLine(HologramLineCallback callback) {
+        List<String> hologramLines = isInfinite() ?
+                plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
+
+        int index = hologramLines.size() - 1;
+        for (String hologramLine : hologramLines) {
+            callback.apply(index, hologramLine);
+            --index;
+        }
+    }
+
+    public interface HologramLineCallback {
+
+        void apply(int index, String line);
+
     }
 
 

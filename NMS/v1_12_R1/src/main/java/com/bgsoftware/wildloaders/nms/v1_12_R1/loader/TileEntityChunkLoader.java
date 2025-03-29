@@ -10,21 +10,21 @@ import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.ITickable;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.World;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
 
-    public static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap = new HashMap<>();
+    public static final Long2ObjectMap<TileEntityChunkLoader> tileEntityChunkLoaderMap = new Long2ObjectOpenHashMap<>();
 
-    public final List<EntityHolograms> holograms = new ArrayList<>();
+    public final Int2ObjectMap<EntityHolograms> holograms = new Int2ObjectArrayMap<>();
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
     private final String cachedPlacerName;
@@ -60,16 +60,16 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
         tileEntityChunkLoaderMap.put(LongHash.toLong(blockPosition.getX() >> 4, blockPosition.getZ() >> 4), this);
 
-        List<String> hologramLines = this.chunkLoader.getHologramLines();
-
-        double currentY = position.getY() + 1;
-        for (int i = hologramLines.size(); i > 0; i--) {
-            EntityHolograms hologram = new EntityHolograms(world, position.getX() + 0.5, currentY, position.getZ() + 0.5);
-            updateName(hologram, hologramLines.get(i - 1));
-            world.addEntity(hologram);
-            currentY += 0.23;
-            holograms.add(hologram);
-        }
+        double baseYLevel = position.getY() + 1;
+        this.chunkLoader.forEachHologramLine((index, hologramLine) -> {
+            if (!hologramLine.isEmpty()) {
+                double currentY = baseYLevel + (index * 0.23);
+                EntityHolograms hologram = new EntityHolograms(world, position.getX() + 0.5, currentY, position.getZ() + 0.5);
+                updateName(hologram, hologramLine);
+                world.addEntity(hologram);
+                this.holograms.put(index, hologram);
+            }
+        });
     }
 
     @Override
@@ -87,13 +87,12 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
         if (chunkLoader.isInfinite())
             return;
 
-        List<String> hologramLines = chunkLoader.getHologramLines();
-
-        int hologramsAmount = holograms.size();
-        for (int i = hologramsAmount; i > 0; i--) {
-            EntityHolograms hologram = holograms.get(hologramsAmount - i);
-            updateName(hologram, hologramLines.get(i - 1));
-        }
+        this.chunkLoader.forEachHologramLine((index, hologramLine) -> {
+            if (!hologramLine.isEmpty()) {
+                EntityHolograms hologram = this.holograms.get(index);
+                updateName(hologram, hologramLine);
+            }
+        });
 
         chunkLoader.tick();
 
@@ -116,7 +115,7 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
     @Override
     public Collection<Hologram> getHolograms() {
-        return Collections.unmodifiableList(holograms);
+        return Collections.unmodifiableCollection(this.holograms.values());
     }
 
     private void updateName(EntityHolograms hologram, String line) {
