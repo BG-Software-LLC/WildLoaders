@@ -12,6 +12,7 @@ import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,10 +24,14 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
 public final class BlocksListener implements Listener {
+
+    private static final EntityType WIND_CHARGE_TYPE = lookupEntityType("WIND_CHARGE");
+    private static final EntityType BREEZE_WIND_CHARGE_TYPE = lookupEntityType("BREEZE_WIND_CHARGE");
 
     private final WildLoadersPlugin plugin;
 
@@ -75,6 +80,10 @@ public final class BlocksListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onLoaderExplode(EntityExplodeEvent e) {
+        EntityType entityType = e.getEntityType();
+        if (entityType == WIND_CHARGE_TYPE || entityType == BREEZE_WIND_CHARGE_TYPE)
+            return;
+
         e.blockList().removeIf(block -> handleLoaderBreak(block, true));
     }
 
@@ -138,6 +147,15 @@ public final class BlocksListener implements Listener {
             blockLoc.getWorld().dropItemNaturally(blockLoc, chunkLoader.getLoaderItem());
 
         return true;
+    }
+
+    @Nullable
+    private static EntityType lookupEntityType(String name) {
+        try {
+            return EntityType.valueOf(name);
+        } catch (IllegalArgumentException error) {
+            return null;
+        }
     }
 
 }
