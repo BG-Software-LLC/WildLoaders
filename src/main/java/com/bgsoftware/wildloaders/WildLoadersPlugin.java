@@ -9,17 +9,17 @@ import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
+import com.bgsoftware.wildloaders.config.SettingsManagerImpl;
+import com.bgsoftware.wildloaders.errors.ManagerLoadException;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
 import com.bgsoftware.wildloaders.handlers.LoadersHandler;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.handlers.ProvidersHandler;
-import com.bgsoftware.wildloaders.handlers.SettingsHandler;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
-import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +32,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     private static WildLoadersPlugin plugin;
 
-    private SettingsHandler settingsHandler;
+    private SettingsManagerImpl settingsHandler;
     private LoadersHandler loadersHandler;
     private NPCHandler npcHandler;
     private DataHandler dataHandler;
@@ -67,11 +67,21 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         log("******** ENABLE START ********");
 
-        dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
+        settingsHandler = new SettingsManagerImpl(this);
+
+        try {
+            settingsHandler.loadData();
+        } catch (ManagerLoadException ex) {
+            if (!ManagerLoadException.handle(ex)) {
+                return;
+            }
+        }
+
+        dataHandler = new DataHandler(this);
         npcHandler = new NPCHandler(this);
         providersHandler = new ProvidersHandler(this);
-        settingsHandler = new SettingsHandler(this);
+
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
@@ -99,9 +109,12 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
 
         Scheduler.disable();
-        Database.stop();
         loadersHandler.removeChunkLoaders();
         npcHandler.killAllNPCs();
+
+        log("Clearing database...");
+        //We need to close the connection
+        dataHandler.clearDatabase();
     }
 
     private boolean loadNMSAdapter() {
@@ -131,7 +144,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         }
     }
 
-    public SettingsHandler getSettings() {
+    public SettingsManagerImpl getSettings() {
         return settingsHandler;
     }
 

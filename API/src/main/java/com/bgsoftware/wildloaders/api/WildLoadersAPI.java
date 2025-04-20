@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.api;
 
+import com.bgsoftware.wildloaders.api.config.SettingsManager;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -32,6 +33,13 @@ public final class WildLoadersAPI {
      */
     public static void removeChunkLoader(ChunkLoader chunkLoader){
         instance.getLoaders().removeChunkLoader(chunkLoader);
+    }
+
+    /**
+     * Get the settings of the plugin.
+     */
+    public static SettingsManager getSettings() {
+        return instance.getSettings();
     }
 
     /**

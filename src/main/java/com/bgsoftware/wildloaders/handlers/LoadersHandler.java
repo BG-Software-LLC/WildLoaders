@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.managers.LoadersManager;
+import com.bgsoftware.wildloaders.database.Query;
 import com.bgsoftware.wildloaders.loaders.UnloadedChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WLoaderData;
@@ -12,7 +13,6 @@ import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -74,12 +74,12 @@ public final class LoadersHandler implements LoadersManager {
         WChunkLoader chunkLoader = addChunkLoaderWithoutDBSave(loaderData, whoPlaced.getUniqueId(),
                 location, timeLeft, false);
 
-        Query.INSERT_CHUNK_LOADER.insertParameters()
+        Query.INSERT_CHUNK_LOADER.getStatementHolder()
                 .setLocation(blockPosition)
                 .setObject(whoPlaced.getUniqueId().toString())
                 .setObject(loaderData.getName())
                 .setObject(timeLeft)
-                .queue(blockPosition);
+                .execute(true);
 
         return chunkLoader;
     }
@@ -150,10 +150,10 @@ public final class LoadersHandler implements LoadersManager {
                     chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
             unloadedChunkLoaders.add(unloadedChunkLoader);
 
-            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
+            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.getStatementHolder()
                     .setObject(unloadedChunkLoader.getTimeLeft())
                     .setLocation(blockPosition)
-                    .queue(blockPosition);
+                    .execute(true);
         });
 
         this.unloadedChunkLoadersByWorlds.put(world.getName(), unloadedChunkLoaders);
@@ -162,9 +162,9 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public void removeChunkLoader(ChunkLoader chunkLoader) {
         BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
-        Query.DELETE_CHUNK_LOADER.insertParameters()
+        Query.DELETE_CHUNK_LOADER.getStatementHolder()
                 .setLocation(blockPosition)
-                .queue(blockPosition);
+                .execute(true);
     }
 
     private BlockPosition removeChunkLoaderWithoutDBSave(ChunkLoader chunkLoader) {
