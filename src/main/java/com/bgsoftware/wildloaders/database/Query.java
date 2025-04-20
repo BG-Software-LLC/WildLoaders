@@ -1,4 +1,4 @@
-package com.bgsoftware.wildloaders.utils.database;
+package com.bgsoftware.wildloaders.database;
 
 public enum Query {
 
@@ -17,7 +17,7 @@ public enum Query {
         this.parametersCount = parametersCount;
     }
 
-    public String getStatement(){
+    String getStatement() {
         return query;
     }
 
@@ -25,8 +25,8 @@ public enum Query {
         return parametersCount;
     }
 
-    public QueryParameters insertParameters(){
-        return new QueryParameters(this);
+    public StatementHolder getStatementHolder() {
+        return new StatementHolder(this);
     }
 
 }

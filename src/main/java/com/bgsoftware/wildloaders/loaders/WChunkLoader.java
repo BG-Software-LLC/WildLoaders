@@ -5,10 +5,10 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.database.Query;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -73,10 +73,10 @@ public final class WChunkLoader implements ChunkLoader {
             if (timeLeft < 0) {
                 remove();
             } else if (timeLeft > 0 && timeLeft % 10 == 0) {
-                Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
+                Query.UPDATE_CHUNK_LOADER_TIME_LEFT.getStatementHolder()
                         .setObject(timeLeft)
                         .setLocation(this.blockPosition)
-                        .queue(this.blockPosition);
+                        .execute(true);
             }
         }
     }
@@ -135,7 +135,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     public void forEachHologramLine(HologramLineCallback callback) {
         List<String> hologramLines = isInfinite() ?
-                plugin.getSettings().infiniteHologramLines : plugin.getSettings().hologramLines;
+                plugin.getSettings().getGlobal().getInfiniteHologramLines() : plugin.getSettings().getGlobal().getHologramLines();
 
         int index = hologramLines.size() - 1;
         for (String hologramLine : hologramLines) {

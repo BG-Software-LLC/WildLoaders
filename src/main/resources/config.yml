@@ -14,6 +14,24 @@ hologram-lines:
 infinite-hologram-lines:
 - '&b{0}''s Loader'
 
+
+# Settings related to database.
+database:
+  # For local database, use "SQLite".
+  # For remote database, use "MySQL" or "MariaDB" (Depends on your setup).
+  type: SQLite
+  # Remote database information
+  address: 'localhost'
+  port: 3306
+  db-name: 'wildloaders'
+  user-name: 'root'
+  password: ''
+  prefix: ''
+  useSSL: false
+  allowPublicKeyRetrieval: true
+  waitTimeout: 600000
+  maxLifetime: 1800000
+
 # You can use the following settings when setting up chunk loaders:
 #
 # time (Integer) - The default amount of time the chunk loader will be alive.

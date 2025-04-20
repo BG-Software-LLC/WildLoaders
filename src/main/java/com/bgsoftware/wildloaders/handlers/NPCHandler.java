@@ -3,8 +3,8 @@ package com.bgsoftware.wildloaders.handlers;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.database.Query;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -65,9 +65,9 @@ public final class NPCHandler implements NPCManager {
         npcs.remove(blockPosition);
         npcUUIDs.remove(blockPosition);
 
-        Query.DELETE_NPC_IDENTIFIER.insertParameters()
+        Query.DELETE_NPC_IDENTIFIER.getStatementHolder()
                 .setLocation(blockPosition)
-                .queue(npc.getUniqueId());
+                .execute(true);
 
         Entity npcEntity = npc.getPlayer();
         npcEntity.removeMetadata("NPC", plugin);
@@ -103,10 +103,10 @@ public final class NPCHandler implements NPCManager {
 
         npcUUIDs.put(blockPosition, uuid);
 
-        Query.INSERT_NPC_IDENTIFIER.insertParameters()
+        Query.INSERT_NPC_IDENTIFIER.getStatementHolder()
                 .setLocation(blockPosition)
                 .setObject(uuid.toString())
-                .queue(uuid);
+                .execute(true);
 
         return uuid;
     }

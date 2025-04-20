@@ -1,54 +1,61 @@
-package com.bgsoftware.wildloaders.handlers;
+package com.bgsoftware.wildloaders.config;
 
-import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.utils.items.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public final class SettingsHandler {
+public class SettingsContainer {
 
     public List<String> hologramLines;
     public List<String> infiniteHologramLines;
 
-    public SettingsHandler(WildLoadersPlugin plugin) {
+    public final String databaseType;
+    public final String databaseMySQLAddress;
+    public final int databaseMySQLPort;
+    public final String databaseMySQLDBName;
+    public final String databaseMySQLUsername;
+    public final String databaseMySQLPassword;
+    public final String databaseMySQLPrefix;
+    public final boolean databaseMySQLSSL;
+    public final boolean databaseMySQLPublicKeyRetrieval;
+    public final long databaseMySQLWaitTimeout;
+    public final long databaseMySQLMaxLifetime;
+
+    public SettingsContainer(WildLoadersPlugin plugin, YamlConfiguration config) {
         WildLoadersPlugin.log("Loading configuration started...");
         long startTime = System.currentTimeMillis();
         int loadersAmount = 0;
-        File file = new File(plugin.getDataFolder(), "config.yml");
 
-        if (!file.exists())
-            plugin.saveResource("config.yml", false);
-
-        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-
-        try {
-            cfg.syncWithConfig(file, plugin.getResource("config.yml"), "chunkloaders");
-        } catch (IOException error) {
-            error.printStackTrace();
-        }
-
-        hologramLines = cfg.getStringList("hologram-lines").stream()
+        hologramLines = config.getStringList("hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
-        infiniteHologramLines = cfg.getStringList("infinite-hologram-lines").stream()
+        infiniteHologramLines = config.getStringList("infinite-hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         Collections.reverse(this.hologramLines);
         Collections.reverse(this.infiniteHologramLines);
 
+        databaseType = config.getString("database.type", "SQLite").toUpperCase(Locale.ENGLISH);
+        databaseMySQLAddress = config.getString("database.address", "localhost");
+        databaseMySQLPort = config.getInt("database.port", 3306);
+        databaseMySQLDBName = config.getString("database.db-name", "wildloaders");
+        databaseMySQLUsername = config.getString("database.user-name", "root");
+        databaseMySQLPassword = config.getString("database.password", "");
+        databaseMySQLPrefix = config.getString("database.prefix", "");
+        databaseMySQLSSL = config.getBoolean("database.useSSL", false);
+        databaseMySQLPublicKeyRetrieval = config.getBoolean("database.allowPublicKeyRetrieval", true);
+        databaseMySQLWaitTimeout = config.getLong("database.waitTimeout", 600000);
+        databaseMySQLMaxLifetime = config.getLong("database.maxLifetime", 1800000);
+
         plugin.getLoaders().removeLoadersData();
 
-        for (String name : cfg.getConfigurationSection("chunkloaders").getKeys(false)) {
-            ConfigurationSection loaderSection = cfg.getConfigurationSection("chunkloaders." + name);
+        for (String name : config.getConfigurationSection("chunkloaders").getKeys(false)) {
+            ConfigurationSection loaderSection = config.getConfigurationSection("chunkloaders." + name);
 
             long timeLeft = loaderSection.getLong("time", Integer.MIN_VALUE);
 
@@ -105,5 +112,8 @@ public final class SettingsHandler {
         WildLoadersPlugin.log(" - Found " + loadersAmount + " chunk-loaders in config.yml.");
         WildLoadersPlugin.log("Loading configuration done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
+
+    
+
 
 }
