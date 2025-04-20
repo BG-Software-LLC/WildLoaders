@@ -22,7 +22,7 @@ public class MariaDBSession extends RemoteSQLSession {
         try {
             HikariConfig config = new HikariConfig();
             config.setConnectionTestQuery("SELECT 1");
-            config.setPoolName("WildStacker Pool");
+            config.setPoolName("WildLoaders Pool");
 
             config.setDriverClassName("com.mysql.jdbc.Driver");
 
