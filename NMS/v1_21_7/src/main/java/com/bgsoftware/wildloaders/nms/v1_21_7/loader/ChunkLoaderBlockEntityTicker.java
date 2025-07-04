@@ -1,4 +1,4 @@
-package com.bgsoftware.wildloaders.nms.v1_21_6.loader;
+package com.bgsoftware.wildloaders.nms.v1_21_7.loader;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;

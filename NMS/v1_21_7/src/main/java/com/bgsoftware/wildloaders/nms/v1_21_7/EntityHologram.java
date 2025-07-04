@@ -1,4 +1,4 @@
-package com.bgsoftware.wildloaders.nms.v1_21_6;
+package com.bgsoftware.wildloaders.nms.v1_21_7;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;

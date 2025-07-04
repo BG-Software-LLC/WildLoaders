@@ -1,10 +1,10 @@
-package com.bgsoftware.wildloaders.nms.v1_21_6.loader;
+package com.bgsoftware.wildloaders.nms.v1_21_7.loader;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
-import com.bgsoftware.wildloaders.nms.v1_21_6.EntityHologram;
+import com.bgsoftware.wildloaders.nms.v1_21_7.EntityHologram;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
