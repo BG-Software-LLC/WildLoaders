@@ -91,7 +91,12 @@ public final class ProvidersHandler implements ProvidersManager {
 
     private void loadSpawnersProviders() {
         if (Bukkit.getPluginManager().isPluginEnabled("SpawnerLegacy")) {
-            Optional<SpawnersProvider> spawnersProvider = createInstance("SpawnersProvider_SpawnerLegacy");
+            Optional<SpawnersProvider> spawnersProvider;
+            if (isClassLoaded("mc.rellox.spawnerlegacyapi.SLAPI")) {
+                spawnersProvider = createInstance("SpawnersProvider_SpawnerLegacy2");
+            } else {
+                spawnersProvider = createInstance("SpawnersProvider_SpawnerLegacy");
+            }
             spawnersProvider.ifPresent(this::addSpawnersProvider);
         }
     }
@@ -99,16 +104,12 @@ public final class ProvidersHandler implements ProvidersManager {
     private void loadWorldProviders() {
         Optional<WorldsProvider> worldsProvider;
 
-        try {
-            Class.forName("com.infernalsuite.aswm.api.SlimePlugin");
+        if (isClassLoaded("com.infernalsuite.aswm.api.SlimePlugin")) {
             worldsProvider = createInstanceSilently("WorldsProvider_AdvancedSlimePaper");
-        } catch (ClassNotFoundException ignored) {
-            try {
-                Class.forName("com.grinderwolf.swm.nms.world.AbstractSlimeNMSWorld");
-                worldsProvider = createInstanceSilently("WorldsProvider_AdvancedSlimeWorldManager");
-            } catch (Throwable error) {
-                worldsProvider = createInstanceSilently("WorldsProvider_SlimeWorldManager");
-            }
+        } else if (isClassLoaded("com.grinderwolf.swm.nms.world.AbstractSlimeNMSWorld")) {
+            worldsProvider = createInstanceSilently("WorldsProvider_AdvancedSlimeWorldManager");
+        } else {
+            worldsProvider = createInstanceSilently("WorldsProvider_SlimeWorldManager");
         }
 
         worldsProvider.ifPresent(this::addWorldsProvider);
@@ -167,6 +168,15 @@ public final class ProvidersHandler implements ProvidersManager {
         }
 
         return null;
+    }
+
+    private static boolean isClassLoaded(String clazz) {
+        try {
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException error) {
+            return false;
+        }
     }
 
     private <T> Optional<T> createInstanceSilently(String className) {

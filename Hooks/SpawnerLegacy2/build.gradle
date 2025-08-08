@@ -1,0 +1,23 @@
+group 'Hooks:SpawnerLegacy2'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly "com.github.OfficialRell:spawnerlegacyapi:1.4.4"
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_spawnerlegacy') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_spawnerlegacy").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}
