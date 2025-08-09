@@ -45,7 +45,6 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         fallDistance = 0.0F;
         fauxSleeping = true;
 
-        spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         //noinspection unchecked

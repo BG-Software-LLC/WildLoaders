@@ -69,7 +69,6 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         if (PLAYER_AFFECTS_SPAWNING.isValid())
             PLAYER_AFFECTS_SPAWNING.set(this, true);
 
-        spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         world.players.add(this);

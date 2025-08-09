@@ -67,7 +67,6 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         } catch (Throwable ignored) {
         }
 
-        spawnIn(this.serverLevel);
         moveTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         this.serverLevel.addNewPlayer(this);

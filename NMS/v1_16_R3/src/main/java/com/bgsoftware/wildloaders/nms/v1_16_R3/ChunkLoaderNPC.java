@@ -69,7 +69,6 @@ public final class ChunkLoaderNPC extends EntityPlayer implements com.bgsoftware
         } catch (Throwable ignored) {
         }
 
-        spawnIn(world);
         setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         ((WorldServer) world).addPlayerJoin(this);

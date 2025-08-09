@@ -81,7 +81,6 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
             // Doesn't exist on Spigot
         }
 
-        spawnIn(this.serverLevel);
         snapTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
         this.serverLevel.addNewPlayer(this);

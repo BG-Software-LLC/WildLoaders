@@ -5,26 +5,25 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_12_R1.EntityHolograms;
+import com.bgsoftware.wildloaders.nms.v1_12_R1.MapUtils;
 import net.minecraft.server.v1_12_R1.Block;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.ITickable;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.World;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 public final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
 
-    public static final Long2ObjectMap<TileEntityChunkLoader> tileEntityChunkLoaderMap = new Long2ObjectOpenHashMap<>();
+    public static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap =
+            MapUtils.LONG2LOADER_MAP_CREATOR.get();
 
-    public final Int2ObjectMap<EntityHolograms> holograms = new Int2ObjectArrayMap<>();
+    public final Map<Integer, EntityHolograms> holograms = MapUtils.INT2HOLOGRAM_MAP_CREATOR.get();
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
     private final String cachedPlacerName;
