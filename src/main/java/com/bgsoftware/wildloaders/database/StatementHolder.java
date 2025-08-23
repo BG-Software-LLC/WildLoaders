@@ -1,8 +1,8 @@
 package com.bgsoftware.wildloaders.database;
 
+import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
-import com.bgsoftware.wildloaders.database.sql.SQLHelper;
-import com.bgsoftware.wildloaders.database.sql.session.QueryResult;
+import com.bgsoftware.wildloaders.database.sql.DBSession;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import org.bukkit.Location;
 
@@ -82,9 +82,9 @@ public final class StatementHolder {
     }
 
     public void execute(boolean async) {
-        SQLHelper.waitForConnection();
+        DBSession.waitForConnection();
 
-        SQLHelper.customQuery(query, new QueryResult<PreparedStatement>()
+        DBSession.customQuery(query, new QueryResult<PreparedStatement>()
                 .onSuccess(statement -> {
                     if (isBatch) {
                         for (Map<Integer, Object> batch : batches) {

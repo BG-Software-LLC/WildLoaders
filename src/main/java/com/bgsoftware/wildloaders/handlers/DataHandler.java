@@ -1,9 +1,10 @@
 package com.bgsoftware.wildloaders.handlers;
 
+import com.bgsoftware.common.databasebridge.sql.query.Column;
+import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
-import com.bgsoftware.wildloaders.database.sql.SQLHelper;
-import com.bgsoftware.wildloaders.database.sql.session.QueryResult;
+import com.bgsoftware.wildloaders.database.sql.DBSession;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import org.bukkit.Bukkit;
@@ -21,7 +22,7 @@ public final class DataHandler {
     public DataHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
         Scheduler.runTask(() -> {
-            if (!SQLHelper.createConnection(plugin)) {
+            if (!DBSession.createConnection(plugin)) {
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
                 return;
             }
@@ -30,20 +31,20 @@ public final class DataHandler {
     }
 
     public void clearDatabase() {
-        SQLHelper.close();
+        DBSession.close();
     }
 
     private void loadDatabase() {
-        SQLHelper.createTable("npc_identifiers",
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("uuid", "TEXT")
+        DBSession.createTable("npc_identifiers",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("uuid", "TEXT")
         );
 
-        SQLHelper.createTable("chunk_loaders",
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("placer", "TEXT"),
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("loader_data", "TEXT"),
-                new com.bgsoftware.wildloaders.api.objects.Pair<>("timeLeft", "BIGINT")
+        DBSession.createTable("chunk_loaders",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("placer", "UUID"),
+                new Column("loader_data", "TEXT"),
+                new Column("timeLeft", "BIGINT")
         );
 
         loadNPCs();
@@ -52,7 +53,7 @@ public final class DataHandler {
     }
 
     private void loadNPCs() {
-        SQLHelper.select("npc_identifiers", "", new QueryResult<ResultSet>()
+        DBSession.select("npc_identifiers", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         BlockPosition blockPosition = BlockPosition.deserialize(resultSet.getString("location"));
@@ -65,7 +66,7 @@ public final class DataHandler {
     }
 
     private void loadChunkLoaders() {
-        SQLHelper.select("chunk_loaders", "", new QueryResult<ResultSet>()
+        DBSession.select("chunk_loaders", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         BlockPosition blockPosition = BlockPosition.deserialize(resultSet.getString("location"));
