@@ -17,14 +17,14 @@ public abstract class DatabaseFilter {
         return new DatabaseFilterSingle(filterKey, filterValue);
     }
 
-    public static DatabaseFilter fromFilters(List<DatabaseEntry<String, Object>> filters) {
+    public static DatabaseFilter fromFilters(List<DatabaseEntry> filters) {
         if (filters.isEmpty()) {
             if (EMPTY_FILTER == null)
                 EMPTY_FILTER = new DatabaseFilterEmpty();
 
             return EMPTY_FILTER;
         } else if (filters.size() == 1) {
-            DatabaseEntry<String, Object> filter = filters.get(0);
+            DatabaseEntry filter = filters.get(0);
             return fromFilter(filter.getKey(), filter.getValue());
         } else {
             return new DatabaseFilterList(filters);
@@ -36,13 +36,13 @@ public abstract class DatabaseFilter {
 
     public abstract void forEach(BiConsumer<String, Object> consumer);
 
-    public abstract Collection<DatabaseEntry<String, Object>> getFilters();
+    public abstract Collection<DatabaseEntry> getFilters();
 
     private static class DatabaseFilterList extends DatabaseFilter {
 
-        private final Collection<DatabaseEntry<String, Object>> filters;
+        private final Collection<DatabaseEntry> filters;
 
-        DatabaseFilterList(Collection<DatabaseEntry<String, Object>> filters) {
+        DatabaseFilterList(Collection<DatabaseEntry> filters) {
             this.filters = filters;
         }
 
@@ -52,10 +52,9 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<DatabaseEntry<String, Object>> getFilters() {
+        public Collection<DatabaseEntry> getFilters() {
             return Collections.unmodifiableCollection(filters);
         }
-
     }
 
     private static class DatabaseFilterEmpty extends DatabaseFilter {
@@ -66,7 +65,7 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<DatabaseEntry<String, Object>> getFilters() {
+        public Collection<DatabaseEntry> getFilters() {
             return Collections.emptyList();
         }
 
@@ -88,8 +87,8 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<DatabaseEntry<String, Object>> getFilters() {
-            return Collections.singleton(new DatabaseEntry<>(filterKey, filterValue));
+        public Collection<DatabaseEntry> getFilters() {
+            return Collections.singleton(new DatabaseEntry(filterKey, filterValue));
         }
 
     }
