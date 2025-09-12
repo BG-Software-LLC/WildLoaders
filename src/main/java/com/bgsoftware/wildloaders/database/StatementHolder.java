@@ -4,6 +4,7 @@ import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.database.sql.DBSession;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
+import com.bgsoftware.wildloaders.utils.Executor;
 import org.bukkit.Location;
 
 import java.sql.PreparedStatement;
@@ -82,6 +83,12 @@ public final class StatementHolder {
     }
 
     public void execute(boolean async) {
+
+        if (async && !Executor.isDataThread()) {
+            Executor.data(() -> execute(false));
+            return;
+        }
+
         DBSession.waitForConnection();
 
         DBSession.customQuery(query, new QueryResult<PreparedStatement>()
