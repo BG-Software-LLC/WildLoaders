@@ -4,7 +4,6 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.managers.NPCManager;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -46,6 +45,7 @@ public final class NPCHandler implements NPCManager {
     public ChunkLoaderNPC createNPC(BlockPosition blockPosition) {
         return npcs.computeIfAbsent(blockPosition, i -> {
             ChunkLoaderNPC npc = plugin.getNMSAdapter().createNPC(i.getLocation(), getUUID(i));
+            plugin.getDataHandler().insertNPC(npc);
             Entity npcEntity = npc.getPlayer();
             npcEntity.setMetadata("NPC", new FixedMetadataValue(plugin, true));
             return npc;
@@ -65,9 +65,7 @@ public final class NPCHandler implements NPCManager {
         npcs.remove(blockPosition);
         npcUUIDs.remove(blockPosition);
 
-        Query.DELETE_NPC_IDENTIFIER.insertParameters()
-                .setLocation(blockPosition)
-                .queue(npc.getUniqueId());
+        plugin.getDataHandler().deleteNPC(npc);
 
         Entity npcEntity = npc.getPlayer();
         npcEntity.removeMetadata("NPC", plugin);
@@ -102,11 +100,6 @@ public final class NPCHandler implements NPCManager {
         } while (npcUUIDs.containsValue(uuid));
 
         npcUUIDs.put(blockPosition, uuid);
-
-        Query.INSERT_NPC_IDENTIFIER.insertParameters()
-                .setLocation(blockPosition)
-                .setObject(uuid.toString())
-                .queue(uuid);
 
         return uuid;
     }

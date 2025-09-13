@@ -8,7 +8,6 @@ import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -73,10 +72,7 @@ public final class WChunkLoader implements ChunkLoader {
             if (timeLeft < 0) {
                 remove();
             } else if (timeLeft > 0 && timeLeft % 10 == 0) {
-                Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
-                        .setObject(timeLeft)
-                        .setLocation(this.blockPosition)
-                        .queue(this.blockPosition);
+                plugin.getDataHandler().saveLoaderTimeLeft(this);
             }
         }
     }

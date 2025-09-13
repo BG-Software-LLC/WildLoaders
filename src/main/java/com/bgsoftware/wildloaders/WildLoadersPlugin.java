@@ -9,6 +9,7 @@ import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
+import com.bgsoftware.wildloaders.database.DBSession;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
 import com.bgsoftware.wildloaders.handlers.LoadersHandler;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
@@ -19,7 +20,6 @@ import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
-import com.bgsoftware.wildloaders.utils.database.Database;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -99,9 +99,9 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
 
         Scheduler.disable();
-        Database.stop();
         loadersHandler.removeChunkLoaders();
         npcHandler.killAllNPCs();
+        DBSession.close();
     }
 
     private boolean loadNMSAdapter() {

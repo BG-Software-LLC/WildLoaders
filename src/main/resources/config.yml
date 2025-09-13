@@ -5,6 +5,23 @@
 ##                                                   ##
 #######################################################
 
+# All settings related to the database of the plugin.
+database:
+  # For local database, use "SQLite".
+  # For remote database, use "MySQL" or "MariaDB" (Depends on your setup).
+  type: SQLite
+  # Remote database information
+  address: 'localhost'
+  port: 3306
+  db-name: 'WildLoaders'
+  user-name: 'root'
+  password: 'root'
+  prefix: ''
+  useSSL: false
+  allowPublicKeyRetrieval: true
+  waitTimeout: 600000
+  maxLifetime: 1800000
+
 # Hologram lines for regular chunk loaders.
 hologram-lines:
 - '&b{0}''s Loader'

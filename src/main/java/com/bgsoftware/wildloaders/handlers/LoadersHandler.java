@@ -1,9 +1,11 @@
 package com.bgsoftware.wildloaders.handlers;
 
+import com.bgsoftware.common.databasebridge.sql.transaction.SQLDatabaseTransaction;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.managers.LoadersManager;
+import com.bgsoftware.wildloaders.database.DBSession;
 import com.bgsoftware.wildloaders.loaders.UnloadedChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WLoaderData;
@@ -12,7 +14,6 @@ import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -69,17 +70,11 @@ public final class LoadersHandler implements LoadersManager {
 
     @Override
     public ChunkLoader addChunkLoader(LoaderData loaderData, Player whoPlaced, Location location, long timeLeft) {
-        BlockPosition blockPosition = BlockPosition.of(location);
-
         WChunkLoader chunkLoader = addChunkLoaderWithoutDBSave(loaderData, whoPlaced.getUniqueId(),
                 location, timeLeft, false);
 
-        Query.INSERT_CHUNK_LOADER.insertParameters()
-                .setLocation(blockPosition)
-                .setObject(whoPlaced.getUniqueId().toString())
-                .setObject(loaderData.getName())
-                .setObject(timeLeft)
-                .queue(blockPosition);
+        if (chunkLoader != null)
+            plugin.getDataHandler().insertChunkLoader(chunkLoader);
 
         return chunkLoader;
     }
@@ -143,28 +138,27 @@ public final class LoadersHandler implements LoadersManager {
 
         List<UnloadedChunkLoader> unloadedChunkLoaders = new LinkedList<>();
 
-        worldChunkLoaders.forEach(chunkLoader -> {
+        SQLDatabaseTransaction<?> updateTransaction = null;
+
+        for(ChunkLoader chunkLoader : worldChunkLoaders) {
             plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
             BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
             UnloadedChunkLoader unloadedChunkLoader = new UnloadedChunkLoader(chunkLoader.getLoaderData(),
                     chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
             unloadedChunkLoaders.add(unloadedChunkLoader);
 
-            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
-                    .setObject(unloadedChunkLoader.getTimeLeft())
-                    .setLocation(blockPosition)
-                    .queue(blockPosition);
-        });
+            updateTransaction = plugin.getDataHandler().saveLoaderTimeLeft(chunkLoader, updateTransaction);
+        }
+
+        DBSession.execute(updateTransaction);
 
         this.unloadedChunkLoadersByWorlds.put(world.getName(), unloadedChunkLoaders);
     }
 
     @Override
     public void removeChunkLoader(ChunkLoader chunkLoader) {
-        BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
-        Query.DELETE_CHUNK_LOADER.insertParameters()
-                .setLocation(blockPosition)
-                .queue(blockPosition);
+        removeChunkLoaderWithoutDBSave(chunkLoader);
+        plugin.getDataHandler().deleteChunkLoader(chunkLoader);
     }
 
     private BlockPosition removeChunkLoaderWithoutDBSave(ChunkLoader chunkLoader) {

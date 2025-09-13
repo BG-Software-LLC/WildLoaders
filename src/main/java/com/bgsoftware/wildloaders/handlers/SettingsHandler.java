@@ -14,12 +14,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public final class SettingsHandler {
 
-    public List<String> hologramLines;
-    public List<String> infiniteHologramLines;
+    public final String databaseType;
+    public final String databaseMySQLAddress;
+    public final int databaseMySQLPort;
+    public final String databaseMySQLDBName;
+    public final String databaseMySQLUsername;
+    public final String databaseMySQLPassword;
+    public final String databaseMySQLPrefix;
+    public final boolean databaseMySQLSSL;
+    public final boolean databaseMySQLPublicKeyRetrieval;
+    public final long databaseMySQLWaitTimeout;
+    public final long databaseMySQLMaxLifetime;
+    public final List<String> hologramLines;
+    public final List<String> infiniteHologramLines;
 
     public SettingsHandler(WildLoadersPlugin plugin) {
         WildLoadersPlugin.log("Loading configuration started...");
@@ -38,6 +50,17 @@ public final class SettingsHandler {
             error.printStackTrace();
         }
 
+        databaseType = cfg.getString("database.type").toUpperCase(Locale.ENGLISH);
+        databaseMySQLAddress = cfg.getString("database.address");
+        databaseMySQLPort = cfg.getInt("database.port");
+        databaseMySQLDBName = cfg.getString("database.db-name");
+        databaseMySQLUsername = cfg.getString("database.user-name");
+        databaseMySQLPassword = cfg.getString("database.password");
+        databaseMySQLPrefix = cfg.getString("database.prefix");
+        databaseMySQLSSL = cfg.getBoolean("database.useSSL");
+        databaseMySQLPublicKeyRetrieval = cfg.getBoolean("database.allowPublicKeyRetrieval");
+        databaseMySQLWaitTimeout = cfg.getLong("database.waitTimeout");
+        databaseMySQLMaxLifetime = cfg.getLong("database.maxLifetime");
         hologramLines = cfg.getStringList("hologram-lines").stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         infiniteHologramLines = cfg.getStringList("infinite-hologram-lines").stream()
