@@ -4,7 +4,7 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.managers.LoadersManager;
-import com.bgsoftware.wildloaders.database.Query;
+import com.bgsoftware.wildloaders.database.DatabaseAccessor;
 import com.bgsoftware.wildloaders.loaders.UnloadedChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WLoaderData;
@@ -74,12 +74,8 @@ public final class LoadersHandler implements LoadersManager {
         WChunkLoader chunkLoader = addChunkLoaderWithoutDBSave(loaderData, whoPlaced.getUniqueId(),
                 location, timeLeft, false);
 
-        Query.INSERT_CHUNK_LOADER.getStatementHolder()
-                .setLocation(blockPosition)
-                .setObject(whoPlaced.getUniqueId().toString())
-                .setObject(loaderData.getName())
-                .setObject(timeLeft)
-                .execute(true);
+        DatabaseAccessor.insertChunkLoader(blockPosition, whoPlaced.getUniqueId(),
+                loaderData.getName(), timeLeft);
 
         return chunkLoader;
     }
@@ -150,10 +146,7 @@ public final class LoadersHandler implements LoadersManager {
                     chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
             unloadedChunkLoaders.add(unloadedChunkLoader);
 
-            Query.UPDATE_CHUNK_LOADER_TIME_LEFT.getStatementHolder()
-                    .setObject(unloadedChunkLoader.getTimeLeft())
-                    .setLocation(blockPosition)
-                    .execute(true);
+            DatabaseAccessor.updateChunkLoaderTimeLeft(blockPosition, unloadedChunkLoader.getTimeLeft());
         });
 
         this.unloadedChunkLoadersByWorlds.put(world.getName(), unloadedChunkLoaders);
@@ -162,9 +155,8 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public void removeChunkLoader(ChunkLoader chunkLoader) {
         BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
-        Query.DELETE_CHUNK_LOADER.getStatementHolder()
-                .setLocation(blockPosition)
-                .execute(true);
+
+        DatabaseAccessor.deleteChunkLoader(blockPosition);
     }
 
     private BlockPosition removeChunkLoaderWithoutDBSave(ChunkLoader chunkLoader) {
