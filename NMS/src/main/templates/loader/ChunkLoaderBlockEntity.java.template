@@ -1,10 +1,10 @@
-package com.bgsoftware.wildloaders.nms.v1_20_4.loader;
+package com.bgsoftware.wildloaders.nms.${NMS_VERSION}.loader;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
-import com.bgsoftware.wildloaders.nms.v1_20_4.EntityHologram;
+import com.bgsoftware.wildloaders.nms.${NMS_VERSION}.EntityHologram;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -15,6 +15,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,10 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
                 this.holograms.put(index, hologram);
             }
         });
+    }
+
+    public boolean isValidBlockState(BlockState state) {
+        return true;
     }
 
     public void tick() {

@@ -1,12 +1,10 @@
-package com.bgsoftware.wildloaders.nms.v1_17.npc;
+package com.bgsoftware.wildloaders.nms.v1_17;
 
-import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.npc.DummyChannel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
@@ -22,77 +20,78 @@ import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.level.GameType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.UUID;
 
-public final class ChunkLoaderPlayer extends ServerPlayer {
+public class ChunkLoaderNPCImpl extends com.bgsoftware.wildloaders.nms.v1_17.AbstractChunkLoaderNPC {
 
-    private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(ServerPlayerGameMode.class,
-            1, GameType.class, GameType.class);
+    private NPCServerPlayer serverPlayer;
 
-    private final ServerLevel serverLevel;
-    private final AABB boundingBox;
-    private final PlayerAdvancements advancements;
+    public ChunkLoaderNPCImpl(Location location, UUID uuid) {
+        super(location, uuid);
+    }
 
-    private boolean dieCall = false;
+    @Override
+    protected ServerPlayer createServerPlayer(ServerLevel serverLevel, UUID uuid) {
+        return (this.serverPlayer = new NPCServerPlayer(serverLevel, uuid));
+    }
 
-    public ChunkLoaderPlayer(MinecraftServer minecraftServer, Location location, UUID uuid) {
-        super(minecraftServer, ((CraftWorld) location.getWorld()).getHandle(),
-                new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())));
+    @Override
+    protected ServerGamePacketListenerImpl createDummyServerGamePacketListenerImpl() {
+        return new DummyServerGamePacketListenerImpl(MinecraftServer.getServer(), serverPlayer);
+    }
 
-        this.serverLevel = getLevel();
-        this.boundingBox = new AABB(new BlockPos(location.getX(), location.getY(), location.getZ()));
+    @Override
+    protected void setViewDistanceInternal(int viewDistance) {
+        this.serverPlayer.clientViewDistance = 0;
+    }
 
-        this.connection = new DummyServerGamePacketListenerImpl(minecraftServer, this);
-        this.advancements = new DummyPlayerAdvancements(minecraftServer, this);
+    @Override
+    protected void movePlayerInternal(double x, double y, double z, float yaw, float pitch) {
+        this.serverPlayer.moveTo(x, y, z, yaw, pitch);
+    }
 
-        SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);
+    @Override
+    protected void removePlayerInternal(Entity.RemovalReason removalReason) {
+        this.serverPlayer.removeInternal(removalReason);
+    }
 
-        fallDistance = 0.0F;
-        fauxSleeping = true;
-        clientViewDistance = 0;
+    private class NPCServerPlayer extends ServerPlayer {
 
-        try {
-            // Paper
-            affectsSpawning = true;
-        } catch (Throwable ignored) {
+        private final PlayerAdvancements advancements = new DummyPlayerAdvancements(MinecraftServer.getServer(), this);
+
+        NPCServerPlayer(ServerLevel serverLevel, UUID uuid) {
+            super(MinecraftServer.getServer(), serverLevel,
+                    new GameProfile(uuid, NPCHandler.getName(serverLevel.getWorld().getName())));
         }
 
-        moveTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-
-        this.serverLevel.addNewPlayer(this);
-
-        super.setBoundingBox(this.boundingBox);
-    }
-
-    @Override
-    public AABB getBoundingBoxForCulling() {
-        return this.boundingBox;
-    }
-
-    @Override
-    public void remove(RemovalReason removalReason) {
-        if (!dieCall) {
-            dieCall = true;
-            this.serverLevel.removePlayerImmediately(this, RemovalReason.UNLOADED_WITH_PLAYER);
-            dieCall = false;
-        } else {
-            super.remove(removalReason);
+        @Override
+        public @NotNull AABB getBoundingBoxForCulling() {
+            return ChunkLoaderNPCImpl.this.getBoundingBox();
         }
-    }
 
-    @Override
-    public PlayerAdvancements getAdvancements() {
-        return advancements;
+        @Override
+        public void remove(@NotNull RemovalReason reason) {
+            ChunkLoaderNPCImpl.this.handlePlayerRemove(reason);
+        }
+
+        @Override
+        public @NotNull PlayerAdvancements getAdvancements() {
+            return this.advancements;
+        }
+
+        private void removeInternal(RemovalReason reason) {
+            super.remove(reason);
+        }
+
     }
 
     public static class DummyConnection extends Connection {
@@ -112,46 +111,46 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         }
 
         @Override
-        public void handleContainerClick(ServerboundContainerClickPacket containerClickPacket) {
+        public void handleContainerClick(@NotNull ServerboundContainerClickPacket containerClickPacket) {
             // Do nothing.
         }
 
         @Override
-        public void handleMovePlayer(ServerboundMovePlayerPacket movePlayerPacket) {
+        public void handleMovePlayer(@NotNull ServerboundMovePlayerPacket movePlayerPacket) {
             // Do nothing.
         }
 
         @Override
-        public void handleSignUpdate(ServerboundSignUpdatePacket signUpdatePacket) {
+        public void handleSignUpdate(@NotNull ServerboundSignUpdatePacket signUpdatePacket) {
             // Do nothing.
         }
 
         @Override
-        public void handlePlayerAction(ServerboundPlayerActionPacket playerActionPacket) {
+        public void handlePlayerAction(@NotNull ServerboundPlayerActionPacket playerActionPacket) {
             // Do nothing.
         }
 
         @Override
-        public void handleUseItem(ServerboundUseItemPacket useItemPacket) {
+        public void handleUseItem(@NotNull ServerboundUseItemPacket useItemPacket) {
             // Do nothing.
         }
 
         @Override
-        public void handleSetCarriedItem(ServerboundSetCarriedItemPacket setCarriedItemPacket) {
+        public void handleSetCarriedItem(@NotNull ServerboundSetCarriedItemPacket setCarriedItemPacket) {
             // Do nothing.
         }
 
         @Override
-        public void handleChat(ServerboundChatPacket chatPacket) {
+        public void handleChat(@NotNull ServerboundChatPacket chatPacket) {
             // Do nothing.
         }
 
         @Override
-        public void disconnect(String s) {
+        public void disconnect(@NotNull String s) {
 
         }
 
-        public void send(Packet<?> packet) {
+        public void send(@NotNull Packet<?> packet) {
             // Do nothing.
         }
 
@@ -170,7 +169,7 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         }
 
         @Override
-        public void setPlayer(ServerPlayer owner) {
+        public void setPlayer(@NotNull ServerPlayer owner) {
             // Do nothing.
         }
 
@@ -180,7 +179,7 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         }
 
         @Override
-        public void reload(ServerAdvancementManager advancementLoader) {
+        public void reload(@NotNull ServerAdvancementManager advancementLoader) {
             // Do nothing.
         }
 
@@ -190,17 +189,17 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         }
 
         @Override
-        public boolean award(Advancement advancement, String criterionName) {
+        public boolean award(@NotNull Advancement advancement, @NotNull String criterionName) {
             return false;
         }
 
         @Override
-        public boolean revoke(Advancement advancement, String criterionName) {
+        public boolean revoke(@NotNull Advancement advancement, @NotNull String criterionName) {
             return false;
         }
 
         @Override
-        public void flushDirty(ServerPlayer player) {
+        public void flushDirty(@NotNull ServerPlayer player) {
             // Do nothing.
         }
 
@@ -210,7 +209,7 @@ public final class ChunkLoaderPlayer extends ServerPlayer {
         }
 
         @Override
-        public AdvancementProgress getOrStartProgress(Advancement advancement) {
+        public @NotNull AdvancementProgress getOrStartProgress(@NotNull Advancement advancement) {
             return new AdvancementProgress();
         }
 

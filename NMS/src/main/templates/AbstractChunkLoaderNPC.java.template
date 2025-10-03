@@ -1,0 +1,103 @@
+package com.bgsoftware.wildloaders.nms.${NMS_VERSION};
+
+import com.bgsoftware.common.reflection.ReflectMethod;
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.AABB;
+import org.bukkit.Location;
+import ${CRAFTBUKKIT_PACKAGE}.CraftWorld;
+import ${CRAFTBUKKIT_PACKAGE}.entity.CraftPlayer;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
+
+public abstract class AbstractChunkLoaderNPC implements ChunkLoaderNPC {
+
+    private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(
+            ServerPlayerGameMode.class, 1, GameType.class, GameType.class);
+
+    private final ServerPlayer serverPlayer;
+    private final ServerLevel serverLevel;
+    private final AABB boundingBox;
+
+    private boolean dieCall = false;
+
+    protected AbstractChunkLoaderNPC(Location location, UUID uuid) {
+        this.serverLevel = ((CraftWorld) location.getWorld()).getHandle();
+        this.serverPlayer = createServerPlayer(this.serverLevel, uuid);
+
+        this.boundingBox = new AABB(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+
+        this.serverPlayer.connection = createDummyServerGamePacketListenerImpl();
+
+        SET_GAMEMODE.invoke(this.serverPlayer.gameMode, GameType.CREATIVE, null);
+
+        this.serverPlayer.fallDistance = 0.0F;
+        this.serverPlayer.fauxSleeping = true;
+
+        try {
+            setViewDistanceInternal(2);
+            this.serverPlayer.affectsSpawning = true;
+        } catch (Throwable ignored) {
+            // Doesn't exist on Spigot
+        }
+
+        movePlayerInternal(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+
+        this.serverLevel.addNewPlayer(this.serverPlayer);
+
+        this.serverPlayer.setBoundingBox(this.boundingBox);
+    }
+
+    protected abstract ServerPlayer createServerPlayer(ServerLevel serverLevel, UUID uuid);
+
+    protected abstract ServerGamePacketListenerImpl createDummyServerGamePacketListenerImpl();
+
+    protected abstract void setViewDistanceInternal(int viewDistance);
+
+    protected abstract void movePlayerInternal(double x, double y, double z, float yaw, float pitch);
+
+    @Override
+    public UUID getUniqueId() {
+        return serverPlayer.getUUID();
+    }
+
+    @Override
+    public void die() {
+        serverPlayer.discard();
+    }
+
+    @Override
+    public Location getLocation() {
+        return getPlayer().getLocation();
+    }
+
+    @Override
+    public Player getPlayer() {
+        return serverPlayer.getBukkitEntity();
+    }
+
+    public void handlePlayerRemove(Entity.RemovalReason removalReason) {
+        if (!dieCall) {
+            dieCall = true;
+            this.serverLevel.removePlayerImmediately(this.serverPlayer, Entity.RemovalReason.UNLOADED_WITH_PLAYER);
+            dieCall = false;
+        } else {
+            removePlayerInternal(removalReason);
+        }
+    }
+
+    protected abstract void removePlayerInternal(Entity.RemovalReason removalReason);
+
+    public AABB getBoundingBox() {
+        return this.boundingBox;
+    }
+
+}
