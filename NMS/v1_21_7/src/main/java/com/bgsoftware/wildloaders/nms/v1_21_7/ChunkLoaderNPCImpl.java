@@ -155,7 +155,7 @@ public class ChunkLoaderNPCImpl extends com.bgsoftware.wildloaders.nms.v1_21_7.A
         }
 
         @Override
-        public void disconnect(@NotNull DisconnectionDetails disconnectionInfo, @NotNull PlayerKickEvent.Cause cause) {
+        public void disconnectAsync(DisconnectionDetails disconnectionInfo) {
             // Do nothing.
         }
 
