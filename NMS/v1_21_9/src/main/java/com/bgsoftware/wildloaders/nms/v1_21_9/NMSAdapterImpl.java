@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.nms.v1_21_9;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.properties.Property;
@@ -12,15 +13,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21_9.AbstractNMSAdapter {
+
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
+            CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
 
     @Override
     protected String getTagInternal(ItemStack itemStack, String key, String def) {
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
-            CompoundTag compoundTag = customData.getUnsafe();
+            CompoundTag compoundTag = getCustomDataTag(customData);
             return compoundTag.getStringOr(key, def);
         }
         return def;
@@ -37,7 +42,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21_9.Abstr
     protected long getTagInternal(ItemStack itemStack, String key, long def) {
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
-            CompoundTag compoundTag = customData.getUnsafe();
+            CompoundTag compoundTag = getCustomDataTag(customData);
             return compoundTag.getLongOr(key, def);
         }
         return def;
@@ -60,6 +65,14 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21_9.Abstr
         ResolvableProfile resolvableProfile = new ResolvableProfile.Static(Either.right(partialProfile), PlayerSkin.Patch.EMPTY);
 
         itemStack.set(DataComponents.PROFILE, resolvableProfile);
+    }
+
+    private static CompoundTag getCustomDataTag(CustomData customData) {
+        try {
+            return customData.getUnsafe();
+        } catch (Throwable error) {
+            return CUSTOM_DATA_TAG.get(customData);
+        }
     }
 
 }
