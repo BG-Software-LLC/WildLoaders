@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://bg-software.com/imgs/wildloaders-logo.png" />
+<img src="https://static.bg-software.com/imgs/wildloaders-logo.png" />
 <h2 align="center">The best alternative for alts!</h2>
 </p>
 <br>
