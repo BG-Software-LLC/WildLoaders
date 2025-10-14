@@ -8,11 +8,9 @@ import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -34,8 +32,6 @@ public final class BlocksListener implements Listener {
 
     private static final EntityType WIND_CHARGE_TYPE = lookupEntityType("WIND_CHARGE");
     private static final EntityType BREEZE_WIND_CHARGE_TYPE = lookupEntityType("BREEZE_WIND_CHARGE");
-
-    private static final boolean CHECK_BREAK_EVENT_IGNORE = Bukkit.getPluginManager().isPluginEnabled("AdvancedEnchantments");
 
     private final WildLoadersPlugin plugin;
 
