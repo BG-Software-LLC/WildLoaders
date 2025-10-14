@@ -7,7 +7,8 @@ import org.bukkit.entity.Entity;
 
 public class Scheduler {
 
-    private static final ScheduledTask NULL_TASK = () -> {};
+    private static final ScheduledTask NULL_TASK = () -> {
+    };
 
     private static final ISchedulerImplementation IMP = initializeSchedulerImplementation();
 
@@ -43,6 +44,26 @@ public class Scheduler {
 
     public static boolean isRegionScheduler() {
         return IMP.isRegionScheduler();
+    }
+
+    public static boolean isRegionThread(Location location) {
+        return isRegionThread(location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
+    }
+
+    public static boolean isRegionThread(World world, int chunkX, int chunkZ) {
+        return IMP.isRegionThread(world, chunkX, chunkZ);
+    }
+
+    public static void ensureMain(Location location, Runnable task) {
+        ensureMain(location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4, task);
+    }
+
+    public static void ensureMain(World world, int chunkX, int chunkZ, Runnable task) {
+        if (!isEnabled || isRegionThread(world, chunkX, chunkZ)) {
+            executeNow(task);
+        } else {
+            runTask(world, chunkX, chunkZ, task, 0L);
+        }
     }
 
     public static ScheduledTask runTask(World world, int chunkX, int chunkZ, Runnable task, long delay) {

@@ -53,14 +53,11 @@ public abstract class AbstractEntityHologram extends ArmorStand implements Holog
 
     @Override
     public void removeHologram() {
-        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
-            World world = this.serverLevel.getWorld();
-            int chunkX = getBlockX() >> 4;
-            int chunkZ = getBlockZ() >> 4;
-            Scheduler.runTask(world, chunkX, chunkZ, () -> super.remove(RemovalReason.DISCARDED));
-        } else {
-            super.remove(RemovalReason.DISCARDED);
-        }
+        World world = this.serverLevel.getWorld();
+        int chunkX = getBlockX() >> 4;
+        int chunkZ = getBlockZ() >> 4;
+
+        Scheduler.ensureMain(world, chunkX, chunkZ, () -> super.remove(RemovalReason.DISCARDED));
     }
 
     @Override

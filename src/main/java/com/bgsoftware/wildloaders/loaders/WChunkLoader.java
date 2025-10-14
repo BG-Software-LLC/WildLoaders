@@ -104,11 +104,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        if (Scheduler.isRegionScheduler() || !Bukkit.isPrimaryThread()) {
-            Scheduler.runTask(getLocation(), this::removeInternal);
-        } else {
-            removeInternal();
-        }
+        Scheduler.ensureMain(getLocation(), this::removeInternal);
     }
 
     private void removeInternal() {

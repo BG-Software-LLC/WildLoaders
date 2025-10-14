@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.scheduler;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
@@ -19,6 +20,11 @@ public class FoliaSchedulerImplementation implements ISchedulerImplementation {
     @Override
     public boolean isRegionScheduler() {
         return true;
+    }
+
+    @Override
+    public boolean isRegionThread(World world, int chunkX, int chunkZ) {
+        return Bukkit.getServer().isOwnedByCurrentRegion(world, chunkX, chunkZ);
     }
 
     @Override

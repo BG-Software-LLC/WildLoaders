@@ -1,11 +1,14 @@
 package com.bgsoftware.wildloaders.scheduler;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 public interface ISchedulerImplementation {
 
     boolean isRegionScheduler();
+
+    boolean isRegionThread(World world, int chunkX, int chunkZ);
 
     ScheduledTask scheduleTask(World world, int chunkX, int chunkZ, Runnable task, long delay);
 
