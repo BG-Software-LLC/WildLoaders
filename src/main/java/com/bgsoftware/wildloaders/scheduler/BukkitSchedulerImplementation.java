@@ -2,7 +2,6 @@ package com.bgsoftware.wildloaders.scheduler;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitTask;
@@ -15,11 +14,6 @@ public class BukkitSchedulerImplementation implements ISchedulerImplementation {
 
     private BukkitSchedulerImplementation() {
 
-    }
-
-    @Override
-    public boolean isRegionScheduler() {
-        return false;
     }
 
     @Override

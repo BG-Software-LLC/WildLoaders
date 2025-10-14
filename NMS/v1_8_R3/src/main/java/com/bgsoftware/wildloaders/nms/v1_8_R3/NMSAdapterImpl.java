@@ -116,12 +116,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         TileEntityChunkLoader tileEntityChunkLoader = new TileEntityChunkLoader(chunkLoader, worldServer, blockPosition);
         worldServer.tileEntityList.add(tileEntityChunkLoader);
 
-        if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() ->
-                    setSpawnersRangeForLoader(chunkLoader, worldServer, true, onSpawnerChangeCallback));
-        } else {
-            setSpawnersRangeForLoader(chunkLoader, worldServer, true, onSpawnerChangeCallback);
-        }
+        Scheduler.ensureMain(loaderLoc, () ->
+                setSpawnersRangeForLoader(chunkLoader, worldServer, true, onSpawnerChangeCallback));
 
         return tileEntityChunkLoader;
     }
@@ -144,12 +140,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (spawnParticle)
             worldServer.a(null, 2001, blockPosition, Block.getCombinedId(worldServer.getType(blockPosition)));
 
-        if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() ->
-                    setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback));
-        } else {
-            setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback);
-        }
+        Scheduler.ensureMain(loaderLoc, () ->
+                setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback));
     }
 
     private static void setSpawnersRangeForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean loaded,

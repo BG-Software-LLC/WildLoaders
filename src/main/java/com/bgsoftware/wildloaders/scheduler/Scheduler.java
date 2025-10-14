@@ -42,10 +42,6 @@ public class Scheduler {
         isEnabled = false;
     }
 
-    public static boolean isRegionScheduler() {
-        return IMP.isRegionScheduler();
-    }
-
     public static boolean isRegionThread(Location location) {
         return isRegionThread(location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }

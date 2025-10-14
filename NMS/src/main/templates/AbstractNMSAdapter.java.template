@@ -86,12 +86,8 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         ChunkLoaderBlockEntity ChunkLoaderBlockEntity = new ChunkLoaderBlockEntity(chunkLoader, serverLevel, blockPos);
         serverLevel.addBlockEntityTicker(ChunkLoaderBlockEntity.getTicker());
 
-        if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() ->
-                    setChunksForcedForLoader(chunkLoader, serverLevel, true, onSpawnerChangeCallback));
-        } else {
-            setChunksForcedForLoader(chunkLoader, serverLevel, true, onSpawnerChangeCallback);
-        }
+        Scheduler.ensureMain(loaderLoc, () ->
+                setChunksForcedForLoader(chunkLoader, serverLevel, true, onSpawnerChangeCallback));
 
         return ChunkLoaderBlockEntity;
     }
@@ -119,12 +115,8 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         if (spawnParticle)
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
-        if (Scheduler.isRegionScheduler()) {
-            Scheduler.runTask(() ->
-                    setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback));
-        } else {
-            setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback);
-        }
+        Scheduler.ensureMain(loaderLoc, () ->
+                setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback));
     }
 
     private static void setChunksForcedForLoader(ChunkLoader chunkLoader, ServerLevel serverLevel, boolean forced,
