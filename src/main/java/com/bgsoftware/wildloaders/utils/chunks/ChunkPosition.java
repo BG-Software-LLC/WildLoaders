@@ -1,15 +1,20 @@
 package com.bgsoftware.wildloaders.utils.chunks;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 public final class ChunkPosition {
 
     private final String world;
     private final int x, z;
+
+    private WeakReference<World> bukkitWorld;
 
     private ChunkPosition(String world, int x, int z){
         this.world = world;
@@ -21,12 +26,23 @@ public final class ChunkPosition {
         return world;
     }
 
+    @Nullable
+    public World getBukkitWorld() {
+        World bukkitWorld = this.bukkitWorld.get();
+        return bukkitWorld == null ? Bukkit.getWorld(this.world) : bukkitWorld;
+    }
+
     public int getX() {
         return x;
     }
 
     public int getZ() {
         return z;
+    }
+
+    ChunkPosition setBukkitWorld(World world) {
+        this.bukkitWorld = new WeakReference<>(world);
+        return this;
     }
 
     @Override
@@ -50,15 +66,19 @@ public final class ChunkPosition {
     }
 
     public static ChunkPosition of(Location location){
-        return new ChunkPosition(location.getWorld().getName(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
+        return of(location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
     public static ChunkPosition of(Chunk chunk){
-        return new ChunkPosition(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+        return of(chunk.getWorld(), chunk.getX(), chunk.getZ());
     }
 
     public static ChunkPosition of(World world, int chunkX, int chunkZ){
-        return new ChunkPosition(world.getName(), chunkX, chunkZ);
+        return new ChunkPosition(world.getName(), chunkX, chunkZ).setBukkitWorld(world);
+    }
+
+    public static ChunkPosition of(String worldName, int chunkX, int chunkZ){
+        return new ChunkPosition(worldName, chunkX, chunkZ);
     }
 
 }

@@ -6,6 +6,7 @@ import me.angeschossen.lands.api.integration.LandsIntegration;
 import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.role.enums.RoleSetting;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 
 import java.util.UUID;
 
@@ -19,8 +20,8 @@ public final class ClaimsProvider_Lands implements ClaimsProvider {
     }
 
     @Override
-    public boolean hasClaimAccess(UUID player, Chunk chunk) {
-        Land land = landsIntegration.getLand(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    public boolean hasClaimAccess(UUID player, World world, int chunkX, int chunkZ) {
+        Land land = landsIntegration.getLand(world, chunkX, chunkZ);
         return land == null || land.canSetting(player, RoleSetting.BLOCK_PLACE);
     }
 

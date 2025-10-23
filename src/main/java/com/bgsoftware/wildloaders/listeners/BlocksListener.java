@@ -8,7 +8,6 @@ import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
-import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -25,6 +24,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -55,8 +55,9 @@ public final class BlocksListener implements Listener {
 
         LoaderData loaderData = optionalLoaderData.get();
 
-        for (Chunk chunk : ChunkLoaderChunks.calculateChunks(loaderData, e.getPlayer().getUniqueId(), e.getBlock().getLocation())) {
-            if (plugin.getLoaders().getChunkLoader(chunk).isPresent()) {
+        List<ChunkPosition> loaderChunks = ChunkLoaderChunks.calculateChunks(loaderData, e.getPlayer().getUniqueId(), e.getBlock().getLocation());
+        for (ChunkPosition chunkPosition : loaderChunks) {
+            if (plugin.getLoaders().getChunkLoader(chunkPosition).isPresent()) {
                 e.setCancelled(true);
                 Locale.ALREADY_LOADED.send(e.getPlayer());
                 return;
@@ -65,7 +66,7 @@ public final class BlocksListener implements Listener {
 
         long timeLeft = plugin.getNMSAdapter().getTag(e.getItemInHand(), "loader-time", loaderData.getTimeLeft());
 
-        plugin.getLoaders().addChunkLoader(loaderData, e.getPlayer(), e.getBlock().getLocation(), timeLeft);
+        plugin.getLoaders().addChunkLoader(loaderData, e.getPlayer(), e.getBlock().getLocation(), timeLeft, loaderChunks);
 
         Locale.PLACED_LOADER.send(e.getPlayer(), ChunkPosition.of(e.getBlock().getLocation()));
     }

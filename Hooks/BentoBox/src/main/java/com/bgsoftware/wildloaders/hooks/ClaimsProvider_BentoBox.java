@@ -1,8 +1,8 @@
 package com.bgsoftware.wildloaders.hooks;
 
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
@@ -20,13 +20,13 @@ public final class ClaimsProvider_BentoBox implements ClaimsProvider {
     }
 
     @Override
-    public boolean hasClaimAccess(UUID player, Chunk chunk) {
+    public boolean hasClaimAccess(UUID player, World world, int chunkX, int chunkZ) {
         User bentoPlayer = BentoBox.getInstance().getPlayersManager().getUser(player);
 
         // There is no API method to get island at a specific chunk.
         // Therefore we need to check for islands in each corner of the chunk.
 
-        Location cornerLocation = new Location(chunk.getWorld(), chunk.getX() << 4, 100, chunk.getZ() << 4);
+        Location cornerLocation = new Location(world, chunkX << 4, 100, chunkZ << 4);
 
         IslandAccess islandAccess = IslandAccess.WILDERNESS;
 

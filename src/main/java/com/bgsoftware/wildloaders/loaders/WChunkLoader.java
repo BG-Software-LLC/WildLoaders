@@ -7,7 +7,9 @@ import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
+import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
+import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -15,8 +17,10 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,22 +29,28 @@ public final class WChunkLoader implements ChunkLoader {
 
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
+    private final List<Chunk> loadedChunksUnmodifiable;
+
     private final UUID whoPlaced;
     private final BlockPosition blockPosition;
-    private final List<Chunk> loadedChunks;
     private final String loaderName;
-    private final ITileEntityChunkLoader tileEntityChunkLoader;
+
+    @Nullable
+    private ITileEntityChunkLoader tileEntityChunkLoader;
 
     private boolean active = true;
+    private boolean removed = true;
+
     private long timeLeft;
 
-    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, BlockPosition blockPosition, List<Chunk> loadedChunks, long timeLeft) {
+    public WChunkLoader(LoaderData loaderData, UUID whoPlaced, BlockPosition blockPosition, List<ChunkPosition> chunksToLoad, long timeLeft) {
         this.loaderName = loaderData.getName();
         this.whoPlaced = whoPlaced;
         this.blockPosition = blockPosition;
-        this.loadedChunks = loadedChunks;
         this.timeLeft = timeLeft;
-        this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
+        List<Chunk> loadedChunks = new LinkedList<>();
+        this.loadedChunksUnmodifiable = Collections.unmodifiableList(loadedChunks);
+        ChunkLoaderChunks.loadChunksAsync(this, chunksToLoad, loadedChunks::add, this::onChunksLoadFinish);
     }
 
     @Override
@@ -54,9 +64,7 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public boolean isNotActive() {
-        if (active)
-            active = plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) == this;
-        return !active;
+        return this.removed || !this.active;
     }
 
     @Override
@@ -65,7 +73,7 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public void tick() {
-        plugin.getProviders().tick(loadedChunks);
+        plugin.getProviders().tick(this.loadedChunksUnmodifiable);
 
         if (!isInfinite()) {
             timeLeft--;
@@ -87,14 +95,8 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     @Override
-    @Deprecated
-    public Chunk[] getLoadedChunks() {
-        return loadedChunks.toArray(new Chunk[0]);
-    }
-
-    @Override
     public Collection<Chunk> getLoadedChunksCollection() {
-        return Collections.unmodifiableCollection(loadedChunks);
+        return this.removed ? Collections.emptyList() : this.loadedChunksUnmodifiable;
     }
 
     @Override
@@ -115,6 +117,11 @@ public final class WChunkLoader implements ChunkLoader {
         getLocation().getBlock().setType(Material.AIR);
     }
 
+    public void markRemoved() {
+        this.removed = true;
+        this.active = false;
+    }
+
     @Override
     public ItemStack getLoaderItem() {
         return getLoaderData().getLoaderItem(getTimeLeft());
@@ -122,7 +129,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Collection<Hologram> getHolograms() {
-        return tileEntityChunkLoader.getHolograms();
+        return this.tileEntityChunkLoader == null ? Collections.emptyList() : this.tileEntityChunkLoader.getHolograms();
     }
 
     public void forEachHologramLine(HologramLineCallback callback) {
@@ -134,6 +141,11 @@ public final class WChunkLoader implements ChunkLoader {
             callback.apply(index, hologramLine);
             --index;
         }
+    }
+
+    private void onChunksLoadFinish() {
+        this.removed = false;
+        this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
     }
 
     public interface HologramLineCallback {

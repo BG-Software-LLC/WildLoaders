@@ -1,11 +1,14 @@
 package com.bgsoftware.wildloaders.handlers;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
 import com.bgsoftware.wildloaders.api.hooks.SpawnersProvider;
 import com.bgsoftware.wildloaders.api.hooks.TickableProvider;
 import com.bgsoftware.wildloaders.api.hooks.WorldsProvider;
 import com.bgsoftware.wildloaders.api.managers.ProvidersManager;
+import com.bgsoftware.wildloaders.hooks.ChunksProvider;
+import com.bgsoftware.wildloaders.hooks.ChunksProvider_Default;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.google.common.base.Preconditions;
@@ -22,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public final class ProvidersHandler implements ProvidersManager {
 
@@ -31,6 +35,8 @@ public final class ProvidersHandler implements ProvidersManager {
     private final List<TickableProvider> tickableProviders = new LinkedList<>();
     private final List<WorldsProvider> worldsProviders = new LinkedList<>();
     private final List<SpawnersProvider> spawnersProviders = new LinkedList<>();
+
+    private final ChunksProvider chunksProvider = initializeChunksProvider();
 
     public ProvidersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
@@ -140,9 +146,9 @@ public final class ProvidersHandler implements ProvidersManager {
         worldsProviders.add(worldsProvider);
     }
 
-    public boolean hasChunkAccess(UUID player, Chunk chunk) {
+    public boolean hasChunkAccess(UUID player, World world, int chunkX, int chunkZ) {
         for (ClaimsProvider claimsProvider : claimsProviders) {
-            if (claimsProvider.hasClaimAccess(player, chunk))
+            if (claimsProvider.hasClaimAccess(player, world, chunkX, chunkZ))
                 return true;
         }
 
@@ -168,6 +174,18 @@ public final class ProvidersHandler implements ProvidersManager {
         }
 
         return null;
+    }
+
+    public void loadChunk(World world, int chunkX, int chunkZ, Consumer<Chunk> consumer) {
+        this.chunksProvider.loadChunk(world, chunkX, chunkZ, consumer);
+    }
+
+    private ChunksProvider initializeChunksProvider() {
+        Optional<ChunksProvider> chunksProvider = Optional.empty();
+        if (new ReflectMethod<>(World.class, "getChunkAtAsync", int.class, int.class).isValid()) {
+            chunksProvider = createInstance("ChunksProvider_Paper");
+        }
+        return chunksProvider.orElseGet(ChunksProvider_Default::new);
     }
 
     private static boolean isClassLoaded(String clazz) {

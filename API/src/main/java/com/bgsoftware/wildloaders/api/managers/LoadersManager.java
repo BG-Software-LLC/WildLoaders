@@ -4,6 +4,7 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,12 +15,23 @@ public interface LoadersManager {
 
     /**
      * Get an active chunk loader from a chunk.
+     *
      * @param chunk The chunk to check.
      */
     Optional<ChunkLoader> getChunkLoader(Chunk chunk);
 
     /**
+     * Get an active chunk loader from a chunk.
+     *
+     * @param world  The world of the chunk.
+     * @param chunkX The x-coords of the chunk.
+     * @param chunkZ The z-coords of the chunk.
+     */
+    Optional<ChunkLoader> getChunkLoader(World world, int chunkX, int chunkZ);
+
+    /**
      * Get a chunk loader by it's location.
+     *
      * @param location The location of the chunk loader.
      */
     Optional<ChunkLoader> getChunkLoader(Location location);
@@ -31,6 +43,7 @@ public interface LoadersManager {
 
     /**
      * Get chunk-loader data by it's name.
+     *
      * @param name The name of the data.
      */
     Optional<LoaderData> getLoaderData(String name);
@@ -42,10 +55,11 @@ public interface LoadersManager {
 
     /**
      * Create a new chunk loader at a specific location.
+     *
      * @param loaderData The data of the chunk loader.
-     * @param whoPlaced The player who placed the chunk loader.
-     * @param location The location of the chunk loader.
-     * @param timeLeft The amount of time left for the chunk loader to run.
+     * @param whoPlaced  The player who placed the chunk loader.
+     * @param location   The location of the chunk loader.
+     * @param timeLeft   The amount of time left for the chunk loader to run.
      * @return The new chunk loader object.
      */
     ChunkLoader addChunkLoader(LoaderData loaderData, Player whoPlaced, Location location, long timeLeft);
@@ -58,8 +72,9 @@ public interface LoadersManager {
 
     /**
      * Create a new chunk-loader data.
-     * @param name The name of the data.
-     * @param timeLeft The default amount of time to run.
+     *
+     * @param name      The name of the data.
+     * @param timeLeft  The default amount of time to run.
      * @param itemStack The item stack to drop upon break.
      */
     LoaderData createLoaderData(String name, long timeLeft, ItemStack itemStack);
