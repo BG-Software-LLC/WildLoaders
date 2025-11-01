@@ -68,7 +68,12 @@ public final class ProvidersHandler implements ProvidersManager {
             claimsProvider.ifPresent(this::addClaimsProvider);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("Lands")) {
-            Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_Lands");
+            Optional<ClaimsProvider> claimsProvider;
+            if(isClassLoaded("me.angeschossen.lands.api.LandsIntegration")) {
+                claimsProvider = createInstance("ClaimsProvider_Lands7");
+            } else {
+                claimsProvider = createInstance("ClaimsProvider_Lands");
+            }
             claimsProvider.ifPresent(this::addClaimsProvider);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("BentoBox")) {
