@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.network.Connection;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
@@ -100,6 +101,11 @@ public class ChunkLoaderNPCImpl extends com.bgsoftware.wildloaders.nms.v1_18.Abs
             super(PacketFlow.SERVERBOUND);
             this.channel = new DummyChannel();
             this.address = null;
+        }
+
+        @Override
+        public void setListener(PacketListener packetListener) {
+            // Do nothing - https://github.com/BG-Software-LLC/WildLoaders/issues/148
         }
 
     }

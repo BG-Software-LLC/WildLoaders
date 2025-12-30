@@ -107,9 +107,12 @@ public class ChunkLoaderNPCImpl extends com.bgsoftware.wildloaders.nms.v1_21_7.A
         }
 
         @Override
-        public void setListenerForServerboundHandshake(@NotNull PacketListener packetListener) {
-            // Do nothing.
+        public void setListenerForServerboundHandshake(PacketListener packetListener) {
+            // Do nothing - https://github.com/BG-Software-LLC/WildLoaders/issues/148
         }
+
+
+
     }
 
     public static class DummyServerGamePacketListenerImpl extends ServerGamePacketListenerImpl {

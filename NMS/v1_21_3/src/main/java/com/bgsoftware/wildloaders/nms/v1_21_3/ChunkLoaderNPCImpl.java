@@ -7,6 +7,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.network.Connection;
 import net.minecraft.network.DisconnectionDetails;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
@@ -104,6 +105,11 @@ public class ChunkLoaderNPCImpl extends com.bgsoftware.wildloaders.nms.v1_21_3.A
             super(PacketFlow.SERVERBOUND);
             this.channel = new DummyChannel();
             this.address = null;
+        }
+
+        @Override
+        public void setListenerForServerboundHandshake(PacketListener packetListener) {
+            // Do nothing - https://github.com/BG-Software-LLC/WildLoaders/issues/148
         }
 
     }
