@@ -7,11 +7,8 @@ import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_16_R3.EntityHolograms;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.server.v1_16_R3.Block;
 import net.minecraft.server.v1_16_R3.BlockPosition;
-import net.minecraft.server.v1_16_R3.ChunkCoordIntPair;
 import net.minecraft.server.v1_16_R3.ITickable;
 import net.minecraft.server.v1_16_R3.TileEntity;
 import net.minecraft.server.v1_16_R3.TileEntityTypes;
@@ -22,8 +19,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 public final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
-
-    public static final Long2ObjectMap<TileEntityChunkLoader> tileEntityChunkLoaderMap = new Long2ObjectOpenHashMap<>();
 
     public final Int2ObjectMap<EntityHolograms> holograms = new Int2ObjectArrayMap<>();
     private final WChunkLoader chunkLoader;
@@ -65,8 +60,6 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
             secondsAmount = (short) timeLeft;
         }
-
-        tileEntityChunkLoaderMap.put(ChunkCoordIntPair.pair(blockPosition.getX() >> 4, blockPosition.getZ() >> 4), this);
 
         double baseYLevel = position.getY() + 1;
         this.chunkLoader.forEachHologramLine((index, hologramLine) -> {

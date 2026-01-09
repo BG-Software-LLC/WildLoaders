@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.nms.v1_16_R3;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
+import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.v1_16_R3.loader.TileEntityChunkLoader;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
@@ -131,8 +132,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         WorldServer world = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
 
-        long tileEntityLong = ChunkCoordIntPair.pair(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
-        TileEntityChunkLoader tileEntityChunkLoader = TileEntityChunkLoader.tileEntityChunkLoaderMap.remove(tileEntityLong);
+        TileEntityChunkLoader tileEntityChunkLoader =
+                (TileEntityChunkLoader) ((WChunkLoader) chunkLoader).getTileEntityChunkLoader();
         if (tileEntityChunkLoader != null) {
             tileEntityChunkLoader.holograms.values().forEach(EntityHolograms::removeHologram);
             tileEntityChunkLoader.removed = true;

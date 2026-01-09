@@ -11,7 +11,6 @@ import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.ITickable;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.World;
-import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,9 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class TileEntityChunkLoader extends TileEntity implements ITickable, ITileEntityChunkLoader {
-
-    public static final Map<Long, TileEntityChunkLoader> tileEntityChunkLoaderMap =
-            MapUtils.LONG2LOADER_MAP_CREATOR.get();
 
     public final Map<Integer, EntityHolograms> holograms = MapUtils.INT2HOLOGRAM_MAP_CREATOR.get();
     private final WChunkLoader chunkLoader;
@@ -56,8 +52,6 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
             secondsAmount = (short) timeLeft;
         }
-
-        tileEntityChunkLoaderMap.put(LongHash.toLong(blockPosition.getX() >> 4, blockPosition.getZ() >> 4), this);
 
         double baseYLevel = position.getY() + 1;
         this.chunkLoader.forEachHologramLine((index, hologramLine) -> {

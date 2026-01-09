@@ -3,6 +3,7 @@ package com.bgsoftware.wildloaders.nms.v1_12_R1;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
+import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.v1_12_R1.loader.TileEntityChunkLoader;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
@@ -22,7 +23,6 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_12_R1.util.LongHash;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -130,8 +130,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         WorldServer worldServer = ((CraftWorld) loaderLoc.getWorld()).getHandle();
         BlockPosition blockPosition = new BlockPosition(loaderLoc.getX(), loaderLoc.getY(), loaderLoc.getZ());
 
-        long tileEntityLong = LongHash.toLong(blockPosition.getX() >> 4, blockPosition.getZ() >> 4);
-        TileEntityChunkLoader tileEntityChunkLoader = TileEntityChunkLoader.tileEntityChunkLoaderMap.remove(tileEntityLong);
+        TileEntityChunkLoader tileEntityChunkLoader =
+                (TileEntityChunkLoader) ((WChunkLoader) chunkLoader).getTileEntityChunkLoader();
         if (tileEntityChunkLoader != null) {
             tileEntityChunkLoader.holograms.values().forEach(EntityHolograms::removeHologram);
             tileEntityChunkLoader.removed = true;

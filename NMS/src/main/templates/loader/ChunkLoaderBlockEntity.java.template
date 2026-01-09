@@ -7,11 +7,8 @@ import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.${NMS_VERSION}.EntityHologram;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,8 +19,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEntityChunkLoader {
-
-    public static final Long2ObjectMap<ChunkLoaderBlockEntity> chunkLoaderBlockEntityMap = new Long2ObjectOpenHashMap<>();
 
     public final Int2ObjectMap<EntityHologram> holograms = new Int2ObjectArrayMap<>();
     private final WChunkLoader chunkLoader;
@@ -65,9 +60,6 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
 
             secondsAmount = (short) timeLeft;
         }
-
-        long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
-        chunkLoaderBlockEntityMap.put(chunkPosLong, this);
 
         double baseYLevel = blockPos.getY() + 1;
         this.chunkLoader.forEachHologramLine((index, hologramLine) -> {

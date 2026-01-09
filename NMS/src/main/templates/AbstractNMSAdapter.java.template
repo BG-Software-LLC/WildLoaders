@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.nms.${NMS_VERSION};
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
+import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.nms.${NMS_VERSION}.loader.ChunkLoaderBlockEntity;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
@@ -105,7 +106,8 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         BlockPos blockPos = new BlockPos(loaderLoc.getBlockX(), loaderLoc.getBlockY(), loaderLoc.getBlockZ());
 
         long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
-        ChunkLoaderBlockEntity chunkLoaderBlockEntity = ChunkLoaderBlockEntity.chunkLoaderBlockEntityMap.remove(chunkPosLong);
+        ChunkLoaderBlockEntity chunkLoaderBlockEntity =
+                (ChunkLoaderBlockEntity) ((WChunkLoader) chunkLoader).getTileEntityChunkLoader();
 
         if (chunkLoaderBlockEntity != null) {
             chunkLoaderBlockEntity.holograms.values().forEach(EntityHologram::removeHologram);
