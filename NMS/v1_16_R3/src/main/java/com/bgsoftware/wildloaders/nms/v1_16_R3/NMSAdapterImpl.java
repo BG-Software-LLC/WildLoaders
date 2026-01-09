@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.nms.v1_16_R3;
 
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
+import com.bgsoftware.wildloaders.chunks.ChunksTracker;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
@@ -154,6 +155,9 @@ public final class NMSAdapterImpl implements NMSAdapter {
         int requiredPlayerRange = forced ? -1 : 16;
 
         for (org.bukkit.Chunk bukkitChunk : chunkLoader.getLoadedChunksCollection()) {
+            if (!(forced ? ChunksTracker.track(bukkitChunk) : ChunksTracker.untrack(bukkitChunk)))
+                continue;
+
             Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
 
             for (TileEntity tileEntity : chunk.tileEntities.values()) {
