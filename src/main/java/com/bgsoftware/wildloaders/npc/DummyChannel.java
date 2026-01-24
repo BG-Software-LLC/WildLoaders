@@ -4,24 +4,35 @@ import io.netty.channel.AbstractChannel;
 import io.netty.channel.ChannelConfig;
 import io.netty.channel.ChannelMetadata;
 import io.netty.channel.ChannelOutboundBuffer;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultChannelConfig;
 import io.netty.channel.EventLoop;
+import io.netty.channel.local.LocalEventLoopGroup;
 
 import java.net.SocketAddress;
 
 public final class DummyChannel extends AbstractChannel {
 
-    public DummyChannel(){
+    private final ChannelConfig config = new DefaultChannelConfig(this);
+    private final EventLoop eventLoop = new LocalEventLoopGroup().next();
+
+    public DummyChannel() {
         super(null);
     }
 
     @Override
     protected AbstractUnsafe newUnsafe() {
-        return null;
+        return new AbstractUnsafe() {
+            @Override
+            public void connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
+                promise.setSuccess(); // Immediate success for testing
+            }
+        };
     }
 
     @Override
-    protected boolean isCompatible(EventLoop eventLoop) {
-        return false;
+    protected boolean isCompatible(EventLoop loop) {
+        return true;
     }
 
     @Override
@@ -35,47 +46,48 @@ public final class DummyChannel extends AbstractChannel {
     }
 
     @Override
-    protected void doBind(SocketAddress socketAddress){
-
+    protected void doBind(SocketAddress localAddress) throws Exception {
     }
 
     @Override
-    protected void doDisconnect(){
-
+    protected void doDisconnect() throws Exception {
     }
 
     @Override
-    protected void doClose(){
-
+    protected void doClose() throws Exception {
     }
 
     @Override
-    protected void doBeginRead(){
-
+    protected void doBeginRead() throws Exception {
     }
 
     @Override
-    protected void doWrite(ChannelOutboundBuffer channelOutboundBuffer){
-
+    protected void doWrite(ChannelOutboundBuffer in) throws Exception {
     }
 
     @Override
     public ChannelConfig config() {
-        return null;
+        return config;
     }
 
     @Override
     public boolean isOpen() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return true;
     }
 
     @Override
     public ChannelMetadata metadata() {
-        return null;
+        return new ChannelMetadata(false);
     }
+
+    @Override
+    public EventLoop eventLoop() {
+        return eventLoop;
+    }
+
 }
