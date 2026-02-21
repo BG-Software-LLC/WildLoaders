@@ -22,14 +22,24 @@ database:
   waitTimeout: 600000
   maxLifetime: 1800000
 
+# You can use the following placeholders in the holograms of loaders:
+#   {0} - The name of the player that placed the chunk loader.
+#   {1} - The amount of days left for the chunk loader.
+#   {2} - The amount of hours left for the chunk loader.
+#   {3} - The amount of minutes left for the chunk loader.
+#   {4} - The amount of seconds left for the chunk loader.
+#   {5} - The radius of chunks the loader loads.
+#   {6} - The area of chunks the loader loads.
+#   {7} - The name of the type of the chunk loader.
+
 # Hologram lines for regular chunk loaders.
 hologram-lines:
-- '&b{0}''s Loader'
+- '&b{0}''s Loader &7({6}x{6})'
 - '&bTime Left: &f{1} days, {2} hours, {3} minutes, {4} seconds'
 
 # Hologram lines for chunk loaders with no time limits.
 infinite-hologram-lines:
-- '&b{0}''s Loader'
+- '&b{0}''s Loader &7({6}x{6})'
 
 # You can use the following settings when setting up chunk loaders:
 #

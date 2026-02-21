@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.nms.v1_12_R1.loader;
 
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
+import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1_12_R1.EntityHolograms;
@@ -28,6 +29,10 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
     private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
     public boolean removed = false;
 
+    private final String cachedHologramRadius;
+    private final String cachedHologramArea;
+    private final String cachedHologramType;
+
     public TileEntityChunkLoader(ChunkLoader chunkLoader, World world, BlockPosition blockPosition) {
         this.chunkLoader = (WChunkLoader) chunkLoader;
 
@@ -52,6 +57,11 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
 
             secondsAmount = (short) timeLeft;
         }
+
+        LoaderData loaderData = chunkLoader.getLoaderData();
+        this.cachedHologramRadius = loaderData.getChunksRadius() + "";
+        this.cachedHologramArea = (loaderData.getChunksRadius() * 2 + 1) + "";
+        this.cachedHologramType = loaderData.getName();
 
         double baseYLevel = position.getY() + 1;
         this.chunkLoader.forEachHologramLine((index, hologramLine) -> {
@@ -118,6 +128,9 @@ public final class TileEntityChunkLoader extends TileEntity implements ITickable
                 .replace("{2}", hoursAmount + "")
                 .replace("{3}", minutesAmount + "")
                 .replace("{4}", secondsAmount + "")
+                .replace("{5}", this.cachedHologramRadius)
+                .replace("{6}", this.cachedHologramArea)
+                .replace("{7}", this.cachedHologramType)
         );
     }
 
