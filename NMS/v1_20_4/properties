@@ -1,2 +1,3 @@
 NMS_VERSION=v1_20_4
 CRAFTBUKKIT_PACKAGE=org.bukkit.craftbukkit
+REGISTRY=net.minecraft.core.registries.BuiltInRegistries

@@ -106,7 +106,6 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         BlockPos blockPos = new BlockPos(loaderLoc.getBlockX(), loaderLoc.getBlockY(), loaderLoc.getBlockZ());
 
-        long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         ChunkLoaderBlockEntity chunkLoaderBlockEntity =
                 (ChunkLoaderBlockEntity) ((WChunkLoader) chunkLoader).getTileEntityChunkLoader();
 
@@ -132,7 +131,10 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
             if(!(forced ? ChunksTracker.track(bukkitChunk) : ChunksTracker.untrack(bukkitChunk)))
                 continue;
 
-            LevelChunk levelChunk = serverLevel.getChunk(bukkitChunk.getX(), bukkitChunk.getZ());
+            int chunkX = bukkitChunk.getX();
+            int chunkZ = bukkitChunk.getZ();
+
+            LevelChunk levelChunk = serverLevel.getChunk(chunkX, chunkZ);
 
             for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
                 if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity) {
@@ -145,8 +147,7 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
                 }
             }
 
-            ChunkPos chunkPos = levelChunk.getPos();
-            serverLevel.setChunkForced(chunkPos.x, chunkPos.z, forced);
+            serverLevel.setChunkForced(chunkX, chunkZ, forced);
         }
     }
 

@@ -16,7 +16,7 @@ dependencies {
     compileOnly "world.bentobox:bskyblock:1.18.1-SNAPSHOT"
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
-    compileOnly rootProject
+    compileOnly project(":")
 }
 
 if (project.hasProperty('hook.compile_bentobox') &&

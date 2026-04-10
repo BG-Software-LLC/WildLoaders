@@ -1,4 +1,4 @@
-package com.bgsoftware.wildloaders.nms.v1_21_7;
+package com.bgsoftware.wildloaders.nms.v26_1;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -8,7 +8,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
-public class EntityHologram extends com.bgsoftware.wildloaders.nms.v1_21_7.AbstractEntityHologram {
+public class EntityHologram extends com.bgsoftware.wildloaders.nms.v26_1.AbstractEntityHologram {
 
     public EntityHologram(ServerLevel serverLevel, double x, double y, double z) {
         super(serverLevel, x, y, z);
@@ -57,7 +57,7 @@ public class EntityHologram extends com.bgsoftware.wildloaders.nms.v1_21_7.Abstr
     }
 
     @Override
-    public InteractionResult interactAt(Player player, Vec3 hitPos, InteractionHand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
         // Prevent stand being equipped
         return InteractionResult.PASS;
     }

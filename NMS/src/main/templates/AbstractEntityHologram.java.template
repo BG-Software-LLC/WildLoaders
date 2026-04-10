@@ -112,12 +112,6 @@ public abstract class AbstractEntityHologram extends ArmorStand implements Holog
         // Locks the custom name.
     }
 
-    @Override
-    public InteractionResult interactAt(Player player, Vec3 hitPos, InteractionHand hand) {
-        // Prevent stand being equipped
-        return InteractionResult.PASS;
-    }
-
     public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack, boolean silent) {
         // Prevent stand being equipped
     }
