@@ -1,3 +1,4 @@
 NMS_VERSION=v1_21
 CRAFTBUKKIT_PACKAGE=org.bukkit.craftbukkit
 REGISTRY=net.minecraft.core.registries.BuiltInRegistries
+BLOCK_ENTITY_TYPE_VALUES_CLASS=net.minecraft.world.level.block.entity.BlockEntityType
