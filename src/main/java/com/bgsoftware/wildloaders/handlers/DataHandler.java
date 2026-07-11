@@ -79,8 +79,10 @@ public final class DataHandler {
 
                 if (world != null) {
                     Location location = blockPosition.getLocation();
-                    Scheduler.ensureMain(location, () -> plugin.getLoaders().addChunkLoaderWithoutDBSave(
-                            loaderData.get(), placer, location, timeLeft, true, null));
+                    Scheduler.runTaskLater(() -> {
+                    plugin.getLoaders().addChunkLoaderWithoutDBSave(
+                            loaderData.get(), placer, location, timeLeft, true, null);
+                    }, 1L);
                 } else {
                     plugin.getLoaders().addUnloadedChunkLoader(loaderData.get(), placer, blockPosition, timeLeft);
                 }
