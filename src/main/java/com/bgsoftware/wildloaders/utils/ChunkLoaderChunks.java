@@ -9,6 +9,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -82,7 +83,13 @@ public class ChunkLoaderChunks {
 
     }
 
-    public static void loadChunksAsync(ChunkLoader chunkLoader, List<ChunkPosition> chunksToLoad, Consumer<Chunk> consumer, Runnable onFinish) {
+    public static void loadChunksAsync(ChunkLoader chunkLoader, List<ChunkPosition> chunksToLoad,
+                                       @Nullable Consumer<Chunk> consumer, @Nullable Runnable onFinish) {
+        loadChunksAsync(chunkLoader.getLocation(), chunksToLoad, consumer, onFinish);
+    }
+
+    public static void loadChunksAsync(Location location, List<ChunkPosition> chunksToLoad,
+                                       @Nullable Consumer<Chunk> consumer, @Nullable Runnable onFinish) {
         CountDownLatch latch = new CountDownLatch(chunksToLoad.size());
         chunksToLoad.forEach(chunkPosition -> {
             World world = chunkPosition.getBukkitWorld();
@@ -94,7 +101,8 @@ public class ChunkLoaderChunks {
                 }
             }
             plugin.getProviders().loadChunk(world, chunkPosition.getX(), chunkPosition.getZ(), chunk -> {
-                consumer.accept(chunk);
+                if (consumer != null)
+                    consumer.accept(chunk);
                 latch.countDown();
             });
         });
@@ -105,8 +113,8 @@ public class ChunkLoaderChunks {
             } catch (Throwable error) {
                 error.printStackTrace();
             }
-            Scheduler.runTask(chunkLoader.getLocation(), onFinish);
+            if (onFinish != null)
+                Scheduler.runTask(location, onFinish);
         });
-
     }
 }

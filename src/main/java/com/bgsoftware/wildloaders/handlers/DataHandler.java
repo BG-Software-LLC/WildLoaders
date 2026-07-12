@@ -13,6 +13,8 @@ import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.database.DBSession;
 import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
+import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
+import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -20,6 +22,7 @@ import org.bukkit.World;
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,10 +82,10 @@ public final class DataHandler {
 
                 if (world != null) {
                     Location location = blockPosition.getLocation();
-                    Scheduler.runTaskLater(() -> {
-                    plugin.getLoaders().addChunkLoaderWithoutDBSave(
-                            loaderData.get(), placer, location, timeLeft, true, null);
-                    }, 1L);
+                    ChunkLoaderChunks.loadChunksAsync(location, Collections.singletonList(ChunkPosition.of(location)),
+                            chunk -> plugin.getLoaders().addChunkLoaderWithoutDBSave(
+                                    loaderData.get(), placer, location, timeLeft, true, null),
+                            null);
                 } else {
                     plugin.getLoaders().addUnloadedChunkLoader(loaderData.get(), placer, blockPosition, timeLeft);
                 }
