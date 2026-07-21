@@ -49,7 +49,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
         nmsItem.setTag(tagCompound);
 
-        return CraftItemStack.asBukkitCopy(nmsItem);
+        return CraftItemStack.asCraftMirror(nmsItem);
     }
 
     @Override
@@ -72,7 +72,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
         nmsItem.setTag(tagCompound);
 
-        return CraftItemStack.asBukkitCopy(nmsItem);
+        return CraftItemStack.asCraftMirror(nmsItem);
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
         nmsItem.setTag(nbtTagCompound);
 
-        return CraftItemStack.asBukkitCopy(nmsItem);
+        return CraftItemStack.asCraftMirror(nmsItem);
     }
 
     @Override
