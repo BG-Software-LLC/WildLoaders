@@ -1,6 +1,7 @@
-package com.bgsoftware.wildloaders.nms.v1_21_9;
+package com.bgsoftware.wildloaders.nms.v26_3;
 
 import com.bgsoftware.common.reflection.ReflectField;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.properties.Property;
@@ -17,10 +18,13 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21_9.AbstractNMSAdapter {
+public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v26_3.AbstractNMSAdapter {
 
     private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
             CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
+
+    private static final ReflectMethod<org.bukkit.inventory.ItemStack> CRAFT_ITEM_STACK_AS_CRAFT_MIRROR = new ReflectMethod<>(
+            CraftItemStack.class, org.bukkit.inventory.ItemStack.class, "asCraftMirror", ItemStack.class);
 
     @Override
     protected String getTagInternal(ItemStack itemStack, String key, String def) {
@@ -70,7 +74,12 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21_9.Abstr
 
     @Override
     protected org.bukkit.inventory.ItemStack asMirror(ItemStack itemStack) {
-        return CraftItemStack.asCraftMirror(itemStack);
+        // Spigot still uses the CraftItemStack#asCraftMirror(ItemStack).
+        if (CRAFT_ITEM_STACK_AS_CRAFT_MIRROR.isValid()) {
+            return CRAFT_ITEM_STACK_AS_CRAFT_MIRROR.invoke(null, itemStack);
+        }
+
+        return CraftItemStack.asBukkitMirror(itemStack);
     }
 
     private static CompoundTag getCustomDataTag(CustomData customData) {

@@ -1,11 +1,10 @@
 package com.bgsoftware.wildloaders.nms.${NMS_VERSION}.loader;
 
+import com.bgsoftware.wildloaders.nms.${NMS_VERSION}.loader.ChunkLoaderBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 
-public record ChunkLoaderBlockEntityTicker(
-        ChunkLoaderBlockEntity chunkLoaderBlockEntity) implements TickingBlockEntity {
+public record ChunkLoaderBlockEntityTicker(ChunkLoaderBlockEntity chunkLoaderBlockEntity) implements TickingBlockEntity {
 
     @Override
     public void tick() {
@@ -25,10 +24,6 @@ public record ChunkLoaderBlockEntityTicker(
     @Override
     public String getType() {
         return ${REGISTRY}.BLOCK_ENTITY_TYPE.getKey(chunkLoaderBlockEntity.getType()) + "";
-    }
-
-    public BlockEntity getTileEntity() {
-        return chunkLoaderBlockEntity;
     }
 
 }

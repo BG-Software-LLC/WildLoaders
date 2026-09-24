@@ -3,6 +3,7 @@ package com.bgsoftware.wildloaders.nms.v1_17;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 
 import java.util.UUID;
 
@@ -52,6 +53,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_17.Abstrac
         skullOwner.putString("Id", UUID.randomUUID().toString());
 
         compoundTag.put("SkullOwner", skullOwner);
+    }
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
     }
 
 }
