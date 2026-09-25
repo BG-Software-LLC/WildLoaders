@@ -3,7 +3,6 @@ package com.bgsoftware.wildloaders.nms.${NMS_VERSION};
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 import ${CRAFTBUKKIT_PACKAGE}.CraftWorld;
-import ${CRAFTBUKKIT_PACKAGE}.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;

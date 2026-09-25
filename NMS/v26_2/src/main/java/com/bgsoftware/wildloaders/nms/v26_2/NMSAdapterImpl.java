@@ -1,6 +1,7 @@
 package com.bgsoftware.wildloaders.nms.v26_2;
 
 import com.bgsoftware.common.reflection.ReflectField;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.properties.Property;
@@ -12,14 +13,16 @@ import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v26_2.AbstractNMSAdapter {
 
-    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
-            CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
+    private static final boolean SUPPORT_CUSTOM_DATA_UNSAFE = new ReflectMethod<>(CustomData.class, "getUnsafe").isValid();
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = SUPPORT_CUSTOM_DATA_UNSAFE ? null :
+            new ReflectField<>(CustomData.class, CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
 
     @Override
     protected String getTagInternal(ItemStack itemStack, String key, String def) {
@@ -67,12 +70,13 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v26_2.Abstrac
         itemStack.set(DataComponents.PROFILE, resolvableProfile);
     }
 
+    @Override
+    protected org.bukkit.inventory.ItemStack asMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
+
     private static CompoundTag getCustomDataTag(CustomData customData) {
-        try {
-            return customData.getUnsafe();
-        } catch (Throwable error) {
-            return CUSTOM_DATA_TAG.get(customData);
-        }
+        return SUPPORT_CUSTOM_DATA_UNSAFE ? customData.getUnsafe() : CUSTOM_DATA_TAG.get(customData);
     }
 
 }

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
 import java.util.Optional;
 
@@ -56,6 +57,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v1_21.Abstrac
         ResolvableProfile resolvableProfile = new ResolvableProfile(Optional.empty(), Optional.empty(), propertyMap);
 
         itemStack.set(DataComponents.PROFILE, resolvableProfile);
+    }
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
     }
 
 }
