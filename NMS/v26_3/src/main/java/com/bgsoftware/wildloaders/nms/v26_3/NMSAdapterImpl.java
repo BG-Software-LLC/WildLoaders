@@ -20,8 +20,9 @@ import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v26_3.AbstractNMSAdapter {
 
-    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
-            CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
+    private static final boolean SUPPORT_CUSTOM_DATA_UNSAFE = new ReflectMethod<>(CustomData.class, "getUnsafe").isValid();
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = SUPPORT_CUSTOM_DATA_UNSAFE ? null :
+            new ReflectField<>(CustomData.class, CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
 
     private static final ReflectMethod<org.bukkit.inventory.ItemStack> CRAFT_ITEM_STACK_AS_CRAFT_MIRROR = new ReflectMethod<>(
             CraftItemStack.class, org.bukkit.inventory.ItemStack.class, "asCraftMirror", ItemStack.class);
@@ -83,11 +84,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildloaders.nms.v26_3.Abstrac
     }
 
     private static CompoundTag getCustomDataTag(CustomData customData) {
-        try {
-            return customData.getUnsafe();
-        } catch (Throwable error) {
-            return CUSTOM_DATA_TAG.get(customData);
-        }
+        return SUPPORT_CUSTOM_DATA_UNSAFE ? customData.getUnsafe() : CUSTOM_DATA_TAG.get(customData);
     }
 
 }
