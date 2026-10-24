@@ -18,6 +18,7 @@ public final class TileEntityChunkLoader extends TileEntity implements IUpdatePl
 
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
+    private final int loaderData;
 
     private short currentTick = 20;
     public boolean removed = false;
@@ -31,11 +32,20 @@ public final class TileEntityChunkLoader extends TileEntity implements IUpdatePl
         a(world);
 
         loaderBlock = world.getType(x, y, z);
+        loaderData = world.getData(x, y, z);
     }
 
     @Override
     public void a() {
-        if (removed || ++currentTick <= 20)
+        if (removed)
+            return;
+
+        if (!chunkLoader.isNotActive() && world.getType(x, y, z) == loaderBlock &&
+                world.getData(x, y, z) != loaderData) {
+            world.setData(x, y, z, loaderData, 2);
+        }
+
+        if (++currentTick <= 20)
             return;
 
         currentTick = 0;

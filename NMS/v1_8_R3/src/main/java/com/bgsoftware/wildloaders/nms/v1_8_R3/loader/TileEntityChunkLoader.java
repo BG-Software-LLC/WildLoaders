@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.IBlockData;
 import net.minecraft.server.v1_8_R3.IUpdatePlayerListBox;
 import net.minecraft.server.v1_8_R3.TileEntity;
 import net.minecraft.server.v1_8_R3.World;
@@ -23,6 +24,7 @@ public final class TileEntityChunkLoader extends TileEntity implements IUpdatePl
     public final Int2ObjectMap<EntityHolograms> holograms = new Int2ObjectArrayMap<>();
     private final WChunkLoader chunkLoader;
     private final Block loaderBlock;
+    private final IBlockData loaderState;
     private final String cachedPlacerName;
 
     private short currentTick = 20;
@@ -39,7 +41,8 @@ public final class TileEntityChunkLoader extends TileEntity implements IUpdatePl
         a(blockPosition);
         a(world);
 
-        loaderBlock = world.getType(blockPosition).getBlock();
+        loaderState = world.getType(blockPosition);
+        loaderBlock = loaderState.getBlock();
 
         this.cachedPlacerName = Optional.ofNullable(this.chunkLoader.getWhoPlaced().getName()).orElse("");
 
@@ -77,7 +80,16 @@ public final class TileEntityChunkLoader extends TileEntity implements IUpdatePl
 
     @Override
     public void c() {
-        if (removed || ++currentTick <= 20)
+        if (removed)
+            return;
+
+        if (!chunkLoader.isNotActive()) {
+            IBlockData blockState = world.getType(position);
+            if (blockState.getBlock() == loaderBlock && blockState != loaderState)
+                world.setTypeAndData(position, loaderState, 2);
+        }
+
+        if (++currentTick <= 20)
             return;
 
         currentTick = 0;
