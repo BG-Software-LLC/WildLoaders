@@ -15,7 +15,6 @@ import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.google.common.collect.Maps;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -121,8 +120,8 @@ public final class LoadersHandler implements LoadersManager {
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, blockPosition, chunksToLoad, timeLeft);
         chunkLoaders.put(blockPosition, chunkLoader);
         chunkLoadersByWorlds.computeIfAbsent(blockPosition.getWorldName(), i -> new LinkedList<>()).add(chunkLoader);
-        for (Chunk loadedChunk : chunkLoader.getLoadedChunksCollection()) {
-            chunkLoadersByChunks.put(ChunkPosition.of(loadedChunk), chunkLoader);
+        for (ChunkPosition chunkPosition : chunkLoader.getChunkPositions()) {
+            chunkLoadersByChunks.put(chunkPosition, chunkLoader);
         }
         plugin.getNPCs().createNPC(blockPosition);
         return chunkLoader;
@@ -160,8 +159,14 @@ public final class LoadersHandler implements LoadersManager {
         SQLDatabaseTransaction<?> updateTransaction = null;
 
         for (ChunkLoader chunkLoader : worldChunkLoaders) {
+            if (getChunkLoader(chunkLoader.getLocation()).orElse(null) != chunkLoader)
+                continue;
+
             plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
             BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
+            if (blockPosition == null)
+                continue;
+
             UnloadedChunkLoader unloadedChunkLoader = new UnloadedChunkLoader(chunkLoader.getLoaderData(),
                     chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
             unloadedChunkLoaders.add(unloadedChunkLoader);
@@ -169,40 +174,39 @@ public final class LoadersHandler implements LoadersManager {
             updateTransaction = plugin.getDataHandler().saveLoaderTimeLeft(chunkLoader, updateTransaction);
         }
 
-        DBSession.execute(updateTransaction);
+        if (updateTransaction != null)
+            DBSession.execute(updateTransaction);
 
         this.unloadedChunkLoadersByWorlds.put(world.getName(), unloadedChunkLoaders);
     }
 
     @Override
     public void removeChunkLoader(ChunkLoader chunkLoader) {
-        removeChunkLoaderWithoutDBSave(chunkLoader);
-        plugin.getDataHandler().deleteChunkLoader(chunkLoader);
+        chunkLoader.remove();
     }
 
+    public void unregisterChunkLoader(ChunkLoader chunkLoader) {
+        if (removeChunkLoaderWithoutDBSave(chunkLoader) != null)
+            plugin.getDataHandler().deleteChunkLoader(chunkLoader);
+    }
+
+    @Nullable
     private BlockPosition removeChunkLoaderWithoutDBSave(ChunkLoader chunkLoader) {
         BlockPosition blockPosition = BlockPosition.of(chunkLoader.getLocation());
-        ChunkLoader oldChunkLoader = chunkLoaders.remove(blockPosition);
+        if (!chunkLoaders.remove(blockPosition, chunkLoader))
+            return null;
 
-        if(oldChunkLoader == null) {
-            WildLoadersPlugin.log(ChatColor.RED + "Removed chunk loader at " + blockPosition.serialize() + " but it was not there.");
-            return blockPosition;
-        } else if (oldChunkLoader != chunkLoader) {
-            WildLoadersPlugin.log(ChatColor.YELLOW + "Removed chunk loader at " + blockPosition.serialize() + " but it was not the one requested to be removed.");
-            ((WChunkLoader) chunkLoader).markRemoved();
+        for (ChunkPosition chunkPosition : ((WChunkLoader) chunkLoader).getChunkPositions()) {
+            chunkLoadersByChunks.remove(chunkPosition, chunkLoader);
         }
 
-        ((WChunkLoader) oldChunkLoader).markRemoved();
-
-        for (Chunk loadedChunk : oldChunkLoader.getLoadedChunksCollection()) {
-            chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
-        }
+        ((WChunkLoader) chunkLoader).markRemoved();
 
         List<ChunkLoader> worldChunkLoaders = chunkLoadersByWorlds.get(blockPosition.getWorldName());
         if (worldChunkLoaders != null)
-            worldChunkLoaders.remove(oldChunkLoader);
+            worldChunkLoaders.remove(chunkLoader);
 
-        oldChunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
+        chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
         return blockPosition;
     }
 

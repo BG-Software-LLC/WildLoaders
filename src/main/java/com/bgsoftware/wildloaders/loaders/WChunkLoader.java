@@ -18,6 +18,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -30,6 +31,7 @@ public final class WChunkLoader implements ChunkLoader {
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     private final List<Chunk> loadedChunksUnmodifiable;
+    private final List<ChunkPosition> chunkPositions;
 
     private final UUID whoPlaced;
     private final BlockPosition blockPosition;
@@ -40,6 +42,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     private boolean active = true;
     private boolean removed = true;
+    private boolean removing;
 
     private long timeLeft;
 
@@ -48,9 +51,10 @@ public final class WChunkLoader implements ChunkLoader {
         this.whoPlaced = whoPlaced;
         this.blockPosition = blockPosition;
         this.timeLeft = timeLeft;
+        this.chunkPositions = Collections.unmodifiableList(new ArrayList<>(chunksToLoad));
         List<Chunk> loadedChunks = new LinkedList<>();
         this.loadedChunksUnmodifiable = Collections.unmodifiableList(loadedChunks);
-        ChunkLoaderChunks.loadChunksAsync(this, chunksToLoad, loadedChunks::add, this::onChunksLoadFinish);
+        ChunkLoaderChunks.loadChunksAsync(this, this.chunkPositions, loadedChunks::add, this::onChunksLoadFinish);
     }
 
     @Override
@@ -99,6 +103,10 @@ public final class WChunkLoader implements ChunkLoader {
         return this.removed ? Collections.emptyList() : this.loadedChunksUnmodifiable;
     }
 
+    public List<ChunkPosition> getChunkPositions() {
+        return this.chunkPositions;
+    }
+
     @Override
     public Optional<ChunkLoaderNPC> getNPC() {
         return plugin.getNPCs().getNPC(this.blockPosition);
@@ -110,11 +118,21 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void removeInternal() {
-        plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive(),
-                SpawnerChangeListener.CALLBACK);
-        plugin.getLoaders().removeChunkLoader(this);
+        Location location = getLocation();
+        if (!this.active || this.removing || plugin.getLoaders().getChunkLoader(location).orElse(null) != this)
+            return;
 
-        getLocation().getBlock().setType(Material.AIR);
+        this.removing = true;
+        try {
+            plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive(),
+                    SpawnerChangeListener.CALLBACK);
+            plugin.getLoaders().unregisterChunkLoader(this);
+
+            if (!plugin.getLoaders().getChunkLoader(location).isPresent())
+                location.getBlock().setType(Material.AIR);
+        } finally {
+            this.removing = false;
+        }
     }
 
     public void markRemoved() {
@@ -149,6 +167,9 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void onChunksLoadFinish() {
+        if (!this.active || plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) != this)
+            return;
+
         this.removed = false;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
     }
