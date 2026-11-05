@@ -51,7 +51,7 @@ public final class WChunkLoader implements ChunkLoader {
         this.whoPlaced = whoPlaced;
         this.blockPosition = blockPosition;
         this.timeLeft = timeLeft;
-        this.chunkPositions = Collections.unmodifiableList(new ArrayList<>(chunksToLoad));
+        this.chunkPositions = Collections.unmodifiableList(new LinkedList<>(chunksToLoad));
         List<Chunk> loadedChunks = new LinkedList<>();
         this.loadedChunksUnmodifiable = Collections.unmodifiableList(loadedChunks);
         ChunkLoaderChunks.loadChunksAsync(this, this.chunkPositions, loadedChunks::add, this::onChunksLoadFinish);
