@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.block.FluidLevelChangeEvent;
@@ -39,11 +38,6 @@ public final class BlockProtectionListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new LevelChangeListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_14))
             plugin.getServer().getPluginManager().registerEvents(new BlockChangesListener(), plugin);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onBlockPhysics(BlockPhysicsEvent e) {
-        protectBlock(e.getBlock(), e);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
