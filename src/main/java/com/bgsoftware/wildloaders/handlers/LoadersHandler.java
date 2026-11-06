@@ -97,6 +97,7 @@ public final class LoadersHandler implements LoadersManager {
     public WChunkLoader addChunkLoaderWithoutDBSave(LoaderData loaderData, UUID placer, Location location,
                                                     long timeLeft, boolean validateBlock,
                                                     @Nullable List<ChunkPosition> chunksToLoad) {
+        // Preventing the async callback of chunk loads to call this after the plugin was disabled.
         if (!plugin.isEnabled())
             return null;
 
