@@ -35,7 +35,7 @@ public final class BlockProtectionListener implements Listener {
         this.plugin = plugin;
 
         if (ServerVersion.isLegacy())
-            plugin.getServer().getPluginManager().registerEvents(new LegacyListener(), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new FurnaceBurnListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_9))
             plugin.getServer().getPluginManager().registerEvents(new LevelChangeListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_14))
@@ -109,7 +109,7 @@ public final class BlockProtectionListener implements Listener {
         blocks.removeIf(blockState -> isLoader(blockState.getBlock()));
     }
 
-    private class LegacyListener implements Listener {
+    private class FurnaceBurnListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onFurnaceBurn(FurnaceBurnEvent e) {
