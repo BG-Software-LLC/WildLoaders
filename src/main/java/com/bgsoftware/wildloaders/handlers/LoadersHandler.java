@@ -12,7 +12,6 @@ import com.bgsoftware.wildloaders.loaders.WLoaderData;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
-import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.google.common.collect.Maps;
 import org.bukkit.Chunk;
@@ -112,18 +111,18 @@ public final class LoadersHandler implements LoadersManager {
             }
         }
 
-        ChunkLoader existingChunkLoader = chunkLoaders.get(blockPosition);
-        if (existingChunkLoader != null) {
-            // Only one loader per block: unload the old one before its chunks are filtered out below.
-            // Its database row is overwritten when the new loader is inserted.
-            plugin.getNMSAdapter().removeLoader(existingChunkLoader, false, SpawnerChangeListener.CALLBACK);
+        boolean filterLoadedChunks = chunksToLoad == null;
+        if (filterLoadedChunks)
+            chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
+
+        ChunkLoader existingChunkLoader;
+        while ((existingChunkLoader = chunkLoaders.get(blockPosition)) != null) {
+            ((WChunkLoader) existingChunkLoader).unload(false);
             removeChunkLoaderWithoutDBSave(existingChunkLoader);
         }
 
-        if (chunksToLoad == null) {
-            chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
+        if (filterLoadedChunks)
             chunksToLoad.removeIf(chunkPosition -> plugin.getLoaders().getChunkLoader(chunkPosition).isPresent());
-        }
 
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, blockPosition, chunksToLoad, timeLeft);
         chunkLoaders.put(blockPosition, chunkLoader);
@@ -167,7 +166,7 @@ public final class LoadersHandler implements LoadersManager {
         SQLDatabaseTransaction<?> updateTransaction = null;
 
         for (ChunkLoader chunkLoader : worldChunkLoaders) {
-            plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
+            ((WChunkLoader) chunkLoader).unload(false);
             BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
             if (blockPosition == null)
                 continue;
@@ -229,11 +228,13 @@ public final class LoadersHandler implements LoadersManager {
 
     @Override
     public void removeChunkLoaders() {
-        chunkLoaders.values().forEach(chunkLoader -> {
-            plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
-            ((WChunkLoader) chunkLoader).markRemoved();
-        });
-        chunkLoaders.clear();
+        while (!chunkLoaders.isEmpty()) {
+            for (ChunkLoader chunkLoader : chunkLoaders.values()) {
+                ((WChunkLoader) chunkLoader).unload(false);
+                ((WChunkLoader) chunkLoader).markRemoved();
+                chunkLoaders.remove(BlockPosition.of(chunkLoader.getLocation()), chunkLoader);
+            }
+        }
         chunkLoadersByChunks.clear();
         chunkLoadersByWorlds.clear();
     }

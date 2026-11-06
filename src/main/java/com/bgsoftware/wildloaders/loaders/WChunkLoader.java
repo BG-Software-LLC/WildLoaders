@@ -117,19 +117,29 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void removeInternal() {
-        if (!this.active)
+        if (!unload(timeLeft <= 0 || isNotActive()))
             return;
 
-        boolean spawnParticle = timeLeft <= 0 || isNotActive();
-        // Cleared before anything else so repeated and re-entrant calls return above.
-        this.active = false;
-
         Location location = getLocation();
-        plugin.getNMSAdapter().removeLoader(this, spawnParticle, SpawnerChangeListener.CALLBACK);
         plugin.getLoaders().unregisterChunkLoader(this);
 
         if (!plugin.getLoaders().getChunkLoader(location).isPresent())
             location.getBlock().setType(Material.AIR);
+    }
+
+    public boolean unload(boolean spawnParticle) {
+        if (!this.active)
+            return false;
+
+        this.active = false;
+        try {
+            plugin.getNMSAdapter().removeLoader(this, spawnParticle, SpawnerChangeListener.CALLBACK);
+        } catch (RuntimeException | Error error) {
+            this.active = plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) == this;
+            throw error;
+        }
+
+        return true;
     }
 
     public void markRemoved() {
