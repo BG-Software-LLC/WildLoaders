@@ -30,7 +30,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class LoadersHandler implements LoadersManager {
 
@@ -39,6 +41,7 @@ public final class LoadersHandler implements LoadersManager {
     private final Map<String, List<ChunkLoader>> chunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, List<UnloadedChunkLoader>> unloadedChunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
+    private final Set<Material> loaderBlockTypes = new CopyOnWriteArraySet<>();
     private final WildLoadersPlugin plugin;
 
     public LoadersHandler(WildLoadersPlugin plugin) {
@@ -58,6 +61,10 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public Optional<ChunkLoader> getChunkLoader(Location location) {
         return Optional.ofNullable(chunkLoaders.get(BlockPosition.of(location)));
+    }
+
+    public boolean isLoaderBlockType(Material type) {
+        return loaderBlockTypes.contains(type);
     }
 
     public Optional<ChunkLoader> getChunkLoader(ChunkPosition chunkPosition) {
@@ -117,6 +124,8 @@ public final class LoadersHandler implements LoadersManager {
             chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
             chunksToLoad.removeIf(chunkPosition -> plugin.getLoaders().getChunkLoader(chunkPosition).isPresent());
         }
+
+        loaderBlockTypes.add(location.getBlock().getType());
 
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, blockPosition, chunksToLoad, timeLeft);
         chunkLoaders.put(blockPosition, chunkLoader);
@@ -225,6 +234,7 @@ public final class LoadersHandler implements LoadersManager {
             ((WChunkLoader) chunkLoader).markRemoved();
         });
         chunkLoaders.clear();
+        loaderBlockTypes.clear();
         chunkLoadersByChunks.clear();
         chunkLoadersByWorlds.clear();
     }

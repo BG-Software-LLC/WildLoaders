@@ -88,7 +88,7 @@ public final class BlockProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onStructureGrow(StructureGrowEvent e) {
-        protectBlocks(e.getBlocks(), e);
+        protectBlocks(e.getBlocks());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -97,6 +97,9 @@ public final class BlockProtectionListener implements Listener {
     }
 
     private boolean isLoader(Block block) {
+        if (!plugin.getLoaders().isLoaderBlockType(block.getType()))
+            return false;
+
         return plugin.getLoaders().getChunkLoader(block.getLocation()).isPresent();
     }
 
@@ -105,13 +108,8 @@ public final class BlockProtectionListener implements Listener {
             e.setCancelled(true);
     }
 
-    private void protectBlocks(List<BlockState> blocks, Cancellable e) {
-        for (BlockState blockState : blocks) {
-            if (isLoader(blockState.getBlock())) {
-                e.setCancelled(true);
-                return;
-            }
-        }
+    private void protectBlocks(List<BlockState> blocks) {
+        blocks.removeIf(blockState -> isLoader(blockState.getBlock()));
     }
 
     private class LevelChangeListener implements Listener {
@@ -137,14 +135,13 @@ public final class BlockProtectionListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onBlockFertilize(BlockFertilizeEvent e) {
-            protectBlock(e.getBlock(), e);
-            protectBlocks(e.getBlocks(), e);
+            protectBlocks(e.getBlocks());
         }
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onSpongeAbsorb(SpongeAbsorbEvent e) {
             protectBlock(e.getBlock(), e);
-            protectBlocks(e.getBlocks(), e);
+            protectBlocks(e.getBlocks());
         }
 
     }
