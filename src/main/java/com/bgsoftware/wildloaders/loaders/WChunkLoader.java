@@ -5,7 +5,6 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
@@ -13,12 +12,10 @@ import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -40,8 +37,7 @@ public final class WChunkLoader implements ChunkLoader {
     @Nullable
     private ITileEntityChunkLoader tileEntityChunkLoader;
 
-    private boolean active = true;
-    private boolean removed = true;
+    private State state = State.LOADING;
 
     private long timeLeft;
 
@@ -67,7 +63,15 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public boolean isNotActive() {
-        return this.removed || !this.active;
+        return this.state != State.ACTIVE;
+    }
+
+    public State getState() {
+        return this.state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     @Override
@@ -99,7 +103,8 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Collection<Chunk> getLoadedChunksCollection() {
-        return this.removed ? Collections.emptyList() : this.loadedChunksUnmodifiable;
+        return this.state == State.ACTIVE || this.state == State.REMOVING ?
+                this.loadedChunksUnmodifiable : Collections.emptyList();
     }
 
     public List<ChunkPosition> getChunkPositions() {
@@ -113,38 +118,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        Scheduler.ensureMain(getLocation(), this::removeInternal);
-    }
-
-    private void removeInternal() {
-        if (!unload(timeLeft <= 0 || isNotActive()))
-            return;
-
-        Location location = getLocation();
-        plugin.getLoaders().unregisterChunkLoader(this);
-
-        if (!plugin.getLoaders().getChunkLoader(location).isPresent())
-            location.getBlock().setType(Material.AIR);
-    }
-
-    public boolean unload(boolean spawnParticle) {
-        if (!this.active)
-            return false;
-
-        this.active = false;
-        try {
-            plugin.getNMSAdapter().removeLoader(this, spawnParticle, SpawnerChangeListener.CALLBACK);
-        } catch (RuntimeException | Error error) {
-            this.active = plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) == this;
-            throw error;
-        }
-
-        return true;
-    }
-
-    public void markRemoved() {
-        this.removed = true;
-        this.active = false;
+        plugin.getLoaders().removeChunkLoader(this);
     }
 
     @Override
@@ -174,11 +148,18 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void onChunksLoadFinish() {
-        if (!this.active)
+        if (this.state != State.LOADING)
             return;
 
-        this.removed = false;
+        this.state = State.ACTIVE;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
+    }
+
+    public enum State {
+        LOADING,
+        ACTIVE,
+        REMOVING,
+        REMOVED
     }
 
     public interface HologramLineCallback {
