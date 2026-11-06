@@ -34,6 +34,8 @@ public final class BlockProtectionListener implements Listener {
     public BlockProtectionListener(WildLoadersPlugin plugin) {
         this.plugin = plugin;
 
+        if (ServerVersion.isLegacy())
+            plugin.getServer().getPluginManager().registerEvents(new LegacyListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_9))
             plugin.getServer().getPluginManager().registerEvents(new LevelChangeListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_14))
@@ -91,11 +93,6 @@ public final class BlockProtectionListener implements Listener {
         protectBlocks(e.getBlocks());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onFurnaceBurn(FurnaceBurnEvent e) {
-        protectBlock(e.getBlock(), e);
-    }
-
     private boolean isLoader(Block block) {
         if (!plugin.getLoaders().isLoaderBlockType(block.getType()))
             return false;
@@ -110,6 +107,15 @@ public final class BlockProtectionListener implements Listener {
 
     private void protectBlocks(List<BlockState> blocks) {
         blocks.removeIf(blockState -> isLoader(blockState.getBlock()));
+    }
+
+    private class LegacyListener implements Listener {
+
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onFurnaceBurn(FurnaceBurnEvent e) {
+            protectBlock(e.getBlock(), e);
+        }
+
     }
 
     private class LevelChangeListener implements Listener {

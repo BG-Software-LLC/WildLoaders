@@ -26,13 +26,13 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class LoadersHandler implements LoadersManager {
 
@@ -41,7 +41,7 @@ public final class LoadersHandler implements LoadersManager {
     private final Map<String, List<ChunkLoader>> chunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, List<UnloadedChunkLoader>> unloadedChunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
-    private final Set<Material> loaderBlockTypes = new CopyOnWriteArraySet<>();
+    private final Set<Material> loaderBlockTypes = EnumSet.noneOf(Material.class);
     private final WildLoadersPlugin plugin;
 
     public LoadersHandler(WildLoadersPlugin plugin) {
@@ -124,8 +124,6 @@ public final class LoadersHandler implements LoadersManager {
             chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
             chunksToLoad.removeIf(chunkPosition -> plugin.getLoaders().getChunkLoader(chunkPosition).isPresent());
         }
-
-        loaderBlockTypes.add(location.getBlock().getType());
 
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, blockPosition, chunksToLoad, timeLeft);
         chunkLoaders.put(blockPosition, chunkLoader);
@@ -218,6 +216,11 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public LoaderData createLoaderData(String name, long timeLeft, ItemStack itemStack) {
         LoaderData loaderData = new WLoaderData(name, timeLeft, itemStack);
+        Material blockType = itemStack.getType();
+        if (ServerVersion.isLegacy() && blockType == Material.CAULDRON_ITEM)
+            blockType = Material.CAULDRON;
+
+        loaderBlockTypes.add(blockType);
         loadersData.put(name, loaderData);
         return loaderData;
     }
@@ -225,6 +228,7 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public void removeLoadersData() {
         loadersData.clear();
+        loaderBlockTypes.clear();
     }
 
     @Override
@@ -234,7 +238,6 @@ public final class LoadersHandler implements LoadersManager {
             ((WChunkLoader) chunkLoader).markRemoved();
         });
         chunkLoaders.clear();
-        loaderBlockTypes.clear();
         chunkLoadersByChunks.clear();
         chunkLoadersByWorlds.clear();
     }
