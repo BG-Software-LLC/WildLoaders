@@ -42,7 +42,6 @@ public final class WChunkLoader implements ChunkLoader {
 
     private boolean active = true;
     private boolean removed = true;
-    private boolean removing;
 
     private long timeLeft;
 
@@ -118,21 +117,19 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void removeInternal() {
-        Location location = getLocation();
-        if (!this.active || this.removing || plugin.getLoaders().getChunkLoader(location).orElse(null) != this)
+        if (!this.active)
             return;
 
-        this.removing = true;
-        try {
-            plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive(),
-                    SpawnerChangeListener.CALLBACK);
-            plugin.getLoaders().unregisterChunkLoader(this);
+        boolean spawnParticle = timeLeft <= 0 || isNotActive();
+        // Cleared before anything else so repeated and re-entrant calls return above.
+        this.active = false;
 
-            if (!plugin.getLoaders().getChunkLoader(location).isPresent())
-                location.getBlock().setType(Material.AIR);
-        } finally {
-            this.removing = false;
-        }
+        Location location = getLocation();
+        plugin.getNMSAdapter().removeLoader(this, spawnParticle, SpawnerChangeListener.CALLBACK);
+        plugin.getLoaders().unregisterChunkLoader(this);
+
+        if (!plugin.getLoaders().getChunkLoader(location).isPresent())
+            location.getBlock().setType(Material.AIR);
     }
 
     public void markRemoved() {
@@ -167,7 +164,7 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void onChunksLoadFinish() {
-        if (!this.active || plugin.getLoaders().getChunkLoader(getLocation()).orElse(null) != this)
+        if (!this.active)
             return;
 
         this.removed = false;

@@ -112,6 +112,14 @@ public final class LoadersHandler implements LoadersManager {
             }
         }
 
+        ChunkLoader existingChunkLoader = chunkLoaders.get(blockPosition);
+        if (existingChunkLoader != null) {
+            // Only one loader per block: unload the old one before its chunks are filtered out below.
+            // Its database row is overwritten when the new loader is inserted.
+            plugin.getNMSAdapter().removeLoader(existingChunkLoader, false, SpawnerChangeListener.CALLBACK);
+            removeChunkLoaderWithoutDBSave(existingChunkLoader);
+        }
+
         if (chunksToLoad == null) {
             chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
             chunksToLoad.removeIf(chunkPosition -> plugin.getLoaders().getChunkLoader(chunkPosition).isPresent());
@@ -159,9 +167,6 @@ public final class LoadersHandler implements LoadersManager {
         SQLDatabaseTransaction<?> updateTransaction = null;
 
         for (ChunkLoader chunkLoader : worldChunkLoaders) {
-            if (getChunkLoader(chunkLoader.getLocation()).orElse(null) != chunkLoader)
-                continue;
-
             plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
             BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
             if (blockPosition == null)
