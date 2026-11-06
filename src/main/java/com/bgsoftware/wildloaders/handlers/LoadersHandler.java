@@ -26,10 +26,12 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public final class LoadersHandler implements LoadersManager {
@@ -39,6 +41,7 @@ public final class LoadersHandler implements LoadersManager {
     private final Map<String, List<ChunkLoader>> chunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, List<UnloadedChunkLoader>> unloadedChunkLoadersByWorlds = Maps.newConcurrentMap();
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
+    private final Set<Material> loaderBlockTypes = EnumSet.noneOf(Material.class);
     private final WildLoadersPlugin plugin;
 
     public LoadersHandler(WildLoadersPlugin plugin) {
@@ -58,6 +61,10 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public Optional<ChunkLoader> getChunkLoader(Location location) {
         return Optional.ofNullable(chunkLoaders.get(BlockPosition.of(location)));
+    }
+
+    public boolean isLoaderBlockType(Material type) {
+        return loaderBlockTypes.contains(type);
     }
 
     public Optional<ChunkLoader> getChunkLoader(ChunkPosition chunkPosition) {
@@ -102,12 +109,9 @@ public final class LoadersHandler implements LoadersManager {
 
         if (validateBlock) {
             Material blockType = location.getBlock().getType();
+            Material loaderBlockType = convertItemTypeToBlockType(loaderData.getLoaderItem().getType());
 
-            if (ServerVersion.isLegacy() && blockType == Material.CAULDRON) {
-                blockType = Material.CAULDRON_ITEM;
-            }
-
-            if (blockType != loaderData.getLoaderItem().getType()) {
+            if (blockType != loaderBlockType) {
                 WildLoadersPlugin.log("The chunk-loader at " + blockPosition.serialize() + " is invalid.");
                 return null;
             }
@@ -209,6 +213,7 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public LoaderData createLoaderData(String name, long timeLeft, ItemStack itemStack) {
         LoaderData loaderData = new WLoaderData(name, timeLeft, itemStack);
+        loaderBlockTypes.add(convertItemTypeToBlockType(itemStack.getType()));
         loadersData.put(name, loaderData);
         return loaderData;
     }
@@ -216,6 +221,7 @@ public final class LoadersHandler implements LoadersManager {
     @Override
     public void removeLoadersData() {
         loadersData.clear();
+        loaderBlockTypes.clear();
     }
 
     @Override
@@ -227,5 +233,12 @@ public final class LoadersHandler implements LoadersManager {
         chunkLoaders.clear();
         chunkLoadersByChunks.clear();
         chunkLoadersByWorlds.clear();
+    }
+
+    private static Material convertItemTypeToBlockType(Material itemType) {
+        if (ServerVersion.isLegacy() && itemType == Material.CAULDRON_ITEM)
+            return Material.CAULDRON;
+
+        return itemType;
     }
 }
