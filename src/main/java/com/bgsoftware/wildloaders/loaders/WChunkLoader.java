@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
+import com.bgsoftware.wildloaders.scheduler.Scheduler;
 import com.bgsoftware.wildloaders.utils.BlockPosition;
 import com.bgsoftware.wildloaders.utils.ChunkLoaderChunks;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
@@ -63,15 +64,7 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public boolean isNotActive() {
-        return this.state != State.ACTIVE;
-    }
-
-    public State getState() {
-        return this.state;
-    }
-
-    public void setState(State state) {
-        this.state = state;
+        return this.state != State.LOADED;
     }
 
     @Override
@@ -103,8 +96,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Collection<Chunk> getLoadedChunksCollection() {
-        return this.state == State.ACTIVE || this.state == State.REMOVING ?
-                this.loadedChunksUnmodifiable : Collections.emptyList();
+        return this.state == State.LOADED ? this.loadedChunksUnmodifiable : Collections.emptyList();
     }
 
     public List<ChunkPosition> getChunkPositions() {
@@ -118,7 +110,15 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        plugin.getLoaders().removeChunkLoader(this);
+        Scheduler.ensureMain(getLocation(), () -> plugin.getLoaders().removeChunkLoader(this));
+    }
+
+    public boolean isRemoved() {
+        return this.state == State.REMOVED;
+    }
+
+    public void markRemoved() {
+        this.state = State.REMOVED;
     }
 
     @Override
@@ -148,23 +148,35 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void onChunksLoadFinish() {
-        if (this.state != State.LOADING)
+        if (this.state != State.LOADING) // removed while its chunks were loading
             return;
 
-        this.state = State.ACTIVE;
+        this.state = State.LOADED;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
-    }
-
-    public enum State {
-        LOADING,
-        ACTIVE,
-        REMOVING,
-        REMOVED
     }
 
     public interface HologramLineCallback {
 
         void apply(int index, String line);
+
+    }
+
+    private enum State {
+
+        /**
+         * Registered, but its chunks are still loading: no tile entity yet and no chunks forced.
+         */
+        LOADING,
+
+        /**
+         * Its chunks are forced and its tile entity exists.
+         */
+        LOADED,
+
+        /**
+         * Removed; any chunks it forced were released.
+         */
+        REMOVED
 
     }
 
