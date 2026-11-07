@@ -142,8 +142,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
             worldServer.a(null, 2001, x, y, z,
                     Block.getId(worldServer.getType(x, y, z)) + (worldServer.getData(x, y, z) << 12));
 
-        Scheduler.ensureMain(loaderLoc, () ->
-                setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback));
+        setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback);
     }
 
     private static void setSpawnersRangeForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean loaded,

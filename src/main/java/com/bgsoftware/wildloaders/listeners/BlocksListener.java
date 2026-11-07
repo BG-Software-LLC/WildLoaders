@@ -10,8 +10,10 @@ import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,8 +24,10 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,10 +77,13 @@ public final class BlocksListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onLoaderBreak(BlockBreakEvent e) {
-        if (handleLoaderBreak(e.getBlock(), e.getPlayer().getGameMode() != GameMode.CREATIVE)) {
-            e.setCancelled(true);
+        ChunkLoader chunkLoader = plugin.getLoaders().getChunkLoader(e.getBlock().getLocation()).orElse(null);
+        if (chunkLoader == null)
+            return;
+
+        e.setCancelled(true);
+        if (handleLoaderBreak(chunkLoader, e.getPlayer().getGameMode() != GameMode.CREATIVE))
             Locale.BROKE_LOADER.send(e.getPlayer());
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -85,7 +92,16 @@ public final class BlocksListener implements Listener {
         if (entityType == WIND_CHARGE_TYPE || entityType == BREEZE_WIND_CHARGE_TYPE)
             return;
 
-        e.blockList().removeIf(block -> handleLoaderBreak(block, true));
+        Iterator<Block> blocks = e.blockList().iterator();
+        while (blocks.hasNext()) {
+            Block block = blocks.next();
+            ChunkLoader chunkLoader = plugin.getLoaders().getChunkLoader(block.getLocation()).orElse(null);
+            if (chunkLoader == null)
+                continue;
+
+            blocks.remove();
+            handleLoaderBreak(chunkLoader, true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -134,18 +150,23 @@ public final class BlocksListener implements Listener {
         }
     }
 
-    private boolean handleLoaderBreak(Block block, boolean dropItem) {
-        Location blockLoc = block.getLocation();
-        Optional<ChunkLoader> optionalChunkLoader = plugin.getLoaders().getChunkLoader(blockLoc);
-
-        if (!optionalChunkLoader.isPresent())
+    private boolean handleLoaderBreak(ChunkLoader chunkLoader, boolean dropItem) {
+        Location blockLoc = chunkLoader.getLocation();
+        ItemStack loaderItem = dropItem ? chunkLoader.getLoaderItem() : null;
+        if (dropItem && (loaderItem == null || loaderItem.getType() == Material.AIR || loaderItem.getAmount() <= 0)) {
+            plugin.getLogger().warning("Cannot break chunk-loader at " + blockLoc + ": its return item is empty.");
             return false;
+        }
 
-        ChunkLoader chunkLoader = optionalChunkLoader.get();
         chunkLoader.remove();
 
-        if (dropItem)
-            blockLoc.getWorld().dropItemNaturally(blockLoc, chunkLoader.getLoaderItem());
+        if (dropItem) {
+            Item item = blockLoc.getWorld().dropItem(blockLoc.clone().add(0.5, 0.5, 0.5), loaderItem);
+            if (!item.isValid()) {
+                plugin.getLogger().warning("The return item for chunk-loader at " + blockLoc +
+                        " did not spawn; another plugin may have cancelled or handled its spawn.");
+            }
+        }
 
         return true;
     }

@@ -55,6 +55,7 @@ public interface LoadersManager {
 
     /**
      * Create a new chunk loader at a specific location.
+     * If a chunk loader already exists at that location, it is unloaded and replaced by the new one.
      *
      * @param loaderData The data of the chunk loader.
      * @param whoPlaced  The player who placed the chunk loader.

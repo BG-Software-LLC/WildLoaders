@@ -15,7 +15,6 @@ import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.SpawnerChangeListener;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.google.common.collect.Maps;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -105,6 +104,10 @@ public final class LoadersHandler implements LoadersManager {
     public WChunkLoader addChunkLoaderWithoutDBSave(LoaderData loaderData, UUID placer, Location location,
                                                     long timeLeft, boolean validateBlock,
                                                     @Nullable List<ChunkPosition> chunksToLoad) {
+        // Preventing the async callback of chunk loads to call this after the plugin was disabled.
+        if (!plugin.isEnabled())
+            return null;
+
         BlockPosition blockPosition = BlockPosition.of(location);
 
         if (validateBlock) {
@@ -117,16 +120,27 @@ public final class LoadersHandler implements LoadersManager {
             }
         }
 
-        if (chunksToLoad == null) {
+        boolean filterLoadedChunks = chunksToLoad == null;
+        if (filterLoadedChunks)
             chunksToLoad = ChunkLoaderChunks.calculateChunks(loaderData, placer, location);
-            chunksToLoad.removeIf(chunkPosition -> plugin.getLoaders().getChunkLoader(chunkPosition).isPresent());
-        }
+
+        // Only one loader per block: unload the old one before its chunks are filtered out below.
+        // Its database row stays, and addChunkLoader overwrites it.
+        ChunkLoader existingChunkLoader = chunkLoaders.get(blockPosition);
+        if (existingChunkLoader != null)
+            removeChunkLoader((WChunkLoader) existingChunkLoader, RemoveReason.UNLOAD);
+
+        if (filterLoadedChunks)
+            chunksToLoad.removeIf(chunkPosition -> {
+                ChunkLoader chunkLoader = chunkLoadersByChunks.get(chunkPosition);
+                return chunkLoader != null && chunkLoader != existingChunkLoader;
+            });
 
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, blockPosition, chunksToLoad, timeLeft);
         chunkLoaders.put(blockPosition, chunkLoader);
         chunkLoadersByWorlds.computeIfAbsent(blockPosition.getWorldName(), i -> new LinkedList<>()).add(chunkLoader);
-        for (Chunk loadedChunk : chunkLoader.getLoadedChunksCollection()) {
-            chunkLoadersByChunks.put(ChunkPosition.of(loadedChunk), chunkLoader);
+        for (ChunkPosition chunkPosition : chunkLoader.getChunkPositions()) {
+            chunkLoadersByChunks.put(chunkPosition, chunkLoader);
         }
         plugin.getNPCs().createNPC(blockPosition);
         return chunkLoader;
@@ -164,50 +178,60 @@ public final class LoadersHandler implements LoadersManager {
         SQLDatabaseTransaction<?> updateTransaction = null;
 
         for (ChunkLoader chunkLoader : worldChunkLoaders) {
-            plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
-            BlockPosition blockPosition = removeChunkLoaderWithoutDBSave(chunkLoader);
+            if (!removeChunkLoader((WChunkLoader) chunkLoader, RemoveReason.UNLOAD))
+                continue;
+
             UnloadedChunkLoader unloadedChunkLoader = new UnloadedChunkLoader(chunkLoader.getLoaderData(),
-                    chunkLoader.getWhoPlaced().getUniqueId(), blockPosition, chunkLoader.getTimeLeft());
+                    chunkLoader.getWhoPlaced().getUniqueId(), BlockPosition.of(chunkLoader.getLocation()),
+                    chunkLoader.getTimeLeft());
             unloadedChunkLoaders.add(unloadedChunkLoader);
 
             updateTransaction = plugin.getDataHandler().saveLoaderTimeLeft(chunkLoader, updateTransaction);
         }
 
-        DBSession.execute(updateTransaction);
+        if (updateTransaction != null)
+            DBSession.execute(updateTransaction);
 
         this.unloadedChunkLoadersByWorlds.put(world.getName(), unloadedChunkLoaders);
     }
 
     @Override
     public void removeChunkLoader(ChunkLoader chunkLoader) {
-        removeChunkLoaderWithoutDBSave(chunkLoader);
-        plugin.getDataHandler().deleteChunkLoader(chunkLoader);
+        removeChunkLoader((WChunkLoader) chunkLoader, LoadersHandler.RemoveReason.DELETE);
     }
 
-    private BlockPosition removeChunkLoaderWithoutDBSave(ChunkLoader chunkLoader) {
+    public boolean removeChunkLoader(WChunkLoader chunkLoader, RemoveReason reason) {
+        // The only guard: repeated and late calls stop here.
+        if (chunkLoader.isRemoved())
+            return false;
+
+        // Its time ran out, or it is removed while its chunks are still loading (isNotActive() is true then).
+        boolean expired = !chunkLoader.isInfinite() && chunkLoader.getTimeLeft() <= 0;
+        boolean spawnParticle = reason == RemoveReason.DELETE && (expired || chunkLoader.isNotActive());
+
+        // Holograms, tile entity and forced chunks. It releases getLoadedChunksCollection(): the forced
+        // chunks when LOADED, nothing while LOADING. markRemoved() empties it, so it must come after.
+        plugin.getNMSAdapter().removeLoader(chunkLoader, spawnParticle, SpawnerChangeListener.CALLBACK);
+        chunkLoader.markRemoved();
+
         BlockPosition blockPosition = BlockPosition.of(chunkLoader.getLocation());
-        ChunkLoader oldChunkLoader = chunkLoaders.remove(blockPosition);
-
-        if(oldChunkLoader == null) {
-            WildLoadersPlugin.log(ChatColor.RED + "Removed chunk loader at " + blockPosition.serialize() + " but it was not there.");
-            return blockPosition;
-        } else if (oldChunkLoader != chunkLoader) {
-            WildLoadersPlugin.log(ChatColor.YELLOW + "Removed chunk loader at " + blockPosition.serialize() + " but it was not the one requested to be removed.");
-            ((WChunkLoader) chunkLoader).markRemoved();
+        chunkLoaders.remove(blockPosition, chunkLoader);
+        for (ChunkPosition chunkPosition : chunkLoader.getChunkPositions()) {
+            chunkLoadersByChunks.remove(chunkPosition, chunkLoader);
         }
-
-        ((WChunkLoader) oldChunkLoader).markRemoved();
-
-        for (Chunk loadedChunk : oldChunkLoader.getLoadedChunksCollection()) {
-            chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
-        }
-
         List<ChunkLoader> worldChunkLoaders = chunkLoadersByWorlds.get(blockPosition.getWorldName());
         if (worldChunkLoaders != null)
-            worldChunkLoaders.remove(oldChunkLoader);
+            worldChunkLoaders.remove(chunkLoader);
 
-        oldChunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
-        return blockPosition;
+        if (reason != RemoveReason.SHUTDOWN)
+            chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
+
+        if (reason == RemoveReason.DELETE) {
+            plugin.getDataHandler().deleteChunkLoader(chunkLoader);
+            chunkLoader.getLocation().getBlock().setType(Material.AIR);
+        }
+
+        return true;
     }
 
     @Override
@@ -226,13 +250,28 @@ public final class LoadersHandler implements LoadersManager {
 
     @Override
     public void removeChunkLoaders() {
-        chunkLoaders.values().forEach(chunkLoader -> {
-            plugin.getNMSAdapter().removeLoader(chunkLoader, false, SpawnerChangeListener.CALLBACK);
-            ((WChunkLoader) chunkLoader).markRemoved();
-        });
-        chunkLoaders.clear();
-        chunkLoadersByChunks.clear();
-        chunkLoadersByWorlds.clear();
+        for (ChunkLoader chunkLoader : chunkLoaders.values()) {
+            removeChunkLoader((WChunkLoader) chunkLoader, RemoveReason.SHUTDOWN);
+        }
+    }
+
+    public enum RemoveReason {
+
+        /**
+         * Broken, expired or removed through the API: its database row is deleted and its block cleared.
+         */
+        DELETE,
+
+        /**
+         * Its world unloads, or another loader replaces it: its database row and block stay.
+         */
+        UNLOAD,
+
+        /**
+         * The plugin disables: its database row, block and NPC stay.
+         */
+        SHUTDOWN
+
     }
 
     private static Material convertItemTypeToBlockType(Material itemType) {
