@@ -15,6 +15,7 @@ import com.bgsoftware.wildloaders.handlers.LoadersHandler;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.handlers.ProvidersHandler;
 import com.bgsoftware.wildloaders.handlers.SettingsHandler;
+import com.bgsoftware.wildloaders.listeners.BlockProtectionListener;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
@@ -74,6 +75,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         settingsHandler = new SettingsHandler(this);
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
 
