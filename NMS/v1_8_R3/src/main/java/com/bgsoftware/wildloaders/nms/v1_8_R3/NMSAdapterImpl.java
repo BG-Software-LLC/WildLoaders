@@ -141,8 +141,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (spawnParticle)
             worldServer.a(null, 2001, blockPosition, Block.getCombinedId(worldServer.getType(blockPosition)));
 
-        Scheduler.ensureMain(loaderLoc, () ->
-                setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback));
+        setSpawnersRangeForLoader(chunkLoader, worldServer, false, onSpawnerChangeCallback);
     }
 
     private static void setSpawnersRangeForLoader(ChunkLoader chunkLoader, WorldServer worldServer, boolean loaded,

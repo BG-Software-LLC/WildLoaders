@@ -13,7 +13,6 @@ import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,6 +29,7 @@ public final class WChunkLoader implements ChunkLoader {
     private static final WildLoadersPlugin plugin = WildLoadersPlugin.getPlugin();
 
     private final List<Chunk> loadedChunksUnmodifiable;
+    private final List<ChunkPosition> chunkPositions;
 
     private final UUID whoPlaced;
     private final BlockPosition blockPosition;
@@ -38,8 +38,7 @@ public final class WChunkLoader implements ChunkLoader {
     @Nullable
     private ITileEntityChunkLoader tileEntityChunkLoader;
 
-    private boolean active = true;
-    private boolean removed = true;
+    private State state = State.LOADING;
 
     private long timeLeft;
 
@@ -48,9 +47,10 @@ public final class WChunkLoader implements ChunkLoader {
         this.whoPlaced = whoPlaced;
         this.blockPosition = blockPosition;
         this.timeLeft = timeLeft;
+        this.chunkPositions = Collections.unmodifiableList(new LinkedList<>(chunksToLoad));
         List<Chunk> loadedChunks = new LinkedList<>();
         this.loadedChunksUnmodifiable = Collections.unmodifiableList(loadedChunks);
-        ChunkLoaderChunks.loadChunksAsync(this, chunksToLoad, loadedChunks::add, this::onChunksLoadFinish);
+        ChunkLoaderChunks.loadChunksAsync(this, this.chunkPositions, loadedChunks::add, this::onChunksLoadFinish);
     }
 
     @Override
@@ -64,7 +64,7 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public boolean isNotActive() {
-        return this.removed || !this.active;
+        return this.state != State.LOADED;
     }
 
     @Override
@@ -96,7 +96,11 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Collection<Chunk> getLoadedChunksCollection() {
-        return this.removed ? Collections.emptyList() : this.loadedChunksUnmodifiable;
+        return this.state == State.LOADED ? this.loadedChunksUnmodifiable : Collections.emptyList();
+    }
+
+    public List<ChunkPosition> getChunkPositions() {
+        return this.chunkPositions;
     }
 
     @Override
@@ -106,20 +110,15 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public void remove() {
-        Scheduler.ensureMain(getLocation(), this::removeInternal);
+        Scheduler.ensureMain(getLocation(), () -> plugin.getLoaders().removeChunkLoader(this));
     }
 
-    private void removeInternal() {
-        plugin.getNMSAdapter().removeLoader(this, timeLeft <= 0 || isNotActive(),
-                SpawnerChangeListener.CALLBACK);
-        plugin.getLoaders().removeChunkLoader(this);
-
-        getLocation().getBlock().setType(Material.AIR);
+    public boolean isRemoved() {
+        return this.state == State.REMOVED;
     }
 
     public void markRemoved() {
-        this.removed = true;
-        this.active = false;
+        this.state = State.REMOVED;
     }
 
     @Override
@@ -149,13 +148,35 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     private void onChunksLoadFinish() {
-        this.removed = false;
+        if (this.state != State.LOADING) // removed while its chunks were loading
+            return;
+
+        this.state = State.LOADED;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this, SpawnerChangeListener.CALLBACK);
     }
 
     public interface HologramLineCallback {
 
         void apply(int index, String line);
+
+    }
+
+    private enum State {
+
+        /**
+         * Registered, but its chunks are still loading: no tile entity yet and no chunks forced.
+         */
+        LOADING,
+
+        /**
+         * Its chunks are forced and its tile entity exists.
+         */
+        LOADED,
+
+        /**
+         * Removed; any chunks it forced were released.
+         */
+        REMOVED
 
     }
 

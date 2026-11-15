@@ -118,8 +118,7 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         if (spawnParticle)
             serverLevel.levelEvent(null, 2001, blockPos, Block.getId(serverLevel.getBlockState(blockPos)));
 
-        Scheduler.ensureMain(loaderLoc, () ->
-                setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback));
+        setChunksForcedForLoader(chunkLoader, serverLevel, false, onSpawnerChangeCallback);
     }
 
     private static void setChunksForcedForLoader(ChunkLoader chunkLoader, ServerLevel serverLevel, boolean forced,
